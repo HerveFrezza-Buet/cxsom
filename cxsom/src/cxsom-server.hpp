@@ -14,13 +14,6 @@
 /**
  * @example example-001-001-datafile.cpp
  *
- * @example test-000-001-type-basics.cpp
- * @example test-001-001-variable-basics.cpp
- * @example test-001-002-variable-center.cpp
- * @example test-002-001-update-basics.cpp
- * @example test-003-001-timestep-basics.cpp
- * @example test-004-001-jobs-basics.cpp
- * @example test-005-001-operations.cpp
  */
 
 
