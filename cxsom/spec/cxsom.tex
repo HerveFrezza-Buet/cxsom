@@ -1,0 +1,49 @@
+
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{graphbox} % adds align=c
+\usepackage[margin=3cm]{geometry}
+
+\setlength{\parskip}{3mm}
+\setlength{\parindent}{0mm}
+
+\usepackage[colorlinks=true, linkcolor=blue, anchorcolor=blue,
+citecolor=blue, filecolor=blue, menucolor=blue,
+urlcolor=blue]{hyperref}
+
+\usepackage{listings}
+
+\input{math.tex}
+\input{algo.tex}
+\input{commands.tex}
+
+
+\begin{document}
+\hrule
+\vspace{5mm}
+\centerline{\Huge \sc CxSOM}
+\vspace{5mm}
+\centerline{Hervé Frezza-Buet}
+\centerline{\footnotesize\href{mailto:Herve.Frezza-Buet@centralesupelec.fr}{Herve.Frezza-Buet@centralesupelec.fr}}
+\vspace{5mm}
+\hrule
+\vspace{10mm}
+\tableofcontents
+
+
+\input{cxsom-introduction.tex}
+\input{cxsom-model.tex}
+\input{cxsom-functions.tex}
+\input{cxsom-implementation.tex}
+
+
+
+
+
+
+\end{document}

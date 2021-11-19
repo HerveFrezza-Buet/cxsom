@@ -1,0 +1,318 @@
+
+
+\section{The model}
+
+The computation enabled by \CxSOM consists of successively updating data, keeping trace of the data values in history files.
+
+\subsection{Data instances (DI)}
+
+The elementary piece of data handled in \CxSOM is called a \ConceptDef{data instance} (\ConceptDef{DI}). Each of the computed DIs ends as a record in a file, once it has been computed.
+
+DIs are denoted by a triplet $\DftDI$, that reads as ``the instance of variable $\DftVar$ hosted by the timeline $\DftTL$ at the time instant $\DftInst$ of that specific timeline''. Only elementary $\DftDI$ DIs matter, the concepts of \ConceptDef{variable}, \ConceptDef{timeline} and \ConceptDef{time instant} only serve for describing the computation.
+
+Each DIs is a value that is stored in a file once definitively computed. A value has a type, that can be:
+\begin{itemize}
+\item \Scalar: A floating point value, usually in $[0,1]$.
+  \item \Pos 1: A value in $[0,1]$ corresponding to a position in a 1D map.
+  \item \Pos 2: A value in $[0,1]^2$ corresponding to a position in a 2D map.
+  \item \Array n: A value in $\Real^n$, usually $[0,1]^n,\; n \in \Natz$.
+  \item \Map 1{\cal X}n: A 1D map of type $\cal X$, i.e. a value in ${\cal X}^n,\; n \in \Natz$.
+  \item \Map 2{\cal X}n: A 2D squared map of type $\cal X$, i.e. a value in $\GroupExp{{\cal X}^n}n,\; n \in \Natz$.
+\end{itemize}
+where type $\cal X \in \Set{\mbox{\Scalar}, \mbox{\Pos 1}, \mbox{\Pos 2}, \mbox{\Array k}}$.
+
+In \CxSOM, the type is associated to a variable, i.e. all the $\DI\DftTL\DftVar\Any$ are DIs with the same type.
+
+Every DI is also doted with a status variable $\Status\DftDI \in \Set{\Busy, \Ready}$:
+\begin{itemize}
+  \item $\Ready$: The computation of the value of the DI is definitively done. The DI value will not change anymore.
+  \item $\Busy$: The definitive value of the DI is still to be determined.
+\end{itemize}
+
+More generally, in the following, $\Status x$ reads as ``the status of $x$''.
+
+\subsection{Updates}
+
+An \ConceptDef{update} of some DI is the (re)computation by the \CxSOM computer of the value of that DI. There are at most two updates for a DI, one for the first update (initialization) that is optional, and one, mandatory, for other updates.
+
+\subsubsection{An update is a function taking arguments and computing a result \label{sec:update}}
+
+An update $\Updt$ for a DI $\DftDI$ is made of:
+\begin{itemize}
+\item The decription of some computation, i.e. the function called to realize an update.
+\item The result $\Res\Updt$, i.e. $\Res\Updt\EqDef\DftDI$ itself, that is computed by the function of the update.
+\item Other DIs, thats serve as arguments to the function (their value is read when the function is called). Among arguments, a distinction is made between \ConceptDef{in-arguments} and \ConceptDef{out-arguments}:
+  \begin{itemize}
+    \item The in-arguments $\InArg\Updt$ of the update $\Updt$ such as $\Res\Updt = \DftDI$ is the set of DIs used as arguments of $\Updt$ of the form $\DI\DftTL\Any\DftInst$. All the DIs handled in the simulation of the form $\DI\DftTL\Any\DftInst$ define a \ConceptDef{time step} $\DftTS$ of the simulation, so the in-arguments are the DIs used for the computation of an update which belong to the same timestep as the result.
+    \item The out-arguments  $\OutArg\Updt$ of the update $\Updt$ are the other DIs used as arguments for the computation of the update.
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Datation and relaxation}
+
+Before it has a definitive value (i.e. before being in the $\Ready$ status), the value of a DI may change several times. Indeed, all DIs in a timestep $\DftTS = \DI\DftTL\Any\DftInst$ are updated until all of them get $\Ready$, and during that process, the values of the DIs may be recomputed several times. In order to handle the dependancies of the DIs within a timestep, we need to timestamp the values of the DIs, in order to determine those of them that have to be updated. Timestamp play the role of file dates in makefile, when the date of a target is compared to the date of its dependancies. Here, in order to know if an update $\Updt$ needs to be performed, we have to consider two things:
+\begin{itemize}
+\item Do we have $\forall \DftDI \in \OutArg\Updt,\; \Status\DftDI = \Ready$? If not, the update cannot be done, it is considered as \ConceptDef{impossible}.
+\item Have the in-arguments been updated since the last computation of the result? If the answer is yes, the result needs to be recomputed.
+\end{itemize}
+
+To compute the second conditon, every DI comes with a \ConceptDef{datation} denoted by $\Datation\DftDI \in \Nat$.
+
+An update then stores, for each of its in-arguments, the datation it had at the last computation of the result. When the simuator considers an update, it compares the current datation of the in-arguments to the ones stored by the update. If some are newer (or if the result has never been computed so far) the result is recomputed, and
+\begin{equation}
+  \Datation{\Res\Updt} = 1 + \max_{\DftDI \in \InArg\Updt}\Datation\DftDI
+\end{equation}
+Considering an update for computation can thus lead to the following status of the update $\Updt$, denoted by $\Status\Updt$:
+\begin{itemize}
+\item $\Status\Updt=\Impossible$: $\Status{\Res\Updt}=\Busy$, computation is not feasible yet, since some out-arguments are $\Busy$.
+\item $\Status\Updt=\UpToDate$:  $\Status{\Res\Updt}=\Busy$, nothing changed in the in-arguments input dates from last update, or the new value was not a significant modification. The datation $\Datation{\Res\Updt}$ has not been modified.
+\item $\Status\Updt=\Updated$:   $\Status{\Res\Updt}=\Busy$, the computation has modified the value of $\Res\Updt$ significantly.
+\item $\Status\Updt=\Done$:      $\Status{\Res\Updt}=\Ready$, the computation has modified the value $\Res\Updt$ definitively.
+\item $\Status\Updt=\None$:      Update status is not determined yet (used for initialization only).
+\end{itemize}
+
+The datation mechanism enables to control the update of all the DIs in a given timestep, i.e. all the DIs like $\DI\DftTL\Any\DftInst$ for the time instant $\DftInst$ of the timeline $\DftTL$. When no more significant writes of the results can be done, the whole timestep is stable. So the relevance of the datation mechanism is to enable a \ConceptDef{relaxation} of the DIs inside a timestep until stabilization of all of them is reached.
+
+\subsubsection{Update computation cycle}
+
+When a specific update is defined in \CxSOM (as average, learning, etc.), the update is inherited from a base \Code{cxsom::update::Base} class. In the subclass, the specificity of the computation has to be implemented, while the base class handles the details of the full update cycle, as datation and status. Algorithm~\ref{algo:update} shows the cycle, the \Code{on\_*} calls are the method that subclass need to override in order to implement a specific update computation.
+
+
+\begin{algorithm}
+  \caption{\AlgoName{One update cycle for update $\Updt$}\label{algo:update}}
+  \begin{algorithmic}[1]
+    \REQUIRE a boolean attribute \Code{out\_ok}, telling if all out-args have been read successfully previously.
+    \REQUIRE a boolean attribute \Code{is\_init}, telling if the update is an initialization.
+    \IF{$\Status{\Res\Updt}=\Ready$} \RETURN $\Done$ \ENDIF
+    \STATE $\CallCode{on\_computation\_start}{}$
+    \IF{$\neg \mbox{\Code{out\_ok}}$} \STATE \COMMENT{out-arguments need to be read.}
+    \FORALL{$\DftDI \in \OutArg\Updt$}
+    \IF{$\Status{\DftDI} = \Ready$}
+    \STATE $\CallCode{on\_read\_out\_arg}{\DftDI}$
+    \ELSE
+    \STATE $\mbox{\Code{out\_ok}} \Affect \mbox{false}$
+    \STATE $\CallCode{on\_read\_out\_arg\_aborted}{}$
+    \RETURN $\Impossible$
+    \ENDIF
+    \ENDFOR
+    \STATE $\mbox{\Code{out\_ok}} \Affect \mbox{true}$ \COMMENT{All in-args have been successfully read.}
+    \ENDIF
+    \FORALL{$\DftDI \in \InArg\Updt$}
+    \STATE\COMMENT{Datation issues are handled in this loop, but not detailed here.}
+    \STATE $\CallCode{on\_read\_in\_arg}{\DftDI}$
+    \ENDFOR
+    \IF{none of the in-arguments have been updated since last cycle}
+    \IF{\Code{is\_init}}
+    \RETURN $\Updated$ \COMMENT{updates used as initialization are never considered as up-to-date.}
+    \ELSE
+    \RETURN $\UpToDate$ 
+    \ENDIF
+    \ENDIF
+    \STATE\COMMENT{From here, we know that the result has to be recomputed.}
+    \STATE $x = \None$ \COMMENT{This is the status we plan to return, it is set next.}
+    \STATE $\alpha = \CallCode{on\_write\_result}{\Res\Updt}$ \COMMENT{$\alpha$ is a Boolean telling if the value change is significant.}
+    \IF{we have just written a new significant value in $\Res\Updt$}
+    \STATE $x \Affect \Updated$
+    \ELSE
+    \IF{\Code{is\_init}}
+    \RETURN $x \Affect \Updated$ \COMMENT{Even not significant changes are considered as an actual update for initialization updates.}
+    \ELSE
+    \RETURN $x \Affect \UpToDate$ 
+    \ENDIF
+    \ENDIF
+    \STATE\COMMENT{Before returning, we have to check if in-arg may change in the future}
+    \IF{all in-arguments are $\Ready$}
+    \IF{\Code{is\_init}}
+    \STATE $x \Affect \Updated$ \COMMENT{As $\Updt$ an init, we return $\Updated$ since further change can be consider by the usual update comming next for updating $\Res\Updt$.}
+    \ELSE
+    \STATE $x \Affect \Done$ \COMMENT{We have definitively computed the result...}
+    \STATE $\Status{\Res\Updt} \Affect \Ready$ \COMMENT{The result DI value is locked.}
+    \ENDIF
+    \ENDIF
+    \RETURN $x$
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Timesteps and tasks}
+
+\subsubsection{A computational structure for timesteps}
+
+In the simulator, the computation of the updates are put in a pool task and computed in parallel. However, since relaxation is related to the computation of updates belonging to the same timestep, this task management needs an intermediate level, which is a computational internal structure representing the timesteps.
+
+Let us recall the notation $\DftTS \EqDef \Sets{\DI\DftTTL\DftVVar\DftIInst \in \mbox{simulation}}{\DftTTL = \DftTL \And \DftIInst=\DftInst}$ for the timestep at instant $\DftInst$ in the timeline $\DftTL$. For each $\DftDI \in \DftTS$, the internal structure used in the simulator gathers at least an \ConceptDef{usual update}, and an optional \ConceptDef{initialization update}. The initialization update, if present, is used for the first feasible setting of the value of $\DftDI$ instead of the ususal update. Otherwise, the usual update is used throughout the successive setting of the value of $\DftDI$ during the relaxation.
+
+In order to avoid further confusions, let us denote by $\TSUpdt$ an update handled by a time step $\DftTS$: it can be either a single update $\Updt$ (so $\Updt$ is the usual update) or a pair $\Pair\Updt\UUpdt$ if an initialization update is defined (then $\UUpdt$ is the initialization update). In the case for which $\TSUpdt = \Pair\Updt\UUpdt$ is a pair, $\Res\Updt = \Res\UUpdt$ obviously stands, so $\Res\TSUpdt \EqDef \Res\Updt$. In the case of a pair as well, the simulator uses $\UUpdt$ until it gets a first computation of $\Res\TSUpdt$, and then it will switch to the use of $\Updt$ for next computations of $\Res\TSUpdt$.
+
+As at least a call to the usual update $\Updt$ is required to be done for $\TSUpdt$, we have particularized the status returned by initialization updates in algorithm~\ref{algo:update}, so that the evaluation of an initialization update can never lead to the definitive computation of $\Res\Updt$ during the relaxation of the timestep.
+
+\subsubsection{Timestep status}
+
+The timestep structures $\DftTS$ at the simulator level have a status $$\Status\DftTS \in \Set{\Blocked, \Relaxing, \Checking, \Done}.$$ The status $\Status\DftTS$ depends on the status of the updates of the timestep, observed when the updates are realized. The meaning of the $\Status\DftTS$ is:
+\begin{itemize}
+\item $\Status\DftTS = \Blocked$: The timestep is blocked due to impossible updates.
+\item $\Status\DftTS = \Relaxing$: The timestep is under unstable computation.
+\item $\Status\DftTS = \Checking$: Every update seem stable, we are checking this.
+\item $\Status\DftTS = \Done$: The timestep is done, all updates $\TSUpdt$ have lead to $\Res\TSUpdt = \Ready$ and have quit the simulator.
+\end{itemize}
+
+\subsubsection{Timestep update queues}
+
+The timestep structures $\DftTS$ at the simulator level are doted each with 4~update queues, where the updates $\TSUpdt$ are stored. Each the $\TSUpdt \in \DftTS$ belongs to one of the 4~queues of $\DftTS$.
+
+When a timestep is asked by the simulator to provide computation, it extracts updates from some of the queues. When the update is performed by the simulator, it is given back to the timestep, with the return status resulting from algorithm~\ref{algo:update}. According to this status, the update is stored in the appropriate queue, and some supplementary transfers from one queue to another queue may happen. This will be detailed further, as the \ConceptDef{timestep state machine}.
+
+For now, let us present the 4~queues used by a timestep $\DftTS$.
+\begin{equation}
+  \begin{array}{ll}
+    \DftTSQu &= \Sets{\TSUpdt\in\DftTS}{\Status\TSUpdt \mbox{ needs to be known.}}                           \\
+    \DftTSQi &= \Sets{\TSUpdt\in\DftTS}{\Status\TSUpdt \mbox{ have been detected as } \Impossible.}         \\
+    \DftTSQs &= \Sets{\TSUpdt\in\DftTS}{\TSUpdt \mbox{ have been seen stable for the first time are here.}} \\
+    \DftTSQc &= \Sets{\TSUpdt\in\DftTS}{\TSUpdt \mbox{ for which stability is confirmed.}}
+  \end{array}
+\end{equation}
+
+\subsubsection{Providing jobs \label{sec:providejobs}}
+
+A timestep is periodically asked by the simulator to provide tasks, i.e. to offer updates that will be evaluated by the simulator. These updates are extracted from the timestep and inserted in a pool task, waiting for execution. The timestep keeps trace of their existency while they are outside, waiting for being executed.
+
+So when a timestep $\DftTS$ is asked for new updates to be done, it provides (and extracts) :
+\begin{itemize}
+\item all the $\TSUpdt \in \DftTSQu \Union \DftTSQs$ if $\Status\DftTS \in \Set{\Relaxing, \Checking}$
+\item nothing otherwise.
+\end{itemize}
+
+
+\subsubsection{The timestep state machine}
+
+When an update is executed, it is given back to the timestep by the simulator, with a status report given by algorithm~\ref{algo:update}.
+
+The reporting of an update makes the update to be inserted in a queue of the timesteps. This is done as detailed in algorithm~\ref{algo:reporting}.
+
+
+\begin{algorithm}
+  \caption{Reporting update $\TSUpdt$ to the timestep $\DftTS$\label{algo:reporting}}
+  \begin{algorithmic}[1]
+    \REQUIRE $\Status\TSUpdt$ is the status of the update execution.
+    \REQUIRE $\Status\DftTS$ is the current status of the timestep.
+    \IF    {$\Status\TSUpdt = \Impossible$} \STATE $\DftTSQi \Affect \DftTSQi \Union \Set\TSUpdt$
+    \ELSIF {$\Status\TSUpdt = \Updated$}    \STATE $\DftTSQu \Affect \DftTSQu \Union \Set\TSUpdt$
+    \ELSIF {$\Status\TSUpdt = \Done$}       \STATE \COMMENT{The update is not handled anymore, since $\Status{\Res\TSUpdt} = \Ready$.}
+    \ELSIF {$\Status\TSUpdt = \UpToDate$}
+    \IF{$\Status\DftTS = \Checking$ \AND $\TSUpdt$ was in $\DftTSQs$}
+    \STATE $\DftTSQc \Affect \DftTSQc \Union \Set\TSUpdt$
+    \ELSE
+    \STATE $\DftTSQs \Affect \DftTSQs \Union \Set\TSUpdt$
+    \ENDIF
+    \ENDIF
+    \STATE $\CallCode{update\_status}{\DftTS}$ \COMMENT{See algorithm~\ref{algo:ts_state}.}
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+  \caption{$\CallCode{update\_status}{\DftTS}$ \label{algo:ts_state}}
+  \begin{algorithmic}[1]
+    \IF{$\DftTSQi \neq \emptyset$}
+    \STATE $\DftTSQs \Affect \DftTSQs \Union \DftTSQc$
+    \STATE $\DftTSQc \Affect \emptyset$ \COMMENT{Blocking out-arguments lead to reconsider the $\DftTS$ stability.}
+    \IF{all the out-arguments of the $\TSUpdt \in \DftTS$ are $\Ready$}
+    \STATE $\DftTSQu \Affect \DftTSQu \Union \DftTSQi$
+    \STATE $\DftTSQi \Affect \emptyset$ \COMMENT{Impossible updates become instable, i.e. evaluable.}
+    \STATE $\Status\DftTS \Affect \Relaxing$
+    \ELSE
+    \STATE $\Status\DftTS \Affect \Blocked$
+    \STATE \COMMENT{At this level, the simulator consider the timesteps $\TS\DftTTL\DftIInst$ owning busy out-arguments as \ConceptDef{blockers} of $\DftTS$.}
+    \ENDIF
+    \ELSIF{$\DftTSQu \neq \emptyset$}
+    \STATE \COMMENT{$\DftTSQi = \emptyset$}
+    \STATE $\DftTSQs \Affect \DftTSQs \Union \DftTSQc$
+    \STATE $\DftTSQc \Affect \emptyset$ \COMMENT{A single unstable argument leads to reconsider the $\DftTS$ stability.}
+    \STATE $\Status\DftTS \Affect \Relaxing$
+    \ELSIF{$\DftTSQs \neq \emptyset$}
+    \STATE \COMMENT{$\DftTSQi = \emptyset, \DftTSQu = \emptyset$}
+    \STATE $\Status\DftTS \Affect \Checking$ \COMMENT{$\DftTS$ updates are all stable, stability confirmation is in progress.}
+    \ELSE
+    \STATE \COMMENT{$\DftTSQi = \emptyset, \DftTSQu = \emptyset, \DftTSQs = \emptyset$}
+    \STATE \COMMENT{Every update stability is confrmed. We can set all the results as $\Ready$}
+    \FORALL{$\TSUpdt \in \DftTSQc$}
+    \STATE $\Status{\Res\TSUpdt} \Affect \Ready$
+    \ENDFOR
+    \STATE $\Status\DftTS \Affect \Done$
+    \FORALL{$\TS\DftTTL\DftIInst$ for which $\DftTS$ is a blocker}
+    \STATE $\CallCode{update\_status}{\TS\DftTTL\DftIInst}$
+    \ENDFOR
+    \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Update patterns \label{sec:pattern}}
+
+Defining an update for all DIs (i.e. at each time $\DftInst$) would be exhausting. It can be done for specific time instants (usually $\DftInst=0$), but a generic update definition is required for the general cases.
+
+This is what \ConceptDef{update patterns} (UP) are introduced for. Let us denote a \ConceptDef{relative data instance} (RDI) as $\DftRDI$, where $\DftShift \in \Rel$ is a relative time shift. A RDI can be \ConceptDef{anchored} as a DI at time $\DftInst$. This consists in transforming $\DftRDI$ into $\DI\DftTL\DftVar{\DftInst+\DftShift}$.
+
+The definition is then similar to the one of an update, presented in section~\ref{sec:update}.
+An UP $\Pat$ is made of:
+\begin{itemize}
+\item The decription of some computation, i.e. the function called to realize an update.
+\item The result $\Res\Pat$, which is a zero-shift DRI $\RDI\DftTL\DftVar 0$.
+\item Other RDIs or DIs, thats serve as arguments to the function.
+\end{itemize}
+
+Anchoring an UP $\Pat$ such as $\Res\Pat = \RDI\DftTL\DftVar 0$ at time $\DftInst$ consists in defining an update by anchoring the result and all the arguments which are RDIs, in order to get a regular update for $\DftDI$.
+
+\subsection{Simulation}
+
+The simulator compute DIs. It does it by asking tasks to its active timesteps, as explained in section~\ref{sec:providejobs}. When it is out of work, it tries to generate more DIs to compute by anchoring available UPs, thus creating new active timesteps. This is described in algorithm~\ref{algo:get_one_job}.
+\begin{algorithm}
+  \caption{$\CallCode{get\_one\_job}{}$ \label{algo:get_one_job}}
+  \begin{algorithmic}[1]
+    \REQUIRE A task queue (jobs) denoted by $\Jobs$, used and updated by the algorithm.
+    \IF{$\Jobs = \emptyset$}
+    \STATE \COMMENT{Let us try to fill the task queue $\Jobs$.}
+    
+    \FORALL{$\DftTS$ which are handled currently}
+    \IF{$\Status\DftTS \in \Set{\Relaxing, \Checking}$}
+    \STATE $\CallCode{push}{\Jobs, \; \DftTSQu \Union \DftTSQs}$ \COMMENT{see section~\ref{sec:providejobs}}
+    \ENDIF
+    \ENDFOR
+    
+    \IF{$\Jobs = \emptyset$}
+    \STATE \COMMENT{No active patterns are able to provide new jobs.}
+    \STATE \COMMENT{We create new timesteps by anchoring the UPs.}
+    \STATE $\CallCode{anchor\_UPs}{}$ \COMMENT{See algorithm~\ref{algo:anchor}.}
+    \STATE \COMMENT{We may have new $\DftTS$s, let us retry to ask them jobs.}
+    \FORALL{$\DftTS$ which are handled currently}
+    \IF{$\Status\DftTS \in \Set{\Relaxing, \Checking}$}
+    \STATE $\CallCode{push}{\Jobs, \; \DftTSQu \Union \DftTSQs}$ \COMMENT{see section~\ref{sec:providejobs}}
+    \ENDIF
+    \ENDFOR
+    \ENDIF
+
+    
+    \ENDIF
+    \IF{$\Jobs = \emptyset$}
+    \RETURN \COMMENT{There is really no way to get a new job.}
+    \ELSE
+    \STATE $\Job \Affect \CallCode{pop}{\Jobs}$
+    \RETURN $\Job$ \COMMENT{That job will be done.}
+    \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+  \caption{$\CallCode{anchor\_UPs}{}$ \label{algo:anchor}}
+  \begin{algorithmic}[1]
+    \REQUIRE The set of defined UPs is referred to as $\Patterns$.
+    \STATE Determine the used variables $\Variables \EqDef \Sets{\Pair\DftTL\DftVar}{\Pat\in\Patterns\And\Res\Pat=\DftRDI}$.
+    \STATE For each timeline $\DftTL$ mentionned in $\Variables$, compute $\MinT\DftTL$ as the first time instant for which a variable $\Pair\DftTL\DftVar \in \Variables$ is $\Busy$ (i.e. not computed so far).
+    \FORALL{$\Pat \in \Patterns$}
+    \STATE Consider $\RDI\DftTL\DftVar 0 = \Res\Pat$
+    \IF{$\Status{\DI\DftTL\DftVar{\MinT\DftTL} = \Busy}$}
+    \STATE Anchor $\Pat$ at time instant $\MinT\DftTL$, thus creating a new timestep in the simulator for the next instant to be computed in that timeline.
+    \ELSE
+    \STATE \COMMENT{The DI computed by $\Pat$ is already available at $\MinT\DftTL$, some other UPs are late, they will be instanciated first.}
+    \ENDIF
+    \ENDFOR
+  \end{algorithmic}
+\end{algorithm}
+

@@ -1,0 +1,106 @@
+
+
+\section{Available update functions}
+
+\subsection{Initializations}
+
+This sets the variable $X$ so that each of the float it contains is 3.14, $Y$ so that each of the float it contains is a random value in $[0,1[$, $Z$ as a copy of $X$.
+\BeginCpp
+"X" << fx::clear() | kwd::use("value", 3.14);
+"Y" << fx::random();
+"Z" << fx::copy("X");
+\end{lstlisting}\end{footnotesize}
+
+
+\subsection{Matching a value against weights}
+
+In SOM-like computation, an input $\xi$ is given and is matched against all the weights $w_i$ in the map. The result is an activity vector, its elements $a_i$ are in $[0,1]$, corresponding to each weight, that is 1 if the weight and the input perfectly match.
+
+The formula is, for a map of weights $w_i$ and an input $\xi$, $\forall i, a_i = \Fxx \mu \xi {w_i}$. Two matcing functions are defined, a triangle matching $\mu_\triangle$ and a Gaussian matching $\mu_G$.
+\begin{equation}
+  \Fxx {\mu_G} \xi w \EqDef \Fx \exp {\frac{\GroupExp{\xi - w}2}{2\sigma^2}},\;
+  \Fxx {\mu_\triangle} \xi w \EqDef \Fxx \max {1-\frac{\left|\xi - w\right|}r} 0
+\end{equation}
+
+\BeginCpp
+kwd::type("Xi",   "Pos2D"            );
+kwd::type("Wgt",  "Map1D<Pos2D>=100" );
+kwd::type("ActT", "Map1D<Scalar>=100");
+kwd::type("ActG", "Map1D<Scalar>=100");
+
+"ActT" << fx::match_triangle("Xi", "Wgt")   | kwd::use("r",     .3);
+"ActG" << fx::match_gaussian("Xi", "Wgt")   | kwd::use("sigma", .3),;
+\end{lstlisting}\end{footnotesize}
+
+\subsection{Merging activities}
+
+The average is also the contextual merge. So we have two names for the same operation.
+\BeginCpp
+kwd::type("Ac1", "Map1D<Scalar>=100");
+kwd::type("Ac2", "Map1D<Scalar>=100");
+kwd::type("Ac3", "Map1D<Scalar>=100");
+kwd::type("Ac",  "Map1D<Scalar>=100");
+"Ac" << fx::average({"Ac1", "Ac2", "Ac3"});       
+"Ac" << fx::context_merge({"Ac1", "Ac2", "Ac3"}); 
+\end{lstlisting}\end{footnotesize}
+
+A specific operation is allowed for merging contextual and external activity.
+\BeginCpp
+kwd::type("Ae", "Map1D<Scalar>=100");
+kwd::type("Ag", "Map1D<Scalar>=100");
+"Ag" << fx::merge("Ae", "Ac"); | kwd::use("beta", .5), 
+\end{lstlisting}\end{footnotesize}
+
+The formula is 
+\begin{equation}
+  \forall i,\; a^g_i = \sqrt{a^e_i\Group{\beta a^e_i + \Group{1-\beta}a^c_i}}
+\end{equation}
+
+\subsection{Learning}
+
+Learning concerns the weights $w_i$ of a map, once a best matching unit (BMU) $\pi$ is defined. Learning consists of moving the weights to the current input $\xi$, in the surrounding of the best matching unit. The neighbooring function is $\Fxx \mu i \pi$, using Gaussian and triangular matchings $\mu_G$ or $\mu_\triangle$. The learning rule is:
+\begin{equation}
+  \forall i,\; w^{t+1}_i = (1-\alpha h)w^t_i + \alpha h \xi,\mbox{ with } h = \Fxx \mu i \pi
+\end{equation}
+
+\BeginCpp
+kwd::type("Xi",   "Pos2D"           );
+kwd::type("BMU",  "Pos1D"           );
+kwd::type("Wgt",  "Map1D<Pos2D>=100");
+
+"Wgt" << fx::learn_gaussian("Xi", kwd::prev("Wgt"),
+                           "BMU") | kwd::use("alpha", .05), kwd::use("r",     .3);
+"Wgt" << fx::learn_triangle("Xi", kwd::prev("Wgt"),
+                           "BMU") | kwd::use("alpha", .05), kwd::use("sigma", .3);
+\end{lstlisting}\end{footnotesize}
+
+\subsection{BMU computation}
+
+A scalar activity distribution over a map serves as a basis for computing the BMU. The basic operation is the argmax, i.e. the position on the map where the activity is maximal. In case of ex-aequos, a random choice can be performed (see the "random-bmu" parameter). The activity distribution can be convoluated by a gaussian kernel before the argmax computation. The variance $\sigma$ of that kernel is expressed in units sich as the map side as a size of 1, whatever the number of units actually in the map.
+
+
+\BeginCpp
+kwd::type("Act",        "Map1D<Scalar>=100");
+kwd::type("BMU_noconv", "Pos1D");
+kwd::type("BMU_conv",   "Pos1D");
+
+"Act"        << fx::random()                
+"BMU_noconv" << fx::argmax("Act")      | kwd::use("random-bmu", 1.0);
+"BMU_conv"   << fx::conv_argmax("Act") | kwd::use("random-bmu", 0.0),
+                                         kwd::use("sigma", .05);
+\end{lstlisting}\end{footnotesize}
+
+The BMU can also be updated from a previous BMU position, by modifying it toward the argmax (after convolution) with a step $\delta$. This is used for relaxation processes. The number of convergence steps can be measured thanks to the "converge" operator.
+
+
+\BeginCpp
+kwd::type("Act", "Map1D<Scalar>=100");
+kwd::type("BMU", "Pos1D");
+kwd::type("NbSteps", "Scalar");
+
+"Act" << fx::random()                
+"BMU" << fx::toward_conv_argmax("Act",
+                                kwd::prev("BMU")) | kwd::use("sigma", .05),
+                                                    kwd::use("delta", .05);
+"NBSteps" << fx::converge({kwd::data("BMU")});
+\end{lstlisting}\end{footnotesize}

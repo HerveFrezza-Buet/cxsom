@@ -1,0 +1,91 @@
+\newcommand{\CxSOM}[0]{{\tt CxSOM}\xspace}
+
+\newcommand{\ConceptDef}[1]{{\em #1}}
+
+\newcommand{\Code}[1]{{\tt #1}}
+
+\definecolor{funcoul}{rgb}{0,0,0.75}
+\newcommand{\CallCode}[2]{\Fx {\mbox{\textcolor{funcoul}{\Code{#1}}}} {#2}}
+
+% Data instances
+
+\newcommand{\DftTL}[0]{T}     % Timeline
+\newcommand{\DftTTL}[0]{T'}
+\newcommand{\DftVar}[0]{X}    % Variable
+\newcommand{\DftVVar}[0]{X'}
+\newcommand{\DftInst}[0]{t}   % Instant
+\newcommand{\DftIInst}[0]{t'}
+\newcommand{\DftShift}[0]{\tau}   % Instant
+\newcommand{\DftSShift}[0]{\tau'}
+
+\newcommand{\Any}[0]{\bullet}
+\newcommand{\DI}[3]{{\left[#1,#2,#3\right]}}
+\newcommand{\DftDI}[0]{{\DI\DftTL\DftVar\DftInst}}
+\newcommand{\RDI}[3]{{\left\{#1,#2,#3\right\}}}
+\newcommand{\DftRDI}[0]{{\RDI\DftTL\DftVar\DftShift}}
+
+% Time step
+\newcommand{\TS}[2]{{{\cal S}_{#1}^{#2}}}
+\newcommand{\DftTS}[0]{{\TS\DftTL\DftInst}}
+\newcommand{\TSQ}[2]{{\left[#1\right]_{\mathrm{#2}}}}
+\newcommand{\TSQu}[1]{{\TSQ{#1}{unstable}}}
+\newcommand{\TSQi}[1]{{\TSQ{#1}{impossible}}}
+\newcommand{\TSQs}[1]{{\TSQ{#1}{stable}}}
+\newcommand{\TSQc}[1]{{\TSQ{#1}{confirmed}}}
+\newcommand{\DftTSQu}[0]{{\TSQu{\DftTS}}}
+\newcommand{\DftTSQi}[0]{{\TSQi{\DftTS}}}
+\newcommand{\DftTSQs}[0]{{\TSQs{\DftTS}}}
+\newcommand{\DftTSQc}[0]{{\TSQc{\DftTS}}}
+
+% Types
+\newcommand{\Scalar}[0]{{\tt Scalar}\xspace}
+\newcommand{\Pos}[1]{{\tt Pos{#1}D}\xspace}
+\newcommand{\Array}[1]{{{\tt Array=}$#1$}\xspace}
+\newcommand{\Map}[3]{{{\tt{Map{#1}D<}{$#2$}{>=}$#3$}}\xspace}
+
+% Status
+
+\definecolor{statuscoul}{rgb}{0,0.5,0}
+\newcommand{\StatusTag}[1]{\textcolor{statuscoul}{\mathtt{#1}}}
+
+\newcommand{\Busy}[0]{{\StatusTag{busy}}}
+\newcommand{\Ready}[0]{{\StatusTag{ready}}}
+
+\newcommand{\Impossible}[0]{\StatusTag{impossible}}
+\newcommand{\UpToDate}[0]{\StatusTag{uptodate}}
+\newcommand{\Updated}[0]{\StatusTag{updated}}
+\newcommand{\Done}[0]{\StatusTag{done}}
+\newcommand{\None}[0]{\StatusTag{none}}
+
+\newcommand{\Blocked}[0]{\StatusTag{blocked}}
+\newcommand{\Relaxing}[0]{\StatusTag{relaxing}}
+\newcommand{\Checking}[0]{\StatusTag{checking}}
+
+
+% Attributes
+
+\newcommand{\Datation}[1]{\mathrm{d}_{#1}}
+\newcommand{\Status}[1]{{\left<{#1}\right>}}
+
+% Updates
+\newcommand{\Updt}[0]{u}
+\newcommand{\UUpdt}[0]{u'}
+\newcommand{\Pat}[0]{\pi}
+\newcommand{\PPat}[0]{\Pat'}
+\newcommand{\Res}[1]{\mathrm{res}_{#1}}
+\newcommand{\InArg}[1]{\mathrm{in}_{#1}}
+\newcommand{\OutArg}[1]{\mathrm{out}_{#1}}
+
+\newcommand{\TSUpdt}[0]{\overline{u}}
+\newcommand{\TSUUpdt}[0]{\overline{u}'}
+
+% Jobs and patterns
+\newcommand{\Jobs}[0]{{\cal J}}
+\newcommand{\Job}[0]{j}
+\newcommand{\Patterns}[0]{{\cal P}}
+\newcommand{\Variables}[0]{{\cal V}}
+\newcommand{\MinT}[1]{\mbox{\tt @}{#1}}
+
+% C++
+\newcommand{\BeginCpp}[0]{\begin{footnotesize}\begin{lstlisting}[language=C++,basicstyle=\ttfamily,keywordstyle=\color{blue}\ttfamily,stringstyle=\color{magenta}\ttfamily]}
+
