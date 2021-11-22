@@ -1,6 +1,6 @@
 
 // #define cxsomDEBUG_PROTOCOL
-// #define cxsomLOG
+#define cxsomLOG
 #include <cxsom-server.hpp>
 
 // This is used in case of some macros are set. You can remove this

@@ -374,7 +374,7 @@ namespace cxsom {
 	  }
 #ifdef cxsomLOG
 	  else {
-	    logger->msg("Done (it was not an init). Not puting in any queue.");
+	    logger->msg("Done (it was not an init). Not putting in any queue.");
 	  }
 #endif
 	  break;
