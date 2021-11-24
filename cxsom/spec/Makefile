@@ -11,11 +11,14 @@ help:
 	@echo
 
 clean:
-	rm -f $(LATEX_JAM) *~
+	rm -f $(LATEX_JAM) *~ *cheatsheet.*
 
-doc:
+doc: commands.tex
 	pdflatex $(DOC)
 	pdflatex $(DOC)
+
+commands.tex : notations.py
+	python3 notations.py
 
 
 

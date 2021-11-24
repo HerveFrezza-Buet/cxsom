@@ -26,9 +26,12 @@ def DIof(T, X, t):
 def RDIof(T, X, t):
     return nb.math.brace(nb.seq(T, X, t))
 
-T, X, t, dt = nb.to('T X t \\tau')
+T, X, t, dt, n = nb.to('T X t \\tau n')
+slot = nb.to('\\bullet')
+any_set = nb.symbol('{\\cal X}')
 DI = DIof(T, X, t)
 RDI = RDIof(T, X, t)
+any_var = DIof(T, X, slot)
 
 time_step = nb.symbol('{\\cal S}')
 TS = time_step@(T, t)
@@ -63,6 +66,9 @@ with nb.files.defs('commands.tex') as defs:
     defs['Relaxing']   = relaxing
     defs['Checking']   = checking
 
+    defs['DftVar'] = X
+    defs['DftTL'] = T
+    defs['DftInst'] = t
     defs['DftDI'] = DI
     defs['DftRDI'] = RDI
     defs['DftTS'] = TS
@@ -72,9 +78,27 @@ with nb.files.defs('commands.tex') as defs:
     defs['DftTSQs'] = TSQs
     defs['DftTSQc'] = TSQc
 
-    defs['DefDatation'] = nb.sets.isin(datation(DI), nb.sets.N)
+    defs['Rn'] = nb.sets.R**n
+    defs['ArraySet'] = nb.seq(nb.sets.range_cc(0, 1)**n, nb.sets.isin(n, nb.sets.N.star))
+    defs['AnySet'] = any_set
+    defs['ContentSetD'] = nb.seq(any_set**n, nb.sets.isin(n, nb.sets.N.star))
+    defs['ContentSetDD'] = nb.seq([any_set**n]**n, nb.sets.isin(n, nb.sets.N.star))
+    defs['AnySetDef'] = nb.sets.isin(any_set, nb.sets.byext(nb.text('\\Scalar'),
+                                                            nb.text('\\Pos 1'),
+                                                            nb.text('\\Pos 2'),
+                                                            nb.text('\\Array k')))
 
+    defs['DefDatation'] = nb.sets.isin(datation(DI), nb.sets.N)
+    defs['DefVar'] = any_var
+    defs['DefStatus'] = nb.sets.isin(status(DI), nb.sets.byext(busy, ready))
+    defs['StatusX'] = status('x')
+
+    defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')
     defs.add_preamble('\\definecolor{funcoul}{rgb}{0,0,0.75}')
     defs.add_preamble('\\definecolor{statuscoul}{rgb}{0,0.5,0}')
+    defs.add_preamble('\\newcommand{\\Scalar}[0]{{\\tt Scalar}\\xspace}')
+    defs.add_preamble('\\newcommand{\\Pos}[1]{{\\tt Pos{#1}D}\\xspace}')
+    defs.add_preamble('\\newcommand{\\Array}[1]{{{\\tt Array=}$#1$}\\xspace}')
+    defs.add_preamble('\\newcommand{\\Map}[3]{{{\\tt{Map{#1}D<}{$#2$}{>=}$#3$}}\\xspace}')
     defs.cheatsheet()

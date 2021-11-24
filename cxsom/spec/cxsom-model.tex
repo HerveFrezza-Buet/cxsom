@@ -8,28 +8,32 @@ The computation enabled by \CxSOM consists of successively updating data, keepin
 
 The elementary piece of data handled in \CxSOM is called a \ConceptDef{data instance} (\ConceptDef{DI}). Each of the computed DIs ends as a record in a file, once it has been computed.
 
-DIs are denoted by a triplet $\DftDI$, that reads as ``the instance of variable $\DftVar$ hosted by the timeline $\DftTL$ at the time instant $\DftInst$ of that specific timeline''. Only elementary $\DftDI$ DIs matter, the concepts of \ConceptDef{variable}, \ConceptDef{timeline} and \ConceptDef{time instant} only serve for describing the computation.
+DIs are denoted by a triplet $\cxDftDI$, that reads as ``the instance of variable $\cxDftVar$ hosted by the timeline $\cxDftTL$ at the time instant $\cxDftInst$ of that specific timeline''. Only elementary $\cxDftDI$ DIs matter, the concepts of \ConceptDef{variable}, \ConceptDef{timeline} and \ConceptDef{time instant} only serve for describing the computation.
+
 
 Each DIs is a value that is stored in a file once definitively computed. A value has a type, that can be:
 \begin{itemize}
 \item \Scalar: A floating point value, usually in $[0,1]$.
   \item \Pos 1: A value in $[0,1]$ corresponding to a position in a 1D map.
   \item \Pos 2: A value in $[0,1]^2$ corresponding to a position in a 2D map.
-  \item \Array n: A value in $\Real^n$, usually $[0,1]^n,\; n \in \Natz$.
-  \item \Map 1{\cal X}n: A 1D map of type $\cal X$, i.e. a value in ${\cal X}^n,\; n \in \Natz$.
-  \item \Map 2{\cal X}n: A 2D squared map of type $\cal X$, i.e. a value in $\GroupExp{{\cal X}^n}n,\; n \in \Natz$.
+  \item \Array n: A value in $\cxRn$, usually $\cxArraySet$.
+  \item \Map 1{\cal X}n: A 1D map of type $\cxAnySet$, i.e. a value in $\cxContentSetD$.
+  \item \Map 2{\cal X}n: A 2D squared map of type $\cxAnySet$, i.e. a value in $\cxContentSetDD$.
 \end{itemize}
-where type $\cal X \in \Set{\mbox{\Scalar}, \mbox{\Pos 1}, \mbox{\Pos 2}, \mbox{\Array k}}$.
+where type $\cxAnySetDef$.
 
-In \CxSOM, the type is associated to a variable, i.e. all the $\DI\DftTL\DftVar\Any$ are DIs with the same type.
 
-Every DI is also doted with a status variable $\Status\DftDI \in \Set{\Busy, \Ready}$:
+In \CxSOM, the type is associated to a variable, i.e. all the $\cxDefVar$ are DIs with the same type.
+
+Every DI is also doted with a status variable $\cxDefStatus$:
 \begin{itemize}
-  \item $\Ready$: The computation of the value of the DI is definitively done. The DI value will not change anymore.
-  \item $\Busy$: The definitive value of the DI is still to be determined.
+  \item $\cxReady$: The computation of the value of the DI is definitively done. The DI value will not change anymore.
+  \item $\cxBusy$: The definitive value of the DI is still to be determined.
 \end{itemize}
 
-More generally, in the following, $\Status x$ reads as ``the status of $x$''.
+More generally, in the following, $\cxStatusX$ reads as ``the status of $x$''.
+
+\end{document}
 
 \subsection{Updates}
 

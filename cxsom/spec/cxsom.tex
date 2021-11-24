@@ -9,6 +9,15 @@
 \usepackage{graphbox} % adds align=c
 \usepackage[margin=3cm]{geometry}
 
+
+\usepackage{bbold}
+\usepackage{esvect}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathdots}
+
+
 \setlength{\parskip}{3mm}
 \setlength{\parindent}{0mm}
 
@@ -31,7 +40,8 @@ urlcolor=blue]{hyperref}
 \newcommand{\Map}[3]{{{\tt{Map{#1}D<}{$#2$}{>=}$#3$}}\xspace}
 
 
-\input{math.tex}
+\newcommand{\BeginCpp}[0]{\begin{footnotesize}\begin{lstlisting}[language=C++,basicstyle=\ttfamily,keywordstyle=\color{blue}\ttfamily,stringstyle=\color{magenta}\ttfamily]}
+
 \input{algo.tex}
 \input{commands.tex}
 
