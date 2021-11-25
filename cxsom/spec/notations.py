@@ -1,9 +1,9 @@
 import notabene as nb
 
 # Call code
-def call_code(fname, code):
-    name = nb.basics.Formula([nb.to(fname)], lambda args: '\\textcolor{funcoul}{\\mathtt{ ' + str(args[0]) + '}}')
-    return nb.fun(name)(code)
+def call_code(fname, *code):
+    name = nb.basics.Formula([nb.to(fname)], lambda args: '\\textcolor{funcoul}{\\mbox{' + str(args[0]) + '}}')
+    return nb.fun(name)(*code)
 
 def tag(tagname):
     return nb.basics.Formula([], lambda args : '\\textcolor{statuscoul}{\\mathtt{' + tagname + '}}')
@@ -60,8 +60,6 @@ out_arg_u = updt_arg('out', u)
 with nb.files.defs('commands.tex') as defs:
     nb.config.push('display style', True) # We set the displaystyle
     defs.prefix = 'cx'
-
-    defs['CallCode'] = call_code(nb.arg(1), nb.arg(2))
 
     defs['Busy']       = busy
     defs['Ready']      = ready
@@ -123,6 +121,30 @@ with nb.files.defs('commands.tex') as defs:
     defs['StatusNone']       = status(u) == none
     defs['ResBusy']          = status(res_u) == busy
     defs['ResReady']         = status(res_u) == ready
+
+    out_ok = nb.text('{\\tt out\\_ok}')
+    is_init = nb.text('{\\tt is\\_init}')
+    is_significant = nb.to('\\alpha')
+    res = nb.to('x')
+    defs['CycleZ'] = call_code('on\\_computation\\_start')
+    defs['CycleA'] = nb.logical.neg(out_ok)
+    defs['CycleB'] = nb.sets.isin(DI, out_arg_u)
+    defs['CycleC'] = status(DI) == ready
+    defs['CycleD'] = call_code('on\\_read\\_out\\_arg', DI)
+    defs['CycleE'] = nb.algo.affect(out_ok, False)
+    defs['CycleF'] = call_code('on\\_read\\_out\\_arg\\_aborted')
+    defs['CycleG'] = nb.algo.affect(out_ok, True)
+    defs['CycleH'] = nb.sets.isin(DI, in_arg_u)
+    defs['CycleI'] = call_code('on\\_read\\_in\\_arg', DI)
+    defs['CycleJ'] = is_init
+    defs['CycleK'] = nb.algo.affect(res, none)
+    defs['CycleL'] = nb.algo.affect(is_significant, call_code('on\\_write\\_result', res_u))
+    defs['CycleM'] = is_significant
+    defs['CycleN'] = nb.algo.affect(res, updated)
+    defs['CycleO'] = nb.algo.affect(res, uptodate)
+    defs['CycleP'] = nb.algo.affect(res, done)
+    defs['CycleQ'] = nb.algo.affect(status(res_u), ready)
+    defs['CycleR'] = res
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')

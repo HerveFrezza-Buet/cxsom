@@ -1,4 +1,3 @@
-\newcommand{\cxCallCode}[2]{{\textcolor{funcoul}{\mathtt{ #1}}}\left(#2\right)}
 \newcommand{\cxBusy}[0]{\textcolor{statuscoul}{\mathtt{busy}}}
 \newcommand{\cxReady}[0]{\textcolor{statuscoul}{\mathtt{ready}}}
 \newcommand{\cxImpossible}[0]{\textcolor{statuscoul}{\mathtt{impossible}}}
@@ -49,3 +48,22 @@
 \newcommand{\cxStatusNone}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{none}}}}
 \newcommand{\cxResBusy}[0]{{\left< {\mathrm{res}}_{u} \right>} = {\textcolor{statuscoul}{\mathtt{busy}}}}
 \newcommand{\cxResReady}[0]{{\left< {\mathrm{res}}_{u} \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxCycleZ}[0]{{\textcolor{funcoul}{\mbox{on\_computation\_start}}}\left(\right)}
+\newcommand{\cxCycleA}[0]{{\neg}{\mbox{{\tt out\_ok}}}}
+\newcommand{\cxCycleB}[0]{{\left[ T,\;X,\;t \right]} \in {{\mathrm{out}}_{u}}}
+\newcommand{\cxCycleC}[0]{{\left< \left[ T,\;X,\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxCycleD}[0]{{\textcolor{funcoul}{\mbox{on\_read\_out\_arg}}}\left(\left[ T,\;X,\;t \right]\right)}
+\newcommand{\cxCycleE}[0]{{\mbox{{\tt out\_ok}}} \leftarrow {\mbox{false}}}
+\newcommand{\cxCycleF}[0]{{\textcolor{funcoul}{\mbox{on\_read\_out\_arg\_aborted}}}\left(\right)}
+\newcommand{\cxCycleG}[0]{{\mbox{{\tt out\_ok}}} \leftarrow {\mbox{true}}}
+\newcommand{\cxCycleH}[0]{{\left[ T,\;X,\;t \right]} \in {{\mathrm{in}}_{u}}}
+\newcommand{\cxCycleI}[0]{{\textcolor{funcoul}{\mbox{on\_read\_in\_arg}}}\left(\left[ T,\;X,\;t \right]\right)}
+\newcommand{\cxCycleJ}[0]{\mbox{{\tt is\_init}}}
+\newcommand{\cxCycleK}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{none}}}}
+\newcommand{\cxCycleL}[0]{{\alpha} \leftarrow {{\textcolor{funcoul}{\mbox{on\_write\_result}}}\left({\mathrm{res}}_{u}\right)}}
+\newcommand{\cxCycleM}[0]{\alpha}
+\newcommand{\cxCycleN}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{updated}}}}
+\newcommand{\cxCycleO}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{uptodate}}}}
+\newcommand{\cxCycleP}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxCycleQ}[0]{{\left< {\mathrm{res}}_{u} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxCycleR}[0]{x}

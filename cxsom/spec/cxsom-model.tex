@@ -77,68 +77,67 @@ Considering an update for computation can thus lead to the following status of t
 
 The datation mechanism enables to control the update of all the DIs in a given timestep, i.e. all the DIs like $\cxDefTimeStep$ for the time instant $\cxDftInst$ of the timeline $\cxDftTL$. When no more significant writes of the results can be done, the whole timestep is stable. So the relevance of the datation mechanism is to enable a \ConceptDef{relaxation} of the DIs inside a timestep until stabilization of all of them is reached.
 
-\end{document}
 
 \subsubsection{Update computation cycle}
 
 When a specific update is defined in \CxSOM (as average, learning, etc.), the update is inherited from a base \Code{cxsom::update::Base} class. In the subclass, the specificity of the computation has to be implemented, while the base class handles the details of the full update cycle, as datation and status. Algorithm~\ref{algo:update} shows the cycle, the \Code{on\_*} calls are the method that subclass need to override in order to implement a specific update computation.
-
 
 \begin{algorithm}
   \caption{\AlgoName{One update cycle for update $\cxDftUpdt$}\label{algo:update}}
   \begin{algorithmic}[1]
     \REQUIRE a boolean attribute \Code{out\_ok}, telling if all out-args have been read successfully previously.
     \REQUIRE a boolean attribute \Code{is\_init}, telling if the update is an initialization.
-    \IF{$\cxResReady$} \RETURN $\Done$ \ENDIF
-    \STATE $\CallCode{on\_computation\_start}{}$
-    \IF{$\neg \mbox{\Code{out\_ok}}$} \STATE \COMMENT{out-arguments need to be read.}
-    \FORALL{$\DftDI \in \OutArg\cxDftUpdt$}
-    \IF{$\Status{\DftDI} = \Ready$}
-    \STATE $\CallCode{on\_read\_out\_arg}{\DftDI}$
+    \IF{$\cxResReady$} \RETURN $\cxDone$ \ENDIF
+    \STATE $\cxCycleZ$
+    \IF{$\cxCycleA$} \STATE \COMMENT{out-arguments need to be read.}
+    \FORALL{$\cxCycleB$}
+    \IF{$\cxCycleC$}
+    \STATE $\cxCycleD$
     \ELSE
-    \STATE $\mbox{\Code{out\_ok}} \Affect \mbox{false}$
-    \STATE $\CallCode{on\_read\_out\_arg\_aborted}{}$
-    \RETURN $\Impossible$
+    \STATE $\cxCycleE$
+    \STATE $\cxCycleF$
+    \RETURN $\cxImpossible$
     \ENDIF
     \ENDFOR
-    \STATE $\mbox{\Code{out\_ok}} \Affect \mbox{true}$ \COMMENT{All in-args have been successfully read.}
+    \STATE $\cxCycleG$ \COMMENT{All in-args have been successfully read.}
     \ENDIF
-    \FORALL{$\DftDI \in \InArg\cxDftUpdt$}
+    \FORALL{$\cxCycleH$}
     \STATE\COMMENT{Datation issues are handled in this loop, but not detailed here.}
-    \STATE $\CallCode{on\_read\_in\_arg}{\DftDI}$
+    \STATE $\cxCycleI$
     \ENDFOR
     \IF{none of the in-arguments have been updated since last cycle}
-    \IF{\Code{is\_init}}
-    \RETURN $\Updated$ \COMMENT{updates used as initialization are never considered as up-to-date.}
+    \IF{$\cxCycleJ$}
+    \RETURN $\cxUpdated$ \COMMENT{updates used as initialization are never considered as up-to-date.}
     \ELSE
-    \RETURN $\UpToDate$ 
+    \RETURN $\cxUpToDate$ 
     \ENDIF
     \ENDIF
     \STATE\COMMENT{From here, we know that the result has to be recomputed.}
-    \STATE $x = \None$ \COMMENT{This is the status we plan to return, it is set next.}
-    \STATE $\alpha = \CallCode{on\_write\_result}{\Res\cxDftUpdt}$ \COMMENT{$\alpha$ is a Boolean telling if the value change is significant.}
-    \IF{we have just written a new significant value in $\Res\cxDftUpdt$}
-    \STATE $x \Affect \Updated$
+    \STATE $\cxCycleK$ \COMMENT{This is the status we plan to return, it is set next.}
+    \STATE $\cxCycleL$ \COMMENT{$\cxCycleM$ is a Boolean telling if the value change is significant.}
+    \IF{we have just written a new significant value in $\cxResUpdt$}
+    \STATE $\cxCycleN$
     \ELSE
     \IF{\Code{is\_init}}
-    \RETURN $x \Affect \Updated$ \COMMENT{Even not significant changes are considered as an actual update for initialization updates.}
+    \RETURN $\cxCycleN$ \COMMENT{Even not significant changes are considered as an actual update for initialization updates.}
     \ELSE
-    \RETURN $x \Affect \UpToDate$ 
+    \RETURN $\cxCycleO$ 
     \ENDIF
     \ENDIF
     \STATE\COMMENT{Before returning, we have to check if in-arg may change in the future}
-    \IF{all in-arguments are $\Ready$}
+    \IF{all in-arguments are $\cxReady$}
     \IF{\Code{is\_init}}
-    \STATE $x \Affect \Updated$ \COMMENT{As $\cxDftUpdt$ an init, we return $\Updated$ since further change can be consider by the usual update comming next for updating $\Res\cxDftUpdt$.}
+    \STATE $\cxCycleN$ \COMMENT{As $\cxDftUpdt$ an init, we return $\cxUpdated$ since further change can be consider by the usual update comming next for updating $\cxResUpdt$.}
     \ELSE
-    \STATE $x \Affect \Done$ \COMMENT{We have definitively computed the result...}
-    \STATE $\Status{\Res\cxDftUpdt} \Affect \Ready$ \COMMENT{The result DI value is locked.}
+    \STATE $\cxCycleP$ \COMMENT{We have definitively computed the result...}
+    \STATE $\cxCycleQ$ \COMMENT{The result DI value is locked.}
     \ENDIF
     \ENDIF
-    \RETURN $x$
+    \RETURN $\cxCycleR$
   \end{algorithmic}
 \end{algorithm}
 
+\end{document}
 \subsection{Timesteps and tasks}
 
 \subsubsection{A computational structure for timesteps}
