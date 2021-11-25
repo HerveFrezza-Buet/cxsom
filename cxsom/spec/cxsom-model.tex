@@ -33,7 +33,6 @@ Every DI is also doted with a status variable $\cxDefStatus$:
 
 More generally, in the following, $\cxStatusX$ reads as ``the status of $x$''.
 
-\end{document}
 
 \subsection{Updates}
 
@@ -41,41 +40,44 @@ An \ConceptDef{update} of some DI is the (re)computation by the \CxSOM computer 
 
 \subsubsection{An update is a function taking arguments and computing a result \label{sec:update}}
 
-An update $\Updt$ for a DI $\DftDI$ is made of:
+An update $\cxDftUpdt$ for a DI $\cxDftDI$ is made of:
 \begin{itemize}
 \item The decription of some computation, i.e. the function called to realize an update.
-\item The result $\Res\Updt$, i.e. $\Res\Updt\EqDef\DftDI$ itself, that is computed by the function of the update.
+\item The result $\cxResUpdt$, i.e. $\cxResUpdtDef$ itself, that is computed by the function of the update.
 \item Other DIs, thats serve as arguments to the function (their value is read when the function is called). Among arguments, a distinction is made between \ConceptDef{in-arguments} and \ConceptDef{out-arguments}:
   \begin{itemize}
-    \item The in-arguments $\InArg\Updt$ of the update $\Updt$ such as $\Res\Updt = \DftDI$ is the set of DIs used as arguments of $\Updt$ of the form $\DI\DftTL\Any\DftInst$. All the DIs handled in the simulation of the form $\DI\DftTL\Any\DftInst$ define a \ConceptDef{time step} $\DftTS$ of the simulation, so the in-arguments are the DIs used for the computation of an update which belong to the same timestep as the result.
-    \item The out-arguments  $\OutArg\Updt$ of the update $\Updt$ are the other DIs used as arguments for the computation of the update.
+  \item The in-arguments $\cxInArgUpdt$ of the update $\cxDftUpdt$ such as $\cxResUpdtEq$ is the set of DIs used as arguments of $\cxDftUpdt$ of the form $\cxDefTimeStep$. All the DIs handled in the simulation of the form $\cxDefTimeStep$ define a \ConceptDef{time step} $\cxDftTS$ of the simulation, so the in-arguments are the DIs used for the computation of an update which belong to the same timestep as the result.
+  \item The out-arguments  $\cxOutArgUpdt$ of the update $\cxDftUpdt$ are the other DIs used as arguments for the computation of the update.
   \end{itemize}
 \end{itemize}
 
+
 \subsubsection{Datation and relaxation}
 
-Before it has a definitive value (i.e. before being in the $\Ready$ status), the value of a DI may change several times. Indeed, all DIs in a timestep $\DftTS = \DI\DftTL\Any\DftInst$ are updated until all of them get $\Ready$, and during that process, the values of the DIs may be recomputed several times. In order to handle the dependancies of the DIs within a timestep, we need to timestamp the values of the DIs, in order to determine those of them that have to be updated. Timestamp play the role of file dates in makefile, when the date of a target is compared to the date of its dependancies. Here, in order to know if an update $\Updt$ needs to be performed, we have to consider two things:
+Before it has a definitive value (i.e. before being in the $\cxReady$ status), the value of a DI may change several times. Indeed, all DIs in a timestep $\cxDftTSEq$ are updated until all of them get $\cxReady$, and during that process, the values of the DIs may be recomputed several times. In order to handle the dependancies of the DIs within a timestep, we need to timestamp the values of the DIs, in order to determine those of them that have to be updated. Timestamp play the role of file dates in makefile, when the date of a target is compared to the date of its dependancies. Here, in order to know if an update $\cxDftUpdt$ needs to be performed, we have to consider two things:
 \begin{itemize}
-\item Do we have $\forall \DftDI \in \OutArg\Updt,\; \Status\DftDI = \Ready$? If not, the update cannot be done, it is considered as \ConceptDef{impossible}.
+\item Do we have $\cxAllReady$? If not, the update cannot be done, it is considered as \ConceptDef{impossible}.
 \item Have the in-arguments been updated since the last computation of the result? If the answer is yes, the result needs to be recomputed.
 \end{itemize}
 
-To compute the second conditon, every DI comes with a \ConceptDef{datation} denoted by $\Datation\DftDI \in \Nat$.
+To compute the second conditon, every DI comes with a \ConceptDef{datation} denoted by $\cxDatationDef$.
 
 An update then stores, for each of its in-arguments, the datation it had at the last computation of the result. When the simuator considers an update, it compares the current datation of the in-arguments to the ones stored by the update. If some are newer (or if the result has never been computed so far) the result is recomputed, and
 \begin{equation}
-  \Datation{\Res\Updt} = 1 + \max_{\DftDI \in \InArg\Updt}\Datation\DftDI
+  \cxDatationUpdt
 \end{equation}
-Considering an update for computation can thus lead to the following status of the update $\Updt$, denoted by $\Status\Updt$:
+Considering an update for computation can thus lead to the following status of the update $\cxDftUpdt$, denoted by $\cxStatusUpdt$:
 \begin{itemize}
-\item $\Status\Updt=\Impossible$: $\Status{\Res\Updt}=\Busy$, computation is not feasible yet, since some out-arguments are $\Busy$.
-\item $\Status\Updt=\UpToDate$:  $\Status{\Res\Updt}=\Busy$, nothing changed in the in-arguments input dates from last update, or the new value was not a significant modification. The datation $\Datation{\Res\Updt}$ has not been modified.
-\item $\Status\Updt=\Updated$:   $\Status{\Res\Updt}=\Busy$, the computation has modified the value of $\Res\Updt$ significantly.
-\item $\Status\Updt=\Done$:      $\Status{\Res\Updt}=\Ready$, the computation has modified the value $\Res\Updt$ definitively.
-\item $\Status\Updt=\None$:      Update status is not determined yet (used for initialization only).
+\item $\cxStatusImpossible$: $\cxResBusy$, computation is not feasible yet, since some out-arguments are $\cxBusy$.
+\item $\cxStatusUpToDate$:  $\cxResBusy$, nothing changed in the in-arguments input dates from last update, or the new value was not a significant modification. The datation $\cxDatationResU$ has not been modified.
+\item $\cxStatusUpdated$:   $\cxResBusy$, the computation has modified the value of $\cxResUpdt$ significantly.
+\item $\cxStatusDone$:      $\cxResReady$, the computation has modified the value $\cxResUpdt$ definitively.
+\item $\cxStatusNone$:      Update status is not determined yet (used for initialization only).
 \end{itemize}
 
-The datation mechanism enables to control the update of all the DIs in a given timestep, i.e. all the DIs like $\DI\DftTL\Any\DftInst$ for the time instant $\DftInst$ of the timeline $\DftTL$. When no more significant writes of the results can be done, the whole timestep is stable. So the relevance of the datation mechanism is to enable a \ConceptDef{relaxation} of the DIs inside a timestep until stabilization of all of them is reached.
+The datation mechanism enables to control the update of all the DIs in a given timestep, i.e. all the DIs like $\cxDefTimeStep$ for the time instant $\cxDftInst$ of the timeline $\cxDftTL$. When no more significant writes of the results can be done, the whole timestep is stable. So the relevance of the datation mechanism is to enable a \ConceptDef{relaxation} of the DIs inside a timestep until stabilization of all of them is reached.
+
+\end{document}
 
 \subsubsection{Update computation cycle}
 
@@ -83,14 +85,14 @@ When a specific update is defined in \CxSOM (as average, learning, etc.), the up
 
 
 \begin{algorithm}
-  \caption{\AlgoName{One update cycle for update $\Updt$}\label{algo:update}}
+  \caption{\AlgoName{One update cycle for update $\cxDftUpdt$}\label{algo:update}}
   \begin{algorithmic}[1]
     \REQUIRE a boolean attribute \Code{out\_ok}, telling if all out-args have been read successfully previously.
     \REQUIRE a boolean attribute \Code{is\_init}, telling if the update is an initialization.
-    \IF{$\Status{\Res\Updt}=\Ready$} \RETURN $\Done$ \ENDIF
+    \IF{$\cxResReady$} \RETURN $\Done$ \ENDIF
     \STATE $\CallCode{on\_computation\_start}{}$
     \IF{$\neg \mbox{\Code{out\_ok}}$} \STATE \COMMENT{out-arguments need to be read.}
-    \FORALL{$\DftDI \in \OutArg\Updt$}
+    \FORALL{$\DftDI \in \OutArg\cxDftUpdt$}
     \IF{$\Status{\DftDI} = \Ready$}
     \STATE $\CallCode{on\_read\_out\_arg}{\DftDI}$
     \ELSE
@@ -101,7 +103,7 @@ When a specific update is defined in \CxSOM (as average, learning, etc.), the up
     \ENDFOR
     \STATE $\mbox{\Code{out\_ok}} \Affect \mbox{true}$ \COMMENT{All in-args have been successfully read.}
     \ENDIF
-    \FORALL{$\DftDI \in \InArg\Updt$}
+    \FORALL{$\DftDI \in \InArg\cxDftUpdt$}
     \STATE\COMMENT{Datation issues are handled in this loop, but not detailed here.}
     \STATE $\CallCode{on\_read\_in\_arg}{\DftDI}$
     \ENDFOR
@@ -114,8 +116,8 @@ When a specific update is defined in \CxSOM (as average, learning, etc.), the up
     \ENDIF
     \STATE\COMMENT{From here, we know that the result has to be recomputed.}
     \STATE $x = \None$ \COMMENT{This is the status we plan to return, it is set next.}
-    \STATE $\alpha = \CallCode{on\_write\_result}{\Res\Updt}$ \COMMENT{$\alpha$ is a Boolean telling if the value change is significant.}
-    \IF{we have just written a new significant value in $\Res\Updt$}
+    \STATE $\alpha = \CallCode{on\_write\_result}{\Res\cxDftUpdt}$ \COMMENT{$\alpha$ is a Boolean telling if the value change is significant.}
+    \IF{we have just written a new significant value in $\Res\cxDftUpdt$}
     \STATE $x \Affect \Updated$
     \ELSE
     \IF{\Code{is\_init}}
@@ -127,10 +129,10 @@ When a specific update is defined in \CxSOM (as average, learning, etc.), the up
     \STATE\COMMENT{Before returning, we have to check if in-arg may change in the future}
     \IF{all in-arguments are $\Ready$}
     \IF{\Code{is\_init}}
-    \STATE $x \Affect \Updated$ \COMMENT{As $\Updt$ an init, we return $\Updated$ since further change can be consider by the usual update comming next for updating $\Res\Updt$.}
+    \STATE $x \Affect \Updated$ \COMMENT{As $\cxDftUpdt$ an init, we return $\Updated$ since further change can be consider by the usual update comming next for updating $\Res\cxDftUpdt$.}
     \ELSE
     \STATE $x \Affect \Done$ \COMMENT{We have definitively computed the result...}
-    \STATE $\Status{\Res\Updt} \Affect \Ready$ \COMMENT{The result DI value is locked.}
+    \STATE $\Status{\Res\cxDftUpdt} \Affect \Ready$ \COMMENT{The result DI value is locked.}
     \ENDIF
     \ENDIF
     \RETURN $x$
@@ -145,9 +147,9 @@ In the simulator, the computation of the updates are put in a pool task and comp
 
 Let us recall the notation $\DftTS \EqDef \Sets{\DI\DftTTL\DftVVar\DftIInst \in \mbox{simulation}}{\DftTTL = \DftTL \And \DftIInst=\DftInst}$ for the timestep at instant $\DftInst$ in the timeline $\DftTL$. For each $\DftDI \in \DftTS$, the internal structure used in the simulator gathers at least an \ConceptDef{usual update}, and an optional \ConceptDef{initialization update}. The initialization update, if present, is used for the first feasible setting of the value of $\DftDI$ instead of the ususal update. Otherwise, the usual update is used throughout the successive setting of the value of $\DftDI$ during the relaxation.
 
-In order to avoid further confusions, let us denote by $\TSUpdt$ an update handled by a time step $\DftTS$: it can be either a single update $\Updt$ (so $\Updt$ is the usual update) or a pair $\Pair\Updt\UUpdt$ if an initialization update is defined (then $\UUpdt$ is the initialization update). In the case for which $\TSUpdt = \Pair\Updt\UUpdt$ is a pair, $\Res\Updt = \Res\UUpdt$ obviously stands, so $\Res\TSUpdt \EqDef \Res\Updt$. In the case of a pair as well, the simulator uses $\UUpdt$ until it gets a first computation of $\Res\TSUpdt$, and then it will switch to the use of $\Updt$ for next computations of $\Res\TSUpdt$.
+In order to avoid further confusions, let us denote by $\TSUpdt$ an update handled by a time step $\DftTS$: it can be either a single update $\cxDftUpdt$ (so $\cxDftUpdt$ is the usual update) or a pair $\Pair\cxDftUpdt\UUpdt$ if an initialization update is defined (then $\UUpdt$ is the initialization update). In the case for which $\TSUpdt = \Pair\cxDftUpdt\UUpdt$ is a pair, $\Res\cxDftUpdt = \Res\UUpdt$ obviously stands, so $\Res\TSUpdt \EqDef \Res\cxDftUpdt$. In the case of a pair as well, the simulator uses $\UUpdt$ until it gets a first computation of $\Res\TSUpdt$, and then it will switch to the use of $\cxDftUpdt$ for next computations of $\Res\TSUpdt$.
 
-As at least a call to the usual update $\Updt$ is required to be done for $\TSUpdt$, we have particularized the status returned by initialization updates in algorithm~\ref{algo:update}, so that the evaluation of an initialization update can never lead to the definitive computation of $\Res\Updt$ during the relaxation of the timestep.
+As at least a call to the usual update $\cxDftUpdt$ is required to be done for $\TSUpdt$, we have particularized the status returned by initialization updates in algorithm~\ref{algo:update}, so that the evaluation of an initialization update can never lead to the definitive computation of $\Res\cxDftUpdt$ during the relaxation of the timestep.
 
 \subsubsection{Timestep status}
 

@@ -19,6 +19,7 @@ doc: commands.tex
 
 commands.tex : notations.py
 	python3 notations.py
+	pdflatex commands-cheatsheet.tex
 
 
 

@@ -26,12 +26,13 @@ def DIof(T, X, t):
 def RDIof(T, X, t):
     return nb.math.brace(nb.seq(T, X, t))
 
-T, X, t, dt, n = nb.to('T X t \\tau n')
+T, X, t, dt, n, u = nb.to('T X t \\tau n u')
 slot = nb.to('\\bullet')
 any_set = nb.symbol('{\\cal X}')
 DI = DIof(T, X, t)
 RDI = RDIof(T, X, t)
-any_var = DIof(T, X, slot)
+any_time = DIof(T, X, slot)
+any_var = DIof(T, slot, t)
 
 time_step = nb.symbol('{\\cal S}')
 TS = time_step@(T, t)
@@ -48,6 +49,13 @@ def datation(x):
 
 def status(x):
     return nb.math.bracket(x)
+
+def updt_arg(argname, updt):
+    return nb.rm(argname)@updt
+
+res_u = updt_arg('res', u)
+in_arg_u = updt_arg('in', u)
+out_arg_u = updt_arg('out', u)
 
 with nb.files.defs('commands.tex') as defs:
     nb.config.push('display style', True) # We set the displaystyle
@@ -72,12 +80,15 @@ with nb.files.defs('commands.tex') as defs:
     defs['DftDI'] = DI
     defs['DftRDI'] = RDI
     defs['DftTS'] = TS
+    defs['DftUpdt'] = u
 
     defs['DftTSQu'] = TSQu
     defs['DftTSQi'] = TSQi
     defs['DftTSQs'] = TSQs
     defs['DftTSQc'] = TSQc
 
+    defs['DftTSEq'] = TS == any_var
+    
     defs['Rn'] = nb.sets.R**n
     defs['ArraySet'] = nb.seq(nb.sets.range_cc(0, 1)**n, nb.sets.isin(n, nb.sets.N.star))
     defs['AnySet'] = any_set
@@ -89,16 +100,31 @@ with nb.files.defs('commands.tex') as defs:
                                                             nb.text('\\Array k')))
 
     defs['DefDatation'] = nb.sets.isin(datation(DI), nb.sets.N)
-    defs['DefVar'] = any_var
+    defs['DefVar'] = any_time
+    defs['DefTimeStep'] = any_var
     defs['DefStatus'] = nb.sets.isin(status(DI), nb.sets.byext(busy, ready))
     defs['StatusX'] = status('x')
 
+    defs['ResUpdt'] = res_u
+    defs['InArgUpdt'] = in_arg_u
+    defs['OutArgUpdt'] = out_arg_u
+    defs['ResUpdtDef'] = nb.define(res_u, DI)
+    defs['ResUpdtEq'] = res_u == DI
+
+    defs['AllReady'] = nb.math.forall(nb.sets.isin(DI, out_arg_u), status(DI) == ready)
+    defs['DatationDef'] = nb.sets.isin(datation(DI), nb.sets.N)
+    defs['DatationResU'] = datation(res_u)
+    defs['DatationUpdt'] = datation(res_u) == 1 + nb.sets.max(nb.sets.isin(DI,in_arg_u), datation(DI))
+    defs['StatusUpdt']       = status(u)
+    defs['StatusImpossible'] = status(u) == impossible
+    defs['StatusUpToDate']   = status(u) == uptodate
+    defs['StatusUpdated']    = status(u) == updated
+    defs['StatusDone']       = status(u) == done
+    defs['StatusNone']       = status(u) == none
+    defs['ResBusy']          = status(res_u) == busy
+    defs['ResReady']         = status(res_u) == ready
+    
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')
-    defs.add_preamble('\\definecolor{funcoul}{rgb}{0,0,0.75}')
-    defs.add_preamble('\\definecolor{statuscoul}{rgb}{0,0.5,0}')
-    defs.add_preamble('\\newcommand{\\Scalar}[0]{{\\tt Scalar}\\xspace}')
-    defs.add_preamble('\\newcommand{\\Pos}[1]{{\\tt Pos{#1}D}\\xspace}')
-    defs.add_preamble('\\newcommand{\\Array}[1]{{{\\tt Array=}$#1$}\\xspace}')
-    defs.add_preamble('\\newcommand{\\Map}[3]{{{\\tt{Map{#1}D<}{$#2$}{>=}$#3$}}\\xspace}')
+    defs.add_preamble('\\input{globalcommands.tex}')
     defs.cheatsheet()

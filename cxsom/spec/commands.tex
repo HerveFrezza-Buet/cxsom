@@ -15,10 +15,12 @@
 \newcommand{\cxDftDI}[0]{\left[ T,\;X,\;t \right]}
 \newcommand{\cxDftRDI}[0]{\left\{ T,\;X,\;t \right\}}
 \newcommand{\cxDftTS}[0]{{{\cal S}}_{T}^{t}}
+\newcommand{\cxDftUpdt}[0]{u}
 \newcommand{\cxDftTSQu}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}
 \newcommand{\cxDftTSQi}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}
 \newcommand{\cxDftTSQs}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}
 \newcommand{\cxDftTSQc}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}
+\newcommand{\cxDftTSEq}[0]{{{{\cal S}}_{T}^{t}} = {\left[ T,\;\bullet,\;t \right]}}
 \newcommand{\cxRn}[0]{{\mathbb{R}}^{n}}
 \newcommand{\cxArraySet}[0]{{\left[0,\;1\right]}^{n},\;{n} \in {\mathbb{N}^\star}}
 \newcommand{\cxAnySet}[0]{{\cal X}}
@@ -27,5 +29,23 @@
 \newcommand{\cxAnySetDef}[0]{{{\cal X}} \in {\left\{\mbox{\Scalar},\;\mbox{\Pos 1},\;\mbox{\Pos 2},\;\mbox{\Array k}\right\}}}
 \newcommand{\cxDefDatation}[0]{{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}} \in {\mathbb{N}}}
 \newcommand{\cxDefVar}[0]{\left[ T,\;X,\;\bullet \right]}
+\newcommand{\cxDefTimeStep}[0]{\left[ T,\;\bullet,\;t \right]}
 \newcommand{\cxDefStatus}[0]{{\left< \left[ T,\;X,\;t \right] \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{busy}},\;\textcolor{statuscoul}{\mathtt{ready}}\right\}}}
 \newcommand{\cxStatusX}[0]{\left< x \right>}
+\newcommand{\cxResUpdt}[0]{{\mathrm{res}}_{u}}
+\newcommand{\cxInArgUpdt}[0]{{\mathrm{in}}_{u}}
+\newcommand{\cxOutArgUpdt}[0]{{\mathrm{out}}_{u}}
+\newcommand{\cxResUpdtDef}[0]{{{\mathrm{res}}_{u}}\;{\stackrel{\mathrm{def}}{=}}\;{\left[ T,\;X,\;t \right]}}
+\newcommand{\cxResUpdtEq}[0]{{{\mathrm{res}}_{u}} = {\left[ T,\;X,\;t \right]}}
+\newcommand{\cxAllReady}[0]{\forall {{\left[ T,\;X,\;t \right]} \in {{\mathrm{out}}_{u}}},\; {{\left< \left[ T,\;X,\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}}
+\newcommand{\cxDatationDef}[0]{{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}} \in {\mathbb{N}}}
+\newcommand{\cxDatationResU}[0]{{\mathrm{d}}_{{\mathrm{res}}_{u}}}
+\newcommand{\cxDatationUpdt}[0]{{{\mathrm{d}}_{{\mathrm{res}}_{u}}} = {{1} + {\displaystyle\mathop{\mathrm{max}}_{{\left[ T,\;X,\;t \right]} \in {{\mathrm{in}}_{u}}}{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}}}}}
+\newcommand{\cxStatusUpdt}[0]{\left< u \right>}
+\newcommand{\cxStatusImpossible}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{impossible}}}}
+\newcommand{\cxStatusUpToDate}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{uptodate}}}}
+\newcommand{\cxStatusUpdated}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{updated}}}}
+\newcommand{\cxStatusDone}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxStatusNone}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{none}}}}
+\newcommand{\cxResBusy}[0]{{\left< {\mathrm{res}}_{u} \right>} = {\textcolor{statuscoul}{\mathtt{busy}}}}
+\newcommand{\cxResReady}[0]{{\left< {\mathrm{res}}_{u} \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}
