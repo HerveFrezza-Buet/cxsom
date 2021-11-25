@@ -137,18 +137,20 @@ When a specific update is defined in \CxSOM (as average, learning, etc.), the up
   \end{algorithmic}
 \end{algorithm}
 
-\end{document}
 \subsection{Timesteps and tasks}
 
 \subsubsection{A computational structure for timesteps}
 
 In the simulator, the computation of the updates are put in a pool task and computed in parallel. However, since relaxation is related to the computation of updates belonging to the same timestep, this task management needs an intermediate level, which is a computational internal structure representing the timesteps.
 
-Let us recall the notation $\DftTS \EqDef \Sets{\DI\DftTTL\DftVVar\DftIInst \in \mbox{simulation}}{\DftTTL = \DftTL \And \DftIInst=\DftInst}$ for the timestep at instant $\DftInst$ in the timeline $\DftTL$. For each $\DftDI \in \DftTS$, the internal structure used in the simulator gathers at least an \ConceptDef{usual update}, and an optional \ConceptDef{initialization update}. The initialization update, if present, is used for the first feasible setting of the value of $\DftDI$ instead of the ususal update. Otherwise, the usual update is used throughout the successive setting of the value of $\DftDI$ during the relaxation.
+Let us recall the notation $\cxDefTimeStepFull$ for the timestep at instant $\cxDftInst$ in the timeline $\cxDftTL$. For each $\cxDIinTS$, the internal structure used in the simulator gathers at least an \ConceptDef{usual update}, and an optional \ConceptDef{initialization update}. The initialization update, if present, is used for the first feasible setting of the value of $\cxDftDI$ instead of the ususal update. Otherwise, the usual update is used throughout the successive setting of the value of $\cxDftDI$ during the relaxation.
 
-In order to avoid further confusions, let us denote by $\TSUpdt$ an update handled by a time step $\DftTS$: it can be either a single update $\cxDftUpdt$ (so $\cxDftUpdt$ is the usual update) or a pair $\Pair\cxDftUpdt\UUpdt$ if an initialization update is defined (then $\UUpdt$ is the initialization update). In the case for which $\TSUpdt = \Pair\cxDftUpdt\UUpdt$ is a pair, $\Res\cxDftUpdt = \Res\UUpdt$ obviously stands, so $\Res\TSUpdt \EqDef \Res\cxDftUpdt$. In the case of a pair as well, the simulator uses $\UUpdt$ until it gets a first computation of $\Res\TSUpdt$, and then it will switch to the use of $\cxDftUpdt$ for next computations of $\Res\TSUpdt$.
 
-As at least a call to the usual update $\cxDftUpdt$ is required to be done for $\TSUpdt$, we have particularized the status returned by initialization updates in algorithm~\ref{algo:update}, so that the evaluation of an initialization update can never lead to the definitive computation of $\Res\cxDftUpdt$ during the relaxation of the timestep.
+In order to avoid further confusions, let us denote by $\cxTSUpdt$ an update handled by a time step $\cxDftTS$: it can be either a single update $\cxDftUpdt$ (so $\cxDftUpdt$ is the usual update) or a pair $\cxUpdtPair$ if an initialization update is defined (then $\cxUUpdt$ is the initialization update). In the case for which $\cxEqUpdtPair$ is a pair, $\cxEqUpdtRes$ obviously stands, so $\cxEqUpdtRes$. In the case of a pair as well, the simulator uses $\cxUUpdt$ until it gets a first computation of $\cxResTSUpdt$, and then it will switch to the use of $\cxDftUpdt$ for next computations of $\cxResTSUpdt$.
+
+As at least a call to the usual update $\cxDftUpdt$ is required to be done for $\cxTSUpdt$, we have particularized the status returned by initialization updates in algorithm~\ref{algo:update}, so that the evaluation of an initialization update can never lead to the definitive computation of $\cxResUpdt$ during the relaxation of the timestep.
+
+\end{document}
 
 \subsubsection{Timestep status}
 

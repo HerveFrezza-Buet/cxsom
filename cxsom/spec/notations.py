@@ -100,6 +100,8 @@ with nb.files.defs('commands.tex') as defs:
     defs['DefDatation'] = nb.sets.isin(datation(DI), nb.sets.N)
     defs['DefVar'] = any_time
     defs['DefTimeStep'] = any_var
+    defs['DefTimeStepFull'] = nb.define(TS, nb.sets.bydef(nb.sets.isin(DIof(T.prime, X.prime, t.prime), nb.text('simulation')),
+                                                          nb.logical.conj(T.prime == T, t.prime == t)))
     defs['DefStatus'] = nb.sets.isin(status(DI), nb.sets.byext(busy, ready))
     defs['StatusX'] = status('x')
 
@@ -145,6 +147,17 @@ with nb.files.defs('commands.tex') as defs:
     defs['CycleP'] = nb.algo.affect(res, done)
     defs['CycleQ'] = nb.algo.affect(status(res_u), ready)
     defs['CycleR'] = res
+
+    defs['DIinTS'] = nb.sets.isin(DI, TS)
+
+    defs['TSUpdt'] = u.bar
+    defs['UUpdt'] = u.prime
+    defs['UpdtPair'] = [u, u.prime]
+    defs['EqUpdtPair'] = u.bar == [u, u.prime]
+    defs['EqUpdtRes'] = res_u == updt_arg('res', u.prime)
+    res_ub = updt_arg('res', u.bar)
+    defs['ResTSUpdt'] = res_ub
+
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')
