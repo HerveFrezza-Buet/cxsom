@@ -159,11 +159,16 @@ with nb.files.defs('commands.tex') as defs:
     defs['ResTSUpdt'] = res_ub
 
     defs['StatusTS'] = status(TS)
+    defs['StatusTSUpdt'] = status(u.bar)
     defs['StatusSet'] = nb.sets.isin(status(TS), nb.sets.byext(blocked, relaxing, checking, done))
     defs['StatusTSBlocked'] = status(TS) == blocked
     defs['StatusTSRelaxing'] = status(TS) == relaxing
     defs['StatusTSChecking'] = status(TS) == checking
     defs['StatusTSDone'] = status(TS) == done
+    defs['StatusTSUpdtImpossible'] = status(u.bar) == impossible
+    defs['StatusTSUpdtUpdated'] = status(u.bar) == updated
+    defs['StatusTSUpdtDone'] = status(u.bar) == done
+    defs['StatusTSUpdtUpToDate'] = status(u.bar) == uptodate
     defs['ResUpdtReady'] = res_ub == ready
 
     defs['TSupdtInSt'] = nb.sets.isin(u.bar, TS)
@@ -181,6 +186,13 @@ with nb.files.defs('commands.tex') as defs:
     defs['JobsA'] = nb.sets.isin(u.bar, nb.sets.union(TSQu, TSQs))
     defs['JobsB'] = nb.sets.isin(status(u.bar), nb.sets.byext(relaxing, checking))
 
+    defs['ReportA'] = nb.algo.affect(TSQi, nb.sets.union(TSQi, nb.sets.byext(u.bar)))
+    defs['ReportB'] = nb.algo.affect(TSQu, nb.sets.union(TSQu, nb.sets.byext(u.bar)))
+    defs['ReportC'] = status(updt_arg('res', u.bar)) == ready
+    defs['ReportD'] = status(TS) == checking
+    defs['ReportE'] = nb.algo.affect(TSQc, nb.sets.union(TSQc, nb.sets.byext(u.bar)))
+    defs['ReportF'] = nb.algo.affect(TSQs, nb.sets.union(TSQs, nb.sets.byext(u.bar)))
+    defs['ReportG'] = call_code('update\\_status', TS)
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')

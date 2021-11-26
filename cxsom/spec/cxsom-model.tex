@@ -183,7 +183,6 @@ So when a timestep $\cxDftTS$ is asked for new updates to be done, it provides (
 \item nothing otherwise.
 \end{itemize}
 
-\end{document}
 
 \subsubsection{The timestep state machine}
 
@@ -193,23 +192,25 @@ The reporting of an update makes the update to be inserted in a queue of the tim
 
 
 \begin{algorithm}
-  \caption{Reporting update $\TSUpdt$ to the timestep $\DftTS$\label{algo:reporting}}
+  \caption{Reporting update $\cxTSUpdt$ to the timestep $\cxDftTS$\label{algo:reporting}}
   \begin{algorithmic}[1]
-    \REQUIRE $\Status\TSUpdt$ is the status of the update execution.
-    \REQUIRE $\Status\DftTS$ is the current status of the timestep.
-    \IF    {$\Status\TSUpdt = \Impossible$} \STATE $\DftTSQi \Affect \DftTSQi \Union \Set\TSUpdt$
-    \ELSIF {$\Status\TSUpdt = \Updated$}    \STATE $\DftTSQu \Affect \DftTSQu \Union \Set\TSUpdt$
-    \ELSIF {$\Status\TSUpdt = \Done$}       \STATE \COMMENT{The update is not handled anymore, since $\Status{\Res\TSUpdt} = \Ready$.}
-    \ELSIF {$\Status\TSUpdt = \UpToDate$}
-    \IF{$\Status\DftTS = \Checking$ \AND $\TSUpdt$ was in $\DftTSQs$}
-    \STATE $\DftTSQc \Affect \DftTSQc \Union \Set\TSUpdt$
+    \REQUIRE $\cxStatusTSUpdt$ is the status of the update execution.
+    \REQUIRE $\cxStatusTS$ is the current status of the timestep.
+    \IF    {$\cxStatusTSUpdtImpossible$} \STATE $\cxReportA$
+    \ELSIF {$\cxStatusTSUpdtUpdated$}    \STATE $\cxReportB$
+    \ELSIF {$\cxStatusTSUpdtDone$}       \STATE \COMMENT{The update is not handled anymore, since $\cxReportC$.}
+    \ELSIF {$\cxStatusTSUpdtUpToDate$}
+    \IF{$\cxReportD$ \AND $\cxTSUpdt$ was in $\cxDftTSQs$}
+    \STATE $\cxReportE$
     \ELSE
-    \STATE $\DftTSQs \Affect \DftTSQs \Union \Set\TSUpdt$
+    \STATE $\cxReportF$
     \ENDIF
     \ENDIF
-    \STATE $\CallCode{update\_status}{\DftTS}$ \COMMENT{See algorithm~\ref{algo:ts_state}.}
+    \STATE $\cxReportG$ \COMMENT{See algorithm~\ref{algo:ts_state}.}
   \end{algorithmic}
 \end{algorithm}
+
+\end{document}
 
 \begin{algorithm}
   \caption{$\CallCode{update\_status}{\DftTS}$ \label{algo:ts_state}}
