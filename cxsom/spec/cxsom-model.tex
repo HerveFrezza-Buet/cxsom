@@ -247,63 +247,65 @@ The reporting of an update makes the update to be inserted in a queue of the tim
   \end{algorithmic}
 \end{algorithm}
 
-\end{document}
 
 
 \subsubsection{Update patterns \label{sec:pattern}}
 
-Defining an update for all DIs (i.e. at each time $\DftInst$) would be exhausting. It can be done for specific time instants (usually $\DftInst=0$), but a generic update definition is required for the general cases.
+Defining an update for all DIs (i.e. at each time $\cxDftInst$) would be exhausting. It can be done for specific time instants (usually $\cxDftInst=0$), but a generic update definition is required for the general cases.
 
-This is what \ConceptDef{update patterns} (UP) are introduced for. Let us denote a \ConceptDef{relative data instance} (RDI) as $\DftRDI$, where $\DftShift \in \Rel$ is a relative time shift. A RDI can be \ConceptDef{anchored} as a DI at time $\DftInst$. This consists in transforming $\DftRDI$ into $\DI\DftTL\DftVar{\DftInst+\DftShift}$.
+This is what \ConceptDef{update patterns} (UP) are introduced for. Let us denote a \ConceptDef{relative data instance} (RDI) as $\cxDftRDI$, where $\cxShiftSet$ is a relative time shift. A RDI can be \ConceptDef{anchored} as a DI at time $\cxDftInst$. This consists in transforming $\cxDftRDI$ into $\cxAnchor$.
+
 
 The definition is then similar to the one of an update, presented in section~\ref{sec:update}.
-An UP $\Pat$ is made of:
+An UP $\cxPat$ is made of:
 \begin{itemize}
 \item The decription of some computation, i.e. the function called to realize an update.
-\item The result $\Res\Pat$, which is a zero-shift DRI $\RDI\DftTL\DftVar 0$.
+\item The result $\cxResPat$, which is a zero-shift DRI $\cxRDIz$.
 \item Other RDIs or DIs, thats serve as arguments to the function.
 \end{itemize}
 
-Anchoring an UP $\Pat$ such as $\Res\Pat = \RDI\DftTL\DftVar 0$ at time $\DftInst$ consists in defining an update by anchoring the result and all the arguments which are RDIs, in order to get a regular update for $\DftDI$.
+Anchoring an UP $\cxPat$ such as $\cxResPatIsRDIz$ at time $\cxDftInst$ consists in defining an update by anchoring the result and all the arguments which are RDIs, in order to get a regular update for $\cxDftDI$.
+
 
 \subsection{Simulation}
 
 The simulator compute DIs. It does it by asking tasks to its active timesteps, as explained in section~\ref{sec:providejobs}. When it is out of work, it tries to generate more DIs to compute by anchoring available UPs, thus creating new active timesteps. This is described in algorithm~\ref{algo:get_one_job}.
 \begin{algorithm}
-  \caption{$\CallCode{get\_one\_job}{}$ \label{algo:get_one_job}}
+  \caption{$\cxSimA$ \label{algo:get_one_job}}
   \begin{algorithmic}[1]
-    \REQUIRE A task queue (jobs) denoted by $\Jobs$, used and updated by the algorithm.
-    \IF{$\Jobs = \emptyset$}
-    \STATE \COMMENT{Let us try to fill the task queue $\Jobs$.}
+    \REQUIRE A task queue (jobs) denoted by $\cxJobs$, used and updated by the algorithm.
+    \IF{$\cxSimB$}
+    \STATE \COMMENT{Let us try to fill the task queue $\cxJobs$.}
     
-    \FORALL{$\DftTS$ which are handled currently}
-    \IF{$\Status\DftTS \in \Set{\Relaxing, \Checking}$}
-    \STATE $\CallCode{push}{\Jobs, \; \DftTSQu \Union \DftTSQs}$ \COMMENT{see section~\ref{sec:providejobs}}
+    \FORALL{$\cxDftTS$ which are handled currently}
+    \IF{$\cxSimC$}
+    \STATE $\cxSimD$ \COMMENT{see section~\ref{sec:providejobs}}
     \ENDIF
     \ENDFOR
     
-    \IF{$\Jobs = \emptyset$}
+    \IF{$\cxSimB$}
     \STATE \COMMENT{No active patterns are able to provide new jobs.}
     \STATE \COMMENT{We create new timesteps by anchoring the UPs.}
-    \STATE $\CallCode{anchor\_UPs}{}$ \COMMENT{See algorithm~\ref{algo:anchor}.}
-    \STATE \COMMENT{We may have new $\DftTS$s, let us retry to ask them jobs.}
-    \FORALL{$\DftTS$ which are handled currently}
-    \IF{$\Status\DftTS \in \Set{\Relaxing, \Checking}$}
-    \STATE $\CallCode{push}{\Jobs, \; \DftTSQu \Union \DftTSQs}$ \COMMENT{see section~\ref{sec:providejobs}}
+    \STATE $\cxSimE$ \COMMENT{See algorithm~\ref{algo:anchor}.}
+    \STATE \COMMENT{We may have new $\cxDftTS$s, let us retry to ask them jobs.}
+    \FORALL{$\cxDftTS$ which are handled currently}
+    \IF{$\cxSimC$}
+    \STATE $\cxSimD$ \COMMENT{see section~\ref{sec:providejobs}}
     \ENDIF
     \ENDFOR
     \ENDIF
 
     
     \ENDIF
-    \IF{$\Jobs = \emptyset$}
+    \IF{$\cxSimB$}
     \RETURN \COMMENT{There is really no way to get a new job.}
     \ELSE
-    \STATE $\Job \Affect \CallCode{pop}{\Jobs}$
-    \RETURN $\Job$ \COMMENT{That job will be done.}
+    \STATE $\cxSimF$
+    \RETURN $\cxJob$ \COMMENT{That job will be done.}
     \ENDIF
   \end{algorithmic}
 \end{algorithm}
+
 
 \begin{algorithm}
   \caption{$\CallCode{anchor\_UPs}{}$ \label{algo:anchor}}
@@ -322,3 +324,5 @@ The simulator compute DIs. It does it by asking tasks to its active timesteps, a
   \end{algorithmic}
 \end{algorithm}
 
+
+\end{document}

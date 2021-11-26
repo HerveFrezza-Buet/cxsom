@@ -12,9 +12,10 @@
 \newcommand{\cxDftTL}[0]{T}
 \newcommand{\cxDftInst}[0]{t}
 \newcommand{\cxDftDI}[0]{\left[ T,\;X,\;t \right]}
-\newcommand{\cxDftRDI}[0]{\left\{ T,\;X,\;t \right\}}
+\newcommand{\cxDftRDI}[0]{\left\{ T,\;X,\;\tau \right\}}
 \newcommand{\cxDftTS}[0]{{{\cal S}}_{T}^{t}}
 \newcommand{\cxDftUpdt}[0]{u}
+\newcommand{\cxDftShift}[0]{\tau}
 \newcommand{\cxDftTSQu}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}
 \newcommand{\cxDftTSQi}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}
 \newcommand{\cxDftTSQs}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}
@@ -118,3 +119,17 @@
 \newcommand{\cxUpstatN}[0]{{\overline{u}} \in {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}
 \newcommand{\cxUpstatO}[0]{{\left< {\mathrm{res}}_{u} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{ready}}}}
 \newcommand{\cxUpstatP}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\left({{\cal S}}_{T'}^{t'}\right)}
+\newcommand{\cxShiftSet}[0]{{\tau} \in {\mathbb{Z}}}
+\newcommand{\cxAnchor}[0]{\left[ T,\;X,\;{t} + {\tau} \right]}
+\newcommand{\cxPat}[0]{\pi}
+\newcommand{\cxResPat}[0]{{\mathrm{res}}_{\pi}}
+\newcommand{\cxRDIz}[0]{\left\{ T,\;X,\;0 \right\}}
+\newcommand{\cxResPatIsRDIz}[0]{{{\mathrm{res}}_{\pi}} = {\left\{ T,\;X,\;0 \right\}}}
+\newcommand{\cxJobs}[0]{{\cal J}}
+\newcommand{\cxJob}[0]{j}
+\newcommand{\cxSimA}[0]{{\textcolor{funcoul}{\mbox{get\_one\_job}}}\left(\right)}
+\newcommand{\cxSimB}[0]{{{\cal J}} = {\emptyset}}
+\newcommand{\cxSimC}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}}\right\}}}
+\newcommand{\cxSimD}[0]{{\textcolor{funcoul}{\mbox{push}}}\left({\cal J},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\right)}
+\newcommand{\cxSimE}[0]{{\textcolor{funcoul}{\mbox{anchor\_UPs}}}\left(\right)}
+\newcommand{\cxSimF}[0]{{j} \leftarrow {{\textcolor{funcoul}{\mbox{push}}}\left({\cal J}\right)}}

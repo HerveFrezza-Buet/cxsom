@@ -27,10 +27,12 @@ def RDIof(T, X, t):
     return nb.math.brace(nb.seq(T, X, t))
 
 T, X, t, dt, n, u = nb.to('T X t \\tau n u')
+pat = nb.to('\\pi')
+
 slot = nb.to('\\bullet')
 any_set = nb.symbol('{\\cal X}')
 DI = DIof(T, X, t)
-RDI = RDIof(T, X, t)
+RDI = RDIof(T, X, dt)
 any_time = DIof(T, X, slot)
 any_var = DIof(T, slot, t)
 
@@ -79,6 +81,7 @@ with nb.files.defs('commands.tex') as defs:
     defs['DftRDI'] = RDI
     defs['DftTS'] = TS
     defs['DftUpdt'] = u
+    defs['DftShift'] = dt
 
     defs['DftTSQu'] = TSQu
     defs['DftTSQi'] = TSQi
@@ -217,6 +220,29 @@ with nb.files.defs('commands.tex') as defs:
     defs['UpstatN'] = nb.sets.isin(u.bar, TSQc)
     defs['UpstatO'] = nb.algo.affect(status(res_u), ready)
     defs['UpstatP'] = call_code('update\\_status', TTS)
+
+    defs['ShiftSet'] = nb.sets.isin(dt, nb.sets.Z)
+    defs['Anchor'] = DIof(T, X, t+dt)
+    defs['Pat'] = pat
+    res_pat = updt_arg('res', pat)
+    RDIz = RDIof(T, X, 0)
+    defs['ResPat'] = res_pat
+    defs['RDIz'] = RDIz
+    defs['ResPatIsRDIz'] = res_pat == RDIz
+
+    jobs = nb.symbol('{\\cal J}')
+    job  = nb.to('j')
+    defs['Jobs'] = jobs
+    defs['Job'] = job
+    defs['SimA'] = call_code('get\\_one\\_job')
+    defs['SimB'] = jobs == nb.sets.empty
+    defs['SimC'] = nb.sets.isin(status(TS), nb.sets.byext(relaxing, checking))
+    defs['SimD'] = call_code('push', jobs, nb.sets.union(TSQu, TSQs))
+    defs['SimE'] = call_code('anchor\\_UPs')
+    defs['SimF'] = nb.algo.affect(job, call_code('pop', jobs))
+
+
+    
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')
