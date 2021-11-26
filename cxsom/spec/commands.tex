@@ -122,6 +122,7 @@
 \newcommand{\cxShiftSet}[0]{{\tau} \in {\mathbb{Z}}}
 \newcommand{\cxAnchor}[0]{\left[ T,\;X,\;{t} + {\tau} \right]}
 \newcommand{\cxPat}[0]{\pi}
+\newcommand{\cxPatterns}[0]{{\cal P}}
 \newcommand{\cxResPat}[0]{{\mathrm{res}}_{\pi}}
 \newcommand{\cxRDIz}[0]{\left\{ T,\;X,\;0 \right\}}
 \newcommand{\cxResPatIsRDIz}[0]{{{\mathrm{res}}_{\pi}} = {\left\{ T,\;X,\;0 \right\}}}
@@ -132,4 +133,12 @@
 \newcommand{\cxSimC}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}}\right\}}}
 \newcommand{\cxSimD}[0]{{\textcolor{funcoul}{\mbox{push}}}\left({\cal J},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\right)}
 \newcommand{\cxSimE}[0]{{\textcolor{funcoul}{\mbox{anchor\_UPs}}}\left(\right)}
-\newcommand{\cxSimF}[0]{{j} \leftarrow {{\textcolor{funcoul}{\mbox{push}}}\left({\cal J}\right)}}
+\newcommand{\cxSimF}[0]{{j} \leftarrow {{\textcolor{funcoul}{\mbox{pop}}}\left({\cal J}\right)}}
+\newcommand{\cxAnchorA}[0]{{\textcolor{funcoul}{\mbox{anchor\_UPs}}}\left(\right)}
+\newcommand{\cxVariables}[0]{{\cal V}}
+\newcommand{\cxAnchorB}[0]{{{\cal V}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{\left(T,X\right)\; \middle| \; {{\pi} \in {{\cal P}}} \wedge {{{\mathrm{res}}_{\pi}} = {\left\{ T,\;X,\;\tau \right\}}}\right\}}}
+\newcommand{\cxMinT}[0]{{\mbox{\tt @}}{T}}
+\newcommand{\cxAnchorC}[0]{{\left(T,X\right)} \in {{\cal V}}}
+\newcommand{\cxAnchorD}[0]{{\pi} \in {{\cal P}}}
+\newcommand{\cxAnchorE}[0]{{\left\{ T,\;X,\;0 \right\}} = {{\mathrm{res}}_{\pi}}}
+\newcommand{\cxAnchorF}[0]{{\left< \left[ T,\;X,\;{\mbox{\tt @}}{T} \right] \right>} = {\textcolor{statuscoul}{\mathtt{busy}}}}

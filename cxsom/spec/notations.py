@@ -28,6 +28,7 @@ def RDIof(T, X, t):
 
 T, X, t, dt, n, u = nb.to('T X t \\tau n u')
 pat = nb.to('\\pi')
+pats = nb.symbol('{\\cal P}')
 
 slot = nb.to('\\bullet')
 any_set = nb.symbol('{\\cal X}')
@@ -58,6 +59,10 @@ def updt_arg(argname, updt):
 res_u = updt_arg('res', u)
 in_arg_u = updt_arg('in', u)
 out_arg_u = updt_arg('out', u)
+
+def min_t(timeline):
+    return nb.cat(nb.text('\\tt @'), timeline)
+minT = min_t(T)
 
 with nb.files.defs('commands.tex') as defs:
     nb.config.push('display style', True) # We set the displaystyle
@@ -224,6 +229,7 @@ with nb.files.defs('commands.tex') as defs:
     defs['ShiftSet'] = nb.sets.isin(dt, nb.sets.Z)
     defs['Anchor'] = DIof(T, X, t+dt)
     defs['Pat'] = pat
+    defs['Patterns'] = pats
     res_pat = updt_arg('res', pat)
     RDIz = RDIof(T, X, 0)
     defs['ResPat'] = res_pat
@@ -241,7 +247,15 @@ with nb.files.defs('commands.tex') as defs:
     defs['SimE'] = call_code('anchor\\_UPs')
     defs['SimF'] = nb.algo.affect(job, call_code('pop', jobs))
 
-
+    defs['AnchorA'] = call_code('anchor\\_UPs')
+    variables = nb.symbol('{\\cal V}')
+    defs['Variables'] = variables
+    defs['AnchorB'] = nb.define(variables, nb.sets.bydef([T, X],nb.logical.conj(nb.sets.isin(pat, pats), res_pat == RDI)))
+    defs['MinT'] = minT
+    defs['AnchorC'] = nb.sets.isin([T, X], variables)
+    defs['AnchorD'] = nb.sets.isin(pat, pats)
+    defs['AnchorE'] = nb.equal(RDIz, res_pat)
+    defs['AnchorF'] = status(DIof(T, X, minT)) == busy
     
     
     defs.add_preamble('\\usepackage{xspace}')

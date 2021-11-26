@@ -308,17 +308,17 @@ The simulator compute DIs. It does it by asking tasks to its active timesteps, a
 
 
 \begin{algorithm}
-  \caption{$\CallCode{anchor\_UPs}{}$ \label{algo:anchor}}
+  \caption{$\cxAnchorA$ \label{algo:anchor}}
   \begin{algorithmic}[1]
-    \REQUIRE The set of defined UPs is referred to as $\Patterns$.
-    \STATE Determine the used variables $\Variables \EqDef \Sets{\Pair\DftTL\DftVar}{\Pat\in\Patterns\And\Res\Pat=\DftRDI}$.
-    \STATE For each timeline $\DftTL$ mentionned in $\Variables$, compute $\MinT\DftTL$ as the first time instant for which a variable $\Pair\DftTL\DftVar \in \Variables$ is $\Busy$ (i.e. not computed so far).
-    \FORALL{$\Pat \in \Patterns$}
-    \STATE Consider $\RDI\DftTL\DftVar 0 = \Res\Pat$
-    \IF{$\Status{\DI\DftTL\DftVar{\MinT\DftTL} = \Busy}$}
-    \STATE Anchor $\Pat$ at time instant $\MinT\DftTL$, thus creating a new timestep in the simulator for the next instant to be computed in that timeline.
+    \REQUIRE The set of defined UPs is referred to as $\cxPatterns$.
+    \STATE Determine the used variables $\cxAnchorB$.
+    \STATE For each timeline $\cxDftTL$ mentionned in $\cxVariables$, compute $\cxMinT$ as the first time instant for which a variable $\cxAnchorC$ is $\cxBusy$ (i.e. not computed so far).
+    \FORALL{$\cxAnchorD$}
+    \STATE Consider $\cxAnchorE$
+    \IF{$\cxAnchorF$}
+    \STATE Anchor $\cxPat$ at time instant $\cxMinT$, thus creating a new timestep in the simulator for the next instant to be computed in that timeline.
     \ELSE
-    \STATE \COMMENT{The DI computed by $\Pat$ is already available at $\MinT\DftTL$, some other UPs are late, they will be instanciated first.}
+    \STATE \COMMENT{The DI computed by $\cxPat$ is already available at $\cxMinT$, some other UPs are late, they will be instanciated first.}
     \ENDIF
     \ENDFOR
   \end{algorithmic}
