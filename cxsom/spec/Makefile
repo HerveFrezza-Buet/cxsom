@@ -8,6 +8,7 @@ help:
 	@echo
 	@echo "make clean     <-- cleans latex generated files"
 	@echo "make doc       <-- compiles"
+	@€cho "make cheat     <-- cheat sheet"
 	@echo
 
 clean:
@@ -20,6 +21,12 @@ doc: commands.tex
 commands.tex : notations.py
 	python3 notations.py
 	pdflatex commands-cheatsheet.tex
+	pdflatex commands-cheatsheet.tex
 
+.PHONY: cheat
+cheat:
+	python3 notations.py
+	pdflatex commands-cheatsheet.tex
+	pdflatex commands-cheatsheet.tex
 
 

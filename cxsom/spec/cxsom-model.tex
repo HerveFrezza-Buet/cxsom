@@ -160,34 +160,30 @@ The timestep structures $\cxDftTS$ at the simulator level have a status $$\cxSta
 \item $\cxStatusTSDone$: The timestep is done, all updates $\cxTSUpdt$ have lead to $\cxResUpdtReady$ and have quit the simulator.
 \end{itemize}
 
-\end{document}
 
 \subsubsection{Timestep update queues}
 
-The timestep structures $\DftTS$ at the simulator level are doted each with 4~update queues, where the updates $\TSUpdt$ are stored. Each the $\TSUpdt \in \DftTS$ belongs to one of the 4~queues of $\DftTS$.
+The timestep structures $\cxDftTS$ at the simulator level are doted each with 4~update queues, where the updates $\cxTSUpdt$ are stored. Each the $\cxTSupdtInSt$ belongs to one of the 4~queues of $\cxDftTS$.
 
 When a timestep is asked by the simulator to provide computation, it extracts updates from some of the queues. When the update is performed by the simulator, it is given back to the timestep, with the return status resulting from algorithm~\ref{algo:update}. According to this status, the update is stored in the appropriate queue, and some supplementary transfers from one queue to another queue may happen. This will be detailed further, as the \ConceptDef{timestep state machine}.
 
-For now, let us present the 4~queues used by a timestep $\DftTS$.
+For now, let us present the 4~queues used by a timestep $\cxDftTS$.
 \begin{equation}
-  \begin{array}{ll}
-    \DftTSQu &= \Sets{\TSUpdt\in\DftTS}{\Status\TSUpdt \mbox{ needs to be known.}}                           \\
-    \DftTSQi &= \Sets{\TSUpdt\in\DftTS}{\Status\TSUpdt \mbox{ have been detected as } \Impossible.}         \\
-    \DftTSQs &= \Sets{\TSUpdt\in\DftTS}{\TSUpdt \mbox{ have been seen stable for the first time are here.}} \\
-    \DftTSQc &= \Sets{\TSUpdt\in\DftTS}{\TSUpdt \mbox{ for which stability is confirmed.}}
-  \end{array}
+  \cxQDefs \nonumber
 \end{equation}
+
 
 \subsubsection{Providing jobs \label{sec:providejobs}}
 
 A timestep is periodically asked by the simulator to provide tasks, i.e. to offer updates that will be evaluated by the simulator. These updates are extracted from the timestep and inserted in a pool task, waiting for execution. The timestep keeps trace of their existency while they are outside, waiting for being executed.
 
-So when a timestep $\DftTS$ is asked for new updates to be done, it provides (and extracts) :
+So when a timestep $\cxDftTS$ is asked for new updates to be done, it provides (and extracts) :
 \begin{itemize}
-\item all the $\TSUpdt \in \DftTSQu \Union \DftTSQs$ if $\Status\DftTS \in \Set{\Relaxing, \Checking}$
+\item all the $\cxJobsA$ if $\cxJobsB$
 \item nothing otherwise.
 \end{itemize}
 
+\end{document}
 
 \subsubsection{The timestep state machine}
 

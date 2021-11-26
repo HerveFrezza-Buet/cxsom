@@ -166,6 +166,21 @@ with nb.files.defs('commands.tex') as defs:
     defs['StatusTSDone'] = status(TS) == done
     defs['ResUpdtReady'] = res_ub == ready
 
+    defs['TSupdtInSt'] = nb.sets.isin(u.bar, TS)
+
+    defs['QDefs'] = nb.layout('l',
+                              [TSQu, ':', nb.sets.bydef(nb.sets.isin(u.bar, TS),
+                                                        nb.kat(status(u.bar), nb.text('needs to be known.')))],
+                              [TSQi, ':', nb.sets.bydef(nb.sets.isin(u.bar, TS),
+                                                        nb.kat(status(u.bar), nb.text('has been detected as'), impossible))],
+                              [TSQs, ':', nb.sets.bydef(nb.sets.isin(u.bar, TS),
+                                                        nb.kat(u.bar, nb.text('have been seen stable for the first time are here.')))],
+                              [TSQc, ':', nb.sets.bydef(nb.sets.isin(u.bar, TS),
+                                                        nb.kat(u.bar, nb.text('for which stability is confirmed.')))])
+
+    defs['JobsA'] = nb.sets.isin(u.bar, nb.sets.union(TSQu, TSQs))
+    defs['JobsB'] = nb.sets.isin(status(u.bar), nb.sets.byext(relaxing, checking))
+
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')
