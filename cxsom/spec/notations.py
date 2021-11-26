@@ -158,6 +158,14 @@ with nb.files.defs('commands.tex') as defs:
     res_ub = updt_arg('res', u.bar)
     defs['ResTSUpdt'] = res_ub
 
+    defs['StatusTS'] = status(TS)
+    defs['StatusSet'] = nb.sets.isin(status(TS), nb.sets.byext(blocked, relaxing, checking, done))
+    defs['StatusTSBlocked'] = status(TS) == blocked
+    defs['StatusTSRelaxing'] = status(TS) == relaxing
+    defs['StatusTSChecking'] = status(TS) == checking
+    defs['StatusTSDone'] = status(TS) == done
+    defs['ResUpdtReady'] = res_ub == ready
+
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')

@@ -150,17 +150,17 @@ In order to avoid further confusions, let us denote by $\cxTSUpdt$ an update han
 
 As at least a call to the usual update $\cxDftUpdt$ is required to be done for $\cxTSUpdt$, we have particularized the status returned by initialization updates in algorithm~\ref{algo:update}, so that the evaluation of an initialization update can never lead to the definitive computation of $\cxResUpdt$ during the relaxation of the timestep.
 
-\end{document}
-
 \subsubsection{Timestep status}
 
-The timestep structures $\DftTS$ at the simulator level have a status $$\Status\DftTS \in \Set{\Blocked, \Relaxing, \Checking, \Done}.$$ The status $\Status\DftTS$ depends on the status of the updates of the timestep, observed when the updates are realized. The meaning of the $\Status\DftTS$ is:
+The timestep structures $\cxDftTS$ at the simulator level have a status $$\cxStatusSet.$$ The status $\cxStatusTS$ depends on the status of the updates of the timestep, observed when the updates are realized. The meaning of the $\cxStatusTS$ is:
 \begin{itemize}
-\item $\Status\DftTS = \Blocked$: The timestep is blocked due to impossible updates.
-\item $\Status\DftTS = \Relaxing$: The timestep is under unstable computation.
-\item $\Status\DftTS = \Checking$: Every update seem stable, we are checking this.
-\item $\Status\DftTS = \Done$: The timestep is done, all updates $\TSUpdt$ have lead to $\Res\TSUpdt = \Ready$ and have quit the simulator.
+\item $\cxStatusTSBlocked$: The timestep is blocked due to impossible updates.
+\item $\cxStatusTSRelaxing$: The timestep is under unstable computation.
+\item $\cxStatusTSChecking$: Every update seem stable, we are checking this.
+\item $\cxStatusTSDone$: The timestep is done, all updates $\cxTSUpdt$ have lead to $\cxResUpdtReady$ and have quit the simulator.
 \end{itemize}
+
+\end{document}
 
 \subsubsection{Timestep update queues}
 
