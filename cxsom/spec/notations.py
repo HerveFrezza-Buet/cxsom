@@ -165,6 +165,12 @@ with nb.files.defs('commands.tex') as defs:
     defs['StatusTSRelaxing'] = status(TS) == relaxing
     defs['StatusTSChecking'] = status(TS) == checking
     defs['StatusTSDone'] = status(TS) == done
+    
+    defs['SetStatusTSBlocked'] = nb.algo.affect(status(TS), blocked)
+    defs['SetStatusTSRelaxing'] = nb.algo.affect(status(TS), relaxing)
+    defs['SetStatusTSChecking'] = nb.algo.affect(status(TS), checking)
+    defs['SetStatusTSDone'] = nb.algo.affect(status(TS), done)
+    
     defs['StatusTSUpdtImpossible'] = status(u.bar) == impossible
     defs['StatusTSUpdtUpdated'] = status(u.bar) == updated
     defs['StatusTSUpdtDone'] = status(u.bar) == done
@@ -193,6 +199,24 @@ with nb.files.defs('commands.tex') as defs:
     defs['ReportE'] = nb.algo.affect(TSQc, nb.sets.union(TSQc, nb.sets.byext(u.bar)))
     defs['ReportF'] = nb.algo.affect(TSQs, nb.sets.union(TSQs, nb.sets.byext(u.bar)))
     defs['ReportG'] = call_code('update\\_status', TS)
+
+    defs['UpstatA'] = TSQi != nb.sets.empty
+    defs['UpstatB'] = nb.algo.affect(TSQs, nb.sets.union(TSQs, TSQc))
+    defs['UpstatC'] = nb.algo.affect(TSQc, nb.sets.empty)
+    defs['UpstatD'] = nb.algo.affect(TSQu, nb.sets.union(TSQu, TSQi))
+    defs['UpstatE'] = nb.algo.affect(TSQi, nb.sets.empty)
+    TTS = time_step@(T.prime, t.prime)
+    defs['UpstatF'] = TTS
+    defs['UpstatG'] = TSQu != nb.sets.empty
+    defs['UpstatH'] = TSQi == nb.sets.empty
+    defs['UpstatI'] = nb.algo.affect(TSQs, nb.sets.union(TSQs, TSQc))
+    defs['UpstatJ'] = nb.algo.affect(TSQc, nb.sets.empty)
+    defs['UpstatK'] = TSQs != nb.sets.empty
+    defs['UpstatL'] = nb.seq(TSQi == nb.sets.empty, TSQu == nb.sets.empty)
+    defs['UpstatM'] = nb.seq(TSQi == nb.sets.empty, TSQu == nb.sets.empty, TSQs == nb.sets.empty)
+    defs['UpstatN'] = nb.sets.isin(u.bar, TSQc)
+    defs['UpstatO'] = nb.algo.affect(status(res_u), ready)
+    defs['UpstatP'] = call_code('update\\_status', TTS)
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')

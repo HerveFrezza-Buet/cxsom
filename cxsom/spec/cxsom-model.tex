@@ -210,43 +210,45 @@ The reporting of an update makes the update to be inserted in a queue of the tim
   \end{algorithmic}
 \end{algorithm}
 
-\end{document}
 
 \begin{algorithm}
-  \caption{$\CallCode{update\_status}{\DftTS}$ \label{algo:ts_state}}
+  \caption{$\cxReportG$ \label{algo:ts_state}}
   \begin{algorithmic}[1]
-    \IF{$\DftTSQi \neq \emptyset$}
-    \STATE $\DftTSQs \Affect \DftTSQs \Union \DftTSQc$
-    \STATE $\DftTSQc \Affect \emptyset$ \COMMENT{Blocking out-arguments lead to reconsider the $\DftTS$ stability.}
-    \IF{all the out-arguments of the $\TSUpdt \in \DftTS$ are $\Ready$}
-    \STATE $\DftTSQu \Affect \DftTSQu \Union \DftTSQi$
-    \STATE $\DftTSQi \Affect \emptyset$ \COMMENT{Impossible updates become instable, i.e. evaluable.}
-    \STATE $\Status\DftTS \Affect \Relaxing$
+    \IF{$\cxUpstatA$}
+    \STATE $\cxUpstatB$
+    \STATE $\cxUpstatC$ \COMMENT{Blocking out-arguments lead to reconsider the $\cxDftTS$ stability.}
+    \IF{all the out-arguments of the $\cxTSupdtInSt$ are $\cxReady$}
+    \STATE $\cxUpstatD$
+    \STATE $\cxUpstatE$ \COMMENT{Impossible updates become instable, i.e. evaluable.}
+    \STATE $\cxSetStatusTSRelaxing$
     \ELSE
-    \STATE $\Status\DftTS \Affect \Blocked$
-    \STATE \COMMENT{At this level, the simulator consider the timesteps $\TS\DftTTL\DftIInst$ owning busy out-arguments as \ConceptDef{blockers} of $\DftTS$.}
+    \STATE $\cxSetStatusTSBlocked$
+    \STATE \COMMENT{At this level, the simulator consider the timesteps $\cxUpstatF$ owning busy out-arguments as \ConceptDef{blockers} of $\cxDftTS$.}
     \ENDIF
-    \ELSIF{$\DftTSQu \neq \emptyset$}
-    \STATE \COMMENT{$\DftTSQi = \emptyset$}
-    \STATE $\DftTSQs \Affect \DftTSQs \Union \DftTSQc$
-    \STATE $\DftTSQc \Affect \emptyset$ \COMMENT{A single unstable argument leads to reconsider the $\DftTS$ stability.}
-    \STATE $\Status\DftTS \Affect \Relaxing$
-    \ELSIF{$\DftTSQs \neq \emptyset$}
-    \STATE \COMMENT{$\DftTSQi = \emptyset, \DftTSQu = \emptyset$}
-    \STATE $\Status\DftTS \Affect \Checking$ \COMMENT{$\DftTS$ updates are all stable, stability confirmation is in progress.}
+    \ELSIF{$\cxUpstatG$}
+    \STATE \COMMENT{$\cxUpstatH$}
+    \STATE $\cxUpstatI$
+    \STATE $\cxUpstatJ$ \COMMENT{A single unstable argument leads to reconsider the $\cxDftTS$ stability.}
+    \STATE $\cxSetStatusTSRelaxing$
+    \ELSIF{$\cxUpstatK$}
+    \STATE \COMMENT{$\cxUpstatL$}
+    \STATE $\cxSetStatusTSChecking$ \COMMENT{$\cxDftTS$ updates are all stable, stability confirmation is in progress.}
     \ELSE
-    \STATE \COMMENT{$\DftTSQi = \emptyset, \DftTSQu = \emptyset, \DftTSQs = \emptyset$}
-    \STATE \COMMENT{Every update stability is confrmed. We can set all the results as $\Ready$}
-    \FORALL{$\TSUpdt \in \DftTSQc$}
-    \STATE $\Status{\Res\TSUpdt} \Affect \Ready$
+    \STATE \COMMENT{$\cxUpstatM$}
+    \STATE \COMMENT{Every update stability is confrmed. We can set all the results as $\cxReady$}
+    \FORALL{$\cxUpstatN$}
+    \STATE $\cxUpstatO$
     \ENDFOR
-    \STATE $\Status\DftTS \Affect \Done$
-    \FORALL{$\TS\DftTTL\DftIInst$ for which $\DftTS$ is a blocker}
-    \STATE $\CallCode{update\_status}{\TS\DftTTL\DftIInst}$
+    \STATE $\cxSetStatusTSDone$
+    \FORALL{$\cxUpstatF$ for which $\cxDftTS$ is a blocker}
+    \STATE $\cxUpstatP$
     \ENDFOR
     \ENDIF
   \end{algorithmic}
 \end{algorithm}
+
+\end{document}
+
 
 \subsubsection{Update patterns \label{sec:pattern}}
 

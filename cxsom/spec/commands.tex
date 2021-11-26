@@ -82,6 +82,10 @@
 \newcommand{\cxStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{relaxing}}}}
 \newcommand{\cxStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{checking}}}}
 \newcommand{\cxStatusTSDone}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxSetStatusTSBlocked}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{blocked}}}}
+\newcommand{\cxSetStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{relaxing}}}}
+\newcommand{\cxSetStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{checking}}}}
+\newcommand{\cxSetStatusTSDone}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{done}}}}
 \newcommand{\cxStatusTSUpdtImpossible}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{impossible}}}}
 \newcommand{\cxStatusTSUpdtUpdated}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{updated}}}}
 \newcommand{\cxStatusTSUpdtDone}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{done}}}}
@@ -98,3 +102,19 @@
 \newcommand{\cxReportE}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \cup {\left\{\overline{u}\right\}}}}
 \newcommand{\cxReportF}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {\left\{\overline{u}\right\}}}}
 \newcommand{\cxReportG}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\left({{\cal S}}_{T}^{t}\right)}
+\newcommand{\cxUpstatA}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \neq {\emptyset}}
+\newcommand{\cxUpstatB}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}}
+\newcommand{\cxUpstatC}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \leftarrow {\emptyset}}
+\newcommand{\cxUpstatD}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}}}
+\newcommand{\cxUpstatE}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \leftarrow {\emptyset}}
+\newcommand{\cxUpstatF}[0]{{{\cal S}}_{T'}^{t'}}
+\newcommand{\cxUpstatG}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \neq {\emptyset}}
+\newcommand{\cxUpstatH}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} = {\emptyset}}
+\newcommand{\cxUpstatI}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}}
+\newcommand{\cxUpstatJ}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \leftarrow {\emptyset}}
+\newcommand{\cxUpstatK}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \neq {\emptyset}}
+\newcommand{\cxUpstatL}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} = {\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} = {\emptyset}}
+\newcommand{\cxUpstatM}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} = {\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} = {\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} = {\emptyset}}
+\newcommand{\cxUpstatN}[0]{{\overline{u}} \in {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}
+\newcommand{\cxUpstatO}[0]{{\left< {\mathrm{res}}_{u} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxUpstatP}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\left({{\cal S}}_{T'}^{t'}\right)}
