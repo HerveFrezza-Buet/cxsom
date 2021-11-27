@@ -12,6 +12,13 @@
 \newcommand{\cxDftTL}[0]{T}
 \newcommand{\cxDftInst}[0]{t}
 \newcommand{\cxDftDI}[0]{\left[ T,\;X,\;t \right]}
+\newcommand{\cxDftDDI}[0]{\left[ T,\;X,\;t' \right]}
+\newcommand{\cxDftDIz}[0]{\left[ T,\;X,\;0 \right]}
+\newcommand{\cxBufSize}[0]{s}
+\newcommand{\cxBufFirst}[0]{\left[ T,\;X,\;{{t} - {s}} + {1} \right]}
+\newcommand{\cxBufLast}[0]{\left[ T,\;X,\;{t} + {1} \right]}
+\newcommand{\cxSizeof}[0]{d}
+\newcommand{\cxDataSize}[0]{{s} \times {\left({d} + {1}\right)}}
 \newcommand{\cxDftRDI}[0]{\left\{ T,\;X,\;\tau \right\}}
 \newcommand{\cxDftTS}[0]{{{\cal S}}_{T}^{t}}
 \newcommand{\cxDftUpdt}[0]{u}
@@ -142,3 +149,14 @@
 \newcommand{\cxAnchorD}[0]{{\pi} \in {{\cal P}}}
 \newcommand{\cxAnchorE}[0]{{\left\{ T,\;X,\;0 \right\}} = {{\mathrm{res}}_{\pi}}}
 \newcommand{\cxAnchorF}[0]{{\left< \left[ T,\;X,\;{\mbox{\tt @}}{T} \right] \right>} = {\textcolor{statuscoul}{\mathtt{busy}}}}
+\newcommand{\cxXi}[0]{\xi}
+\newcommand{\cxWi}[0]{{w}_{i}}
+\newcommand{\cxAi}[0]{{a}_{i}}
+\newcommand{\cxMatchG}[0]{{\mu}_{G}}
+\newcommand{\cxMatchT}[0]{{\mu}_{\triangle}}
+\newcommand{\cxAiDef}[0]{\forall {i},\; {{{a}_{i}} = {{\mu}\left(\xi,\;{w}_{i}\right)}}}
+\newcommand{\cxBMU}[0]{\pi}
+\newcommand{\cxMatchEq}[0]{\begin{array}{l} {{{\mu}_{G}}\left(\xi,\;w\right)}\;{\stackrel{\mathrm{def}}{=}}\;{{\exp}\left(\displaystyle\frac{{\left({\xi} - {w}\right)}^{2}}{{2}{{\sigma}^{2}}}\right)} \\ {{{\mu}_{\triangle}}\left(\xi,\;w\right)}\;{\stackrel{\mathrm{def}}{=}}\;{{\max}\left({1} - {\displaystyle\frac{\left| {\xi} - {w} \right|}{r}},\;0\right)} \end{array}}
+\newcommand{\cxMergeEq}[0]{\forall {i},\; {{{a}_{i}^{g}} = {\sqrt{ {{a}_{i}^{e}} + {{{\left({1} - {\beta}\right)}{a}}_{i}^{c}}}}}}
+\newcommand{\cxTopoMatch}[0]{{\mu}\left(i,\;\pi\right)}
+\newcommand{\cxLearnEq}[0]{\forall {i},\; {{{w}_{i}^{{t} + {1}}} = {{{{\left({1} - {{\alpha}{h}}\right)}{w}}_{i}^{t}} + {{{\alpha}{h}}{\xi}}}},\;{\mbox{with}}\;{{h} = {{\mu}\left(i,\;\pi\right)}}}

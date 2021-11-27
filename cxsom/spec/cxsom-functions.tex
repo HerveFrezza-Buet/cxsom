@@ -14,12 +14,12 @@ This sets the variable $X$ so that each of the float it contains is 3.14, $Y$ so
 
 \subsection{Matching a value against weights}
 
-In SOM-like computation, an input $\xi$ is given and is matched against all the weights $w_i$ in the map. The result is an activity vector, its elements $a_i$ are in $[0,1]$, corresponding to each weight, that is 1 if the weight and the input perfectly match.
+In SOM-like computation, an input $\cxXi$ is given and is matched against all the weights $\cxWi$ in the map. The result is an activity vector, its elements $\cxAi$ are in $[0,1]$, corresponding to each weight, that is 1 if the weight and the input perfectly match.
 
-The formula is, for a map of weights $w_i$ and an input $\xi$, $\forall i, a_i = \Fxx \mu \xi {w_i}$. Two matcing functions are defined, a triangle matching $\mu_\triangle$ and a Gaussian matching $\mu_G$.
+The formula is, for a map of weights $\cxWi$ and an input $\cxAi$, $\cxAiDef$. Two matching functions are defined, a triangle matching $\cxMatchT$ and a Gaussian matching $\cxMatchG$.
+
 \begin{equation}
-  \Fxx {\mu_G} \xi w \EqDef \Fx \exp {\frac{\GroupExp{\xi - w}2}{2\sigma^2}},\;
-  \Fxx {\mu_\triangle} \xi w \EqDef \Fxx \max {1-\frac{\left|\xi - w\right|}r} 0
+  \cxMatchEq \nonumber
 \end{equation}
 
 \BeginCpp
@@ -53,14 +53,14 @@ kwd::type("Ag", "Map1D<Scalar>=100");
 
 The formula is 
 \begin{equation}
-  \forall i,\; a^g_i = \sqrt{a^e_i\Group{\beta a^e_i + \Group{1-\beta}a^c_i}}
+  \cxMergeEq \nonumber
 \end{equation}
 
 \subsection{Learning}
 
-Learning concerns the weights $w_i$ of a map, once a best matching unit (BMU) $\pi$ is defined. Learning consists of moving the weights to the current input $\xi$, in the surrounding of the best matching unit. The neighbooring function is $\Fxx \mu i \pi$, using Gaussian and triangular matchings $\mu_G$ or $\mu_\triangle$. The learning rule is:
+Learning concerns the weights $\cxWi$ of a map, once a best matching unit (BMU) $\cxBMU$ is defined. Learning consists of moving the weights to the current input $\xi$, in the surrounding of the best matching unit. The neighbooring function is $\cxTopoMatch$, using Gaussian and triangular matchings $\cxMatchG$ or $\cxMatchT$. The learning rule is:
 \begin{equation}
-  \forall i,\; w^{t+1}_i = (1-\alpha h)w^t_i + \alpha h \xi,\mbox{ with } h = \Fxx \mu i \pi
+  \cxLearnEq \nonumber
 \end{equation}
 
 \BeginCpp
@@ -104,3 +104,4 @@ kwd::type("NbSteps", "Scalar");
                                                     kwd::use("delta", .05);
 "NBSteps" << fx::converge({kwd::data("BMU")});
 \end{lstlisting}\end{footnotesize}
+

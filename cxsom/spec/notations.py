@@ -26,7 +26,7 @@ def DIof(T, X, t):
 def RDIof(T, X, t):
     return nb.math.brace(nb.seq(T, X, t))
 
-T, X, t, dt, n, u = nb.to('T X t \\tau n u')
+T, X, t, dt, n, u, size, size_of = nb.to('T X t \\tau n u s d')
 pat = nb.to('\\pi')
 pats = nb.symbol('{\\cal P}')
 
@@ -83,6 +83,13 @@ with nb.files.defs('commands.tex') as defs:
     defs['DftTL'] = T
     defs['DftInst'] = t
     defs['DftDI'] = DI
+    defs['DftDDI'] = DIof(T, X, t.prime)
+    defs['DftDIz'] = DIof(T, X, 0)
+    defs['BufSize'] = size
+    defs['BufFirst'] = DIof(T, X, t - size  + 1)
+    defs['BufLast'] = DIof(T, X, t + 1)
+    defs['Sizeof'] = size_of
+    defs['DataSize'] = size^[size_of+1]
     defs['DftRDI'] = RDI
     defs['DftTS'] = TS
     defs['DftUpdt'] = u
@@ -256,6 +263,33 @@ with nb.files.defs('commands.tex') as defs:
     defs['AnchorD'] = nb.sets.isin(pat, pats)
     defs['AnchorE'] = nb.equal(RDIz, res_pat)
     defs['AnchorF'] = status(DIof(T, X, minT)) == busy
+
+
+    #### Learning rules
+    xi, sigma, w, i, r, a, g, e, c, h, t, mu, alpha, beta = nb.to('\\xi \\sigma w i r a g e c h t \\mu \\alpha \\beta')
+    bmu = nb.to('\\pi')
+    wi = w@i
+    ai = a@i
+    match_triangle = mu@'\\triangle'
+    match_gaussian = mu@'G'
+    match = nb.fun(mu)
+    defs['Xi'] = xi
+    defs['Wi'] = wi
+    defs['Ai'] = ai
+    defs['MatchG'] = match_gaussian
+    defs['MatchT'] = match_triangle
+    defs['AiDef'] = nb.math.forall(i, ai == match(xi, wi))
+    defs['BMU'] = bmu
+
+    match_G_def = nb.define(nb.fun(match_gaussian)(xi, w), nb.math.exp(nb.to([xi - w])**2/(2*sigma**2)))
+    match_T_def = nb.define(nb.fun(match_triangle)(xi, w), nb.math.max(1-nb.math.abs(xi - w)/r, 0))
+    defs['MatchEq'] = nb.layout('l', [match_G_def], [match_T_def])
+    defs['MergeEq'] = nb.math.forall(i, a@(i, g) == nb.math.sqrt(a@(i, e) + [1 - beta]*a@(i, c)))
+    topomatch = nb.fun(mu)(i, bmu)
+    defs['TopoMatch'] = topomatch
+    defs['LearnEq'] = nb.seq(nb.math.forall(i, w@(i, t+1) == [1-alpha*h]*w@(i,t) + alpha*h*xi),
+                             nb.kat(nb.text('with'), h == topomatch))
+    
     
     
     defs.add_preamble('\\usepackage{xspace}')
