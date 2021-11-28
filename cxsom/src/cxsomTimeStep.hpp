@@ -18,14 +18,16 @@ namespace cxsom {
   namespace timestep {
 
     enum class Status : char {
-      Blocked  = 'b', //!< The timestep is blocked due to impossible updates.
-      Relaxing = 'r', //!< The timestep is under unstable computation.
-      Checking = 'c', //!< Every update seem stable, we are checking this.
-      Done     = 'd'  //!< The timestep is done, all updates have been made ready and removed.
+			      Unbound  = 'u', //!< The timestep handles updates whose in-arg cannot be updated (unbound).
+			      Blocked  = 'b', //!< The timestep is blocked due to impossible updates.
+			      Relaxing = 'r', //!< The timestep is under unstable computation.
+			      Checking = 'c', //!< Every update seem stable, we are checking this.
+			      Done     = 'd'  //!< The timestep is done, all updates have been made ready and removed.
     };
 
     inline std::ostream& operator<<(std::ostream& os, const Status& s) {
       switch(s) {
+      case Status::Unbound  : os << "unbound" ; break;
       case Status::Blocked  : os << "blocked" ; break;
       case Status::Relaxing : os << "relaxing"; break;
       case Status::Checking : os << "checking"; break;
@@ -64,10 +66,10 @@ namespace cxsom {
     using update_handler = std::list<content>::iterator;
 
     enum class Queue : unsigned int {
-      Unstable   = 0, //!< Updates whose status need to be known.
-      Impossible = 1, //!< Updates that have been detected as impossible.
-      Stable     = 2, //!< Updates that have been seen stable once are here.
-      Confirmed  = 3  //!< Updates whose stability is confirmed.
+				     Unstable   = 0, //!< Updates whose status need to be known.
+				     Impossible = 1, //!< Updates that have been detected as impossible.
+				     Stable     = 2, //!< Updates that have been seen stable once are here.
+				     Confirmed  = 3  //!< Updates whose stability is confirmed.
     };
 
     inline std::ostream& operator<<(std::ostream& os, const Queue& s) {
@@ -124,6 +126,9 @@ namespace cxsom {
 	std::ostringstream ostr;
 	ostr << "Timestep " << who << " status update : from " << status;
 #endif
+
+	call_has_unbound_here; // and return Status::Unbound if needed.
+	
 	if(queues[static_cast<unsigned int>(Queue::Impossible)].size() > 0) {
 	  // This is ok since all updates here are no_processing==true;
 	  move_queue_content(Queue::Confirmed, Queue::Stable);
@@ -167,8 +172,8 @@ namespace cxsom {
 	queues[static_cast<unsigned int>(Queue::Confirmed)].clear();
 	notify_done(who);
 #ifdef cxsomLOG
-	  ostr << " to " << status << '.';
-	  logger->msg(ostr.str());
+	ostr << " to " << status << '.';
+	logger->msg(ostr.str());
 #endif
 	return status;
       }
@@ -200,9 +205,9 @@ namespace cxsom {
 	logger->msg("Touching all arguments of the impossible updates.");
 	logger->push();
 #endif
-	  for(auto& c : queues[static_cast<unsigned int>(Queue::Impossible)]) c()->sync_arguments_availability();
+	for(auto& c : queues[static_cast<unsigned int>(Queue::Impossible)]) c()->sync_arguments_availability();
 #ifdef cxsomLOG
-	  logger->pop();
+	logger->pop();
 #endif
 
 #ifdef cxsomLOG
@@ -213,7 +218,7 @@ namespace cxsom {
 	move_queue_content(Queue::Impossible, Queue::Unstable);
 	status = Status::Relaxing;
 #ifdef cxsomLOG
-	  logger->pop();
+	logger->pop();
 #endif
       }
 
@@ -338,7 +343,7 @@ namespace cxsom {
 	    update.init_done();
 	    queues[static_cast<unsigned int>(Queue::Unstable)].push_back(update);
 #ifdef cxsomLOG
-	  logger->msg("Updtodate, but init, so putting in \"unstable\" queue.");
+	    logger->msg("Updtodate, but init, so putting in \"unstable\" queue.");
 #endif
 	  }
 	  else {

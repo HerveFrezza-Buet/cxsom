@@ -8,7 +8,7 @@ help:
 	@echo
 	@echo "make clean     <-- cleans latex generated files"
 	@echo "make doc       <-- compiles"
-	@€cho "make cheat     <-- cheat sheet"
+	@echo "make cheat     <-- cheat sheet"
 	@echo
 
 clean:

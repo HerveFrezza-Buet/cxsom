@@ -5,6 +5,7 @@
 \newcommand{\cxUpdated}[0]{\textcolor{statuscoul}{\mathtt{updated}}}
 \newcommand{\cxDone}[0]{\textcolor{statuscoul}{\mathtt{done}}}
 \newcommand{\cxNone}[0]{\textcolor{statuscoul}{\mathtt{none}}}
+\newcommand{\cxUnbound}[0]{\textcolor{statuscoul}{\mathtt{unbound}}}
 \newcommand{\cxBlocked}[0]{\textcolor{statuscoul}{\mathtt{blocked}}}
 \newcommand{\cxRelaxing}[0]{\textcolor{statuscoul}{\mathtt{relaxing}}}
 \newcommand{\cxChecking}[0]{\textcolor{statuscoul}{\mathtt{checking}}}
@@ -85,11 +86,13 @@
 \newcommand{\cxResTSUpdt}[0]{{\mathrm{res}}_{\overline{u}}}
 \newcommand{\cxStatusTS}[0]{\left< {{\cal S}}_{T}^{t} \right>}
 \newcommand{\cxStatusTSUpdt}[0]{\left< \overline{u} \right>}
-\newcommand{\cxStatusSet}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{blocked}},\;\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}},\;\textcolor{statuscoul}{\mathtt{done}}\right\}}}
+\newcommand{\cxStatusSet}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{unbound}},\;\textcolor{statuscoul}{\mathtt{blocked}},\;\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}},\;\textcolor{statuscoul}{\mathtt{done}}\right\}}}
+\newcommand{\cxStatusTSUnbound}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{unbound}}}}
 \newcommand{\cxStatusTSBlocked}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{blocked}}}}
 \newcommand{\cxStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{relaxing}}}}
 \newcommand{\cxStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{checking}}}}
 \newcommand{\cxStatusTSDone}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxSetStatusTSUnbound}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{unbound}}}}
 \newcommand{\cxSetStatusTSBlocked}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{blocked}}}}
 \newcommand{\cxSetStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{relaxing}}}}
 \newcommand{\cxSetStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{checking}}}}
@@ -126,6 +129,8 @@
 \newcommand{\cxUpstatN}[0]{{\overline{u}} \in {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}
 \newcommand{\cxUpstatO}[0]{{\left< {\mathrm{res}}_{u} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{ready}}}}
 \newcommand{\cxUpstatP}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\left({{\cal S}}_{T'}^{t'}\right)}
+\newcommand{\cxUbdA}[0]{{\textcolor{funcoul}{\mbox{has\_unbound}}}\left({{\cal S}}_{T}^{t}\right)}
+\newcommand{\cxUbdB}[0]{{{{\cal F}}_{T}^{t}} \neq {\emptyset}}
 \newcommand{\cxShiftSet}[0]{{\tau} \in {\mathbb{Z}}}
 \newcommand{\cxAnchor}[0]{\left[ T,\;X,\;{t} + {\tau} \right]}
 \newcommand{\cxPat}[0]{\pi}
@@ -160,3 +165,13 @@
 \newcommand{\cxMergeEq}[0]{\forall {i},\; {{{a}_{i}^{g}} = {\sqrt{ {{a}_{i}^{e}} + {{{\left({1} - {\beta}\right)}{a}}_{i}^{c}}}}}}
 \newcommand{\cxTopoMatch}[0]{{\mu}\left(i,\;\pi\right)}
 \newcommand{\cxLearnEq}[0]{\forall {i},\; {{{w}_{i}^{{t} + {1}}} = {{{{\left({1} - {{\alpha}{h}}\right)}{w}}_{i}^{t}} + {{{\alpha}{h}}{\xi}}}},\;{\mbox{with}}\;{{h} = {{\mu}\left(i,\;\pi\right)}}}
+\newcommand{\cxTSU}[0]{{{\cal U}}_{T}^{t}}
+\newcommand{\cxTSUDef}[0]{{{{\cal U}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{u\; \middle| \; {{\mathrm{res}}_{u}} \in {{{\cal S}}_{T}^{t}}\right\}}}
+\newcommand{\cxTSO}[0]{{{\cal O}}_{T}^{t}}
+\newcommand{\cxTSODef}[0]{{{{\cal O}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{\left[ T,\;X,\;t \right]\; \middle| \; \exists {{u} \in {{{\cal U}}_{T}^{t}}},\; {{\left[ T,\;X,\;t \right]} \in {{\mathrm{out}}_{u}}}\right\}}}
+\newcommand{\cxTSOAct}[0]{\forall {{\left[ T',\;X',\;t' \right]} \in {{{\cal O}}_{T}^{t}}},\; {{\left< \left[ T',\;X',\;t' \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}}
+\newcommand{\cxTSF}[0]{{{\cal F}}_{T}^{t}}
+\newcommand{\cxTSFDef}[0]{{{{\cal F}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{{{{\cal S}}_{T}^{t}} \setminus {\left\{{\mathrm{res}}_{u}\; \middle| \; {u} \in {{{\cal U}}_{T}^{t}}\right\}}}}
+\newcommand{\cxTSFAct}[0]{\forall {{\left[ T,\;X',\;t \right]} \in {{{\cal F}}_{T}^{t}}},\; {{\left< \left[ T,\;X',\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}}
+\newcommand{\cxTSAct}[0]{{\left(\forall {{\left[ T',\;X',\;t' \right]} \in {{{\cal O}}_{T}^{t}}},\; {{\left< \left[ T',\;X',\;t' \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}\right)} \wedge {\left(\forall {{\left[ T,\;X',\;t \right]} \in {{{\cal F}}_{T}^{t}}},\; {{\left< \left[ T,\;X',\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}\right)}}
+\newcommand{\cxHasTSF}[0]{{{{\cal F}}_{T}^{t}} \neq {\emptyset}}

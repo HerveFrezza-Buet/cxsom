@@ -51,6 +51,18 @@ An update $\cxDftUpdt$ for a DI $\cxDftDI$ is made of:
   \end{itemize}
 \end{itemize}
 
+\subsubsection{Time steps}
+
+As just introduced in the previous section, let us call a \ConceptDef{time step} all the DIs $\cxDefTimeStep$. So a time step is only parametrized by a timeline $\cxDftTL$ and an instant $\cxDftInst$, thus denoted by $\cxDftTS$.
+
+As detailed in next paragraph, all the DIs in a timestep will be updated several times until they reach some kind of consensus on the final values of the DIs.
+
+Let us denote all the updates defined for a timestep by $\cxTSUDef$. Let us denote by $\cxTSUDef$ the set of their out-arguments. One immediate condition for activating the computation related to some timestep $\cxDftTS$ is to have $\cxTSOAct$.
+
+Another condition is less obvious. Indeed, there may be some in-arguments in a timestep for which no update are defined. Such arguments need to be set externally, they are typically inputs provided to our simulation. Let us call them \ConceptDef{unbound} DIs of a timestep $\cxDftTS$, and denote them by $\cxTSFDef$. The second condition for activating  the computation related to some timestep $\cxDftTS$ is then to have $\cxTSFAct$.
+
+So once we have $$\cxTSAct$$ the computation of the DIs of a time step $\cxDftTS$ which are still $\cxReady$ can be processed. This is the relaxation of the timestep.
+
 
 \subsubsection{Datation and relaxation}
 
@@ -146,7 +158,7 @@ In the simulator, the computation of the updates are put in a pool task and comp
 Let us recall the notation $\cxDefTimeStepFull$ for the timestep at instant $\cxDftInst$ in the timeline $\cxDftTL$. For each $\cxDIinTS$, the internal structure used in the simulator gathers at least an \ConceptDef{usual update}, and an optional \ConceptDef{initialization update}. The initialization update, if present, is used for the first feasible setting of the value of $\cxDftDI$ instead of the ususal update. Otherwise, the usual update is used throughout the successive setting of the value of $\cxDftDI$ during the relaxation.
 
 
-In order to avoid further confusions, let us denote by $\cxTSUpdt$ an update handled by a time step $\cxDftTS$: it can be either a single update $\cxDftUpdt$ (so $\cxDftUpdt$ is the usual update) or a pair $\cxUpdtPair$ if an initialization update is defined (then $\cxUUpdt$ is the initialization update). In the case for which $\cxEqUpdtPair$ is a pair, $\cxEqUpdtRes$ obviously stands, so $\cxEqUpdtRes$. In the case of a pair as well, the simulator uses $\cxUUpdt$ until it gets a first computation of $\cxResTSUpdt$, and then it will switch to the use of $\cxDftUpdt$ for next computations of $\cxResTSUpdt$.
+In order to avoid further confusions, let us denote by $\cxTSUpdt$ an update handled by a time step $\cxDftTS$: it can be either a single update $\cxDftUpdt$ (so $\cxDftUpdt$ is the usual update) or a pair $\cxUpdtPair$ if an initialization update is defined (then $\cxUUpdt$ is the initialization update). In the case for which $\cxEqUpdtPair$ is a pair, $\cxEqUpdtRes$ obviously stands. In the case of a pair as well, the simulator uses $\cxUUpdt$ until it gets a first computation of $\cxResTSUpdt$, and then it will switch to the use of $\cxDftUpdt$ for next computations of $\cxResTSUpdt$.
 
 As at least a call to the usual update $\cxDftUpdt$ is required to be done for $\cxTSUpdt$, we have particularized the status returned by initialization updates in algorithm~\ref{algo:update}, so that the evaluation of an initialization update can never lead to the definitive computation of $\cxResUpdt$ during the relaxation of the timestep.
 
@@ -154,6 +166,7 @@ As at least a call to the usual update $\cxDftUpdt$ is required to be done for $
 
 The timestep structures $\cxDftTS$ at the simulator level have a status $$\cxStatusSet.$$ The status $\cxStatusTS$ depends on the status of the updates of the timestep, observed when the updates are realized. The meaning of the $\cxStatusTS$ is:
 \begin{itemize}
+\item $\cxStatusTSUnbound$: The timestep as unbound DIs, i.e. $\cxHasTSF$.
 \item $\cxStatusTSBlocked$: The timestep is blocked due to impossible updates.
 \item $\cxStatusTSRelaxing$: The timestep is under unstable computation.
 \item $\cxStatusTSChecking$: Every update seem stable, we are checking this.
@@ -214,7 +227,9 @@ The reporting of an update makes the update to be inserted in a queue of the tim
 \begin{algorithm}
   \caption{$\cxReportG$ \label{algo:ts_state}}
   \begin{algorithmic}[1]
-    \IF{$\cxUpstatA$}
+    \IF{$\cxUbdA$}
+    \STATE $\cxSetStatusTSUnbound$  \COMMENT{See algorithm~\ref{algo:ts_unbound}.}
+    \ELSIF{$\cxUpstatA$}
     \STATE $\cxUpstatB$
     \STATE $\cxUpstatC$ \COMMENT{Blocking out-arguments lead to reconsider the $\cxDftTS$ stability.}
     \IF{all the out-arguments of the $\cxTSupdtInSt$ are $\cxReady$}
@@ -247,6 +262,12 @@ The reporting of an update makes the update to be inserted in a queue of the tim
   \end{algorithmic}
 \end{algorithm}
 
+\begin{algorithm}
+  \caption{$\cxUbdA$ \label{algo:ts_unbound}}
+  \begin{algorithmic}[1]
+    \RETURN $\cxUbdB$
+  \end{algorithmic}
+\end{algorithm}
 
 
 \subsubsection{Update patterns \label{sec:pattern}}

@@ -17,6 +17,7 @@ updated    = tag('updated')
 done       = tag('done')
 none       = tag('none')
 
+unbound  = tag('unbound')
 blocked  = tag('blocked')
 relaxing = tag('relaxing')
 checking = tag('checking')
@@ -39,6 +40,12 @@ any_var = DIof(T, slot, t)
 
 time_step = nb.symbol('{\\cal S}')
 TS = time_step@(T, t)
+time_step_update = nb.symbol('{\\cal U}')
+TSU = time_step_update@(T, t)
+time_step_out = nb.symbol('{\\cal O}')
+TSO = time_step_out@(T, t)
+time_step_free = nb.symbol('{\\cal F}')
+TSF = time_step_free@(T, t)
 
 def TSQ(ts, queue):
     return nb.math.matrix(ts)@nb.rm(queue)
@@ -75,6 +82,7 @@ with nb.files.defs('commands.tex') as defs:
     defs['Updated']    = updated
     defs['Done']       = done
     defs['None']       = none
+    defs['Unbound']    = unbound
     defs['Blocked']    = blocked
     defs['Relaxing']   = relaxing
     defs['Checking']   = checking
@@ -83,6 +91,7 @@ with nb.files.defs('commands.tex') as defs:
     defs['DftTL'] = T
     defs['DftInst'] = t
     defs['DftDI'] = DI
+    DDI = DIof(T.prime, X.prime, t.prime)
     defs['DftDDI'] = DIof(T, X, t.prime)
     defs['DftDIz'] = DIof(T, X, 0)
     defs['BufSize'] = size
@@ -175,12 +184,14 @@ with nb.files.defs('commands.tex') as defs:
 
     defs['StatusTS'] = status(TS)
     defs['StatusTSUpdt'] = status(u.bar)
-    defs['StatusSet'] = nb.sets.isin(status(TS), nb.sets.byext(blocked, relaxing, checking, done))
+    defs['StatusSet'] = nb.sets.isin(status(TS), nb.sets.byext(unbound, blocked, relaxing, checking, done))
+    defs['StatusTSUnbound'] = status(TS) == unbound
     defs['StatusTSBlocked'] = status(TS) == blocked
     defs['StatusTSRelaxing'] = status(TS) == relaxing
     defs['StatusTSChecking'] = status(TS) == checking
     defs['StatusTSDone'] = status(TS) == done
     
+    defs['SetStatusTSUnbound'] = nb.algo.affect(status(TS), unbound)
     defs['SetStatusTSBlocked'] = nb.algo.affect(status(TS), blocked)
     defs['SetStatusTSRelaxing'] = nb.algo.affect(status(TS), relaxing)
     defs['SetStatusTSChecking'] = nb.algo.affect(status(TS), checking)
@@ -232,6 +243,9 @@ with nb.files.defs('commands.tex') as defs:
     defs['UpstatN'] = nb.sets.isin(u.bar, TSQc)
     defs['UpstatO'] = nb.algo.affect(status(res_u), ready)
     defs['UpstatP'] = call_code('update\\_status', TTS)
+
+    defs['UbdA'] = call_code('has\\_unbound', TS)
+    defs['UbdB'] = TSF != nb.sets.empty
 
     defs['ShiftSet'] = nb.sets.isin(dt, nb.sets.Z)
     defs['Anchor'] = DIof(T, X, t+dt)
@@ -290,7 +304,23 @@ with nb.files.defs('commands.tex') as defs:
     defs['LearnEq'] = nb.seq(nb.math.forall(i, w@(i, t+1) == [1-alpha*h]*w@(i,t) + alpha*h*xi),
                              nb.kat(nb.text('with'), h == topomatch))
     
+
+
+    defs['TSU'] = TSU
+    defs['TSUDef'] = nb.define(TSU, nb.sets.bydef(u, nb.sets.isin(res_u, TS)))
+    defs['TSO'] = TSO
+    defs['TSODef'] = nb.define(TSO, nb.sets.bydef(DI,
+                                                  nb.math.exists(nb.sets.isin(u, TSU), nb.sets.isin(DI, out_arg_u))))
+    act1 = nb.math.forall(nb.sets.isin(DDI, TSO), status(DDI) == ready)
+    defs['TSOAct'] = act1
     
+    defs['TSF'] = TSF
+    defs['TSFDef'] = nb.define(TSF, nb.sets.minus(TS, nb.sets.bydef(res_u, nb.sets.isin(u, TSU))))
+    DDIX = DIof(T, X.prime, t)
+    act2 = nb.math.forall(nb.sets.isin(DDIX, TSF), status(DDIX) == ready)
+    defs['TSFAct'] = act2
+    defs['TSAct'] = nb.logical.conj([act1], [act2])
+    defs['HasTSF'] = (TSF != nb.sets.empty)
     
     defs.add_preamble('\\usepackage{xspace}')
     defs.add_preamble('\\usepackage{color}')
