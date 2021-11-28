@@ -299,6 +299,10 @@ The simulator compute DIs. It does it by asking tasks to its active timesteps, a
     \STATE \COMMENT{Let us try to fill the task queue $\cxJobs$.}
     
     \FORALL{$\cxDftTS$ which are handled currently}
+    \STATE \COMMENT{We check for eventual unbound DIs}
+    \IF{$\cxUbdA$}
+    \STATE $\cxSetStatusTSUnbound$  \COMMENT{See algorithm~\ref{algo:ts_unbound}.}
+    \ENDIF
     \IF{$\cxSimC$}
     \STATE $\cxSimD$ \COMMENT{see section~\ref{sec:providejobs}}
     \ENDIF
@@ -310,6 +314,10 @@ The simulator compute DIs. It does it by asking tasks to its active timesteps, a
     \STATE $\cxSimE$ \COMMENT{See algorithm~\ref{algo:anchor}.}
     \STATE \COMMENT{We may have new $\cxDftTS$s, let us retry to ask them jobs.}
     \FORALL{$\cxDftTS$ which are handled currently}
+    \STATE \COMMENT{We check for eventual unbound DIs}
+    \IF{$\cxUbdA$}
+    \STATE $\cxSetStatusTSUnbound$  \COMMENT{See algorithm~\ref{algo:ts_unbound}.}
+    \ENDIF
     \IF{$\cxSimC$}
     \STATE $\cxSimD$ \COMMENT{see section~\ref{sec:providejobs}}
     \ENDIF

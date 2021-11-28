@@ -287,6 +287,20 @@ namespace cxsom {
       void operator+=(const content& update) {if(test_add(*(update.usual))) add(update);}
 
       /**
+       * Tells wether unbound DIs are present in this timestep.
+       */
+      bool has_unbound() {
+	to_be_done;
+	return false;
+      }
+     
+      // This sets the timestep status to Unbound if unbound DIs are found.
+      void ckeck_unbound() {
+	if(has_unbound())
+	  status = Status::Unbound;
+      }
+
+      /**
        * This search for the update in all queues and removes it.
        */
       void remove_update(const std::string& varname) {
@@ -454,6 +468,12 @@ namespace cxsom {
 #endif
 	  return res;
 	  break;
+	case Status::Unbound :
+#ifdef cxsomLOG
+	  logger->msg("no jobs, timestep has unbound data instances.");
+	  logger->pop();
+#endif
+	  return false ; break;
 	case Status::Blocked :
 #ifdef cxsomLOG
 	  logger->msg("no jobs, timestep is blocked.");
