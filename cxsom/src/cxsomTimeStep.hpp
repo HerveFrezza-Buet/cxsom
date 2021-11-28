@@ -110,6 +110,9 @@ namespace cxsom {
 
       std::array<std::list<content>, 4> queues;
 
+      std::optional<std::list<symbol::Variable>> unbounds; // These are the unbound variables of the timestep. It is optional, i.e. it is computed once and then set.
+      bool has_unbound_buzy = true; // This tells that there is still busy unbound variables.
+
 
       void move_queue_content(Queue from, Queue to) {
 	std::copy(queues[static_cast<unsigned int>(from)].begin(),
@@ -127,7 +130,14 @@ namespace cxsom {
 	ostr << "Timestep " << who << " status update : from " << status;
 #endif
 
-	call_has_unbound_here; // and return Status::Unbound if needed.
+	if(has_unbound()) {
+	  status = Status::Unbound;
+#ifdef cxsomLOG
+	  ostr << " to " << status << '.';
+	  logger->msg(ostr.str());
+#endif
+	  return status;
+	}
 	
 	if(queues[static_cast<unsigned int>(Queue::Impossible)].size() > 0) {
 	  // This is ok since all updates here are no_processing==true;
@@ -186,7 +196,7 @@ namespace cxsom {
       Instance(Instance&&)                 = default;
       Instance& operator=(Instance&&)      = default;
 
-      Instance(const symbol::TimeStep& who) : who(who) {}
+      Instance(const symbol::TimeStep& who) : who(who), unbounds(std::nullopt) {}
       
       operator Status()           const {return status;}
       operator symbol::TimeStep() const {return who;}
@@ -281,7 +291,7 @@ namespace cxsom {
 	queues[static_cast<unsigned int>(Queue::Unstable)].push_back(update);
       }
 
-      /**
+      /** 
        * Trys to add the update. It performs test_add and add if relevant.
        */
       void operator+=(const content& update) {if(test_add(*(update.usual))) add(update);}
@@ -290,12 +300,52 @@ namespace cxsom {
        * Tells wether unbound DIs are present in this timestep.
        */
       bool has_unbound() {
-	to_be_done;
+#ifdef cxsomLOG
+	logger->msg("");
+	logger->msg("Checking for unbound DIs");
+	logger->push();
+#endif
+	// Un même timestep peut se faire nourrir d'updates en plusieurs fois.
+	// Donc faut tout revérifier... du moins pour les buzy.
+	// Bref, faut refair ça bien.
+	if(has_unbound_buzy) {
+	  if(!unbounds) {
+	    unbounds = std::list<symbol::Variable>();
+	    // We have to compute the unbound DIs. The updates are all
+	    // in the unstable queue at first.
+	    auto ubds_out = std::back_inserter(*unbounds);
+	    for(auto& u_bar : queues[static_cast<unsigned int>(Queue::Unstable)]) 
+	      for(auto u : {u_bar.init, u_bar.usual})
+		if(u)
+		  for(auto& arg : u->args_in)
+		    if(variables.find(arg.who.variable) == variables.end())
+		      *(ubds_out++) = arg.who.variable;
+#ifdef cxsomLOG
+	    {
+	      std::ostringstream ostr;
+	      ostr << "We determine unbound variables... found [ ";
+	      for(auto& v : *unbounds) ostr << v << ' ';
+	      ostr << ']';
+	      logger->msg(ostr.str());
+	    }
+#endif
+	  }
+	  /*
+	  ######
+	  bon.... ben là faut verifier la busyness... et virer de la liste ceux qui sont busy.
+	  */
+	  
+	}
+	
+#ifdef cxsomLOG
+	logger->pop();
+	logger->msg("");
+#endif
 	return false;
       }
      
       // This sets the timestep status to Unbound if unbound DIs are found.
-      void ckeck_unbound() {
+      void check_unbound() {
 	if(has_unbound())
 	  status = Status::Unbound;
       }
@@ -425,6 +475,9 @@ namespace cxsom {
       bool get_jobs(ref that, TaksOutputIt out) {
 	bool res = false;
 	std::list<content>::iterator end;
+
+	this->check_unbound();
+	
 #ifdef cxsomLOG
 	{
 	  std::ostringstream ostr;

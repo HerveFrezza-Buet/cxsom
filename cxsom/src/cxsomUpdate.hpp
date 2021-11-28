@@ -202,9 +202,6 @@ namespace cxsom {
     public:
       
       ResInstance                 result;
-	
-    protected:
-      
       std::vector<InArgInstance>  args_in;
       std::vector<OutArgInstance> args_out;
 
