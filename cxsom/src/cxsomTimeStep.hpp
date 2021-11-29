@@ -65,11 +65,15 @@ namespace cxsom {
     using wref           = std::weak_ptr<Instance>;
     using update_handler = std::list<content>::iterator;
 
+    
+    
+#define cxsomTIME_STEP_NB_QUEUES 5
     enum class Queue : unsigned int {
 				     Unstable   = 0, //!< Updates whose status need to be known.
 				     Impossible = 1, //!< Updates that have been detected as impossible.
 				     Stable     = 2, //!< Updates that have been seen stable once are here.
-				     Confirmed  = 3  //!< Updates whose stability is confirmed.
+				     Confirmed  = 3, //!< Updates whose stability is confirmed.
+				     New        = 4  //!< The updates newly added to the queue. They stay here until all unbound variables in their arguments (in-arguments) are ready.
     };
 
     inline std::ostream& operator<<(std::ostream& os, const Queue& s) {
@@ -78,6 +82,7 @@ namespace cxsom {
       case Queue::Impossible : os << "impossible"; break;
       case Queue::Stable     : os << "stable"    ; break;
       case Queue::Confirmed  : os << "confirmed" ; break;
+      case Queue::New        : os << "new" ; break;
       };
       return os;
     }
@@ -94,7 +99,124 @@ namespace cxsom {
     };
     std::ostream& operator<<(std::ostream& os, const Task& i);
     
-    
+
+    struct UnboundManager {
+      std::set<symbol::Variable> unbounds_ready;
+
+      /**
+       * @returns True is there are unbound busy variables.
+       */
+      bool busy_unbounds_found(std::list<content>& new_queue,
+			       std::list<content>& unstable_queue,
+			       const std::set<symbol::Variable>& updatable_variables) {
+#ifdef cxsomLOG
+	{
+	  logger->msg("");
+	  std::ostringstream ostr;
+	  if(new_queue.size() > 0)
+	    ostr << "Checking for unbound DIs (from the " << new_queue.size() << " updates in the 'new' queue)";
+	  else
+	    ostr << "Checking for unbound DIs... the 'new' queue is empty ! No unbounds are blocking.";
+	  logger->msg(ostr.str());
+	  logger->push();
+	}
+#endif
+	bool unbound_busy = false;
+	for(auto new_it = new_queue.begin(); new_it != new_queue.end(); /* No increment here */) {
+	  auto& u_bar = *new_it;
+	  bool that_update_has_unbound_busy = false;
+	  for(auto u : {u_bar.init, u_bar.usual})
+	    if(u) {
+#ifdef cxsomLOG
+	      {
+		std::ostringstream ostr;
+		ostr << "Checking unbounds in update:   " << *u;
+		logger->msg(ostr.str());
+		logger->push();
+	      }
+#endif
+	      for(auto& arg : u->args_in) {
+#ifdef cxsomLOG
+		{
+		  std::ostringstream ostr;
+		  ostr << "Checking if argument " << arg << " is unbound and busy";
+		  logger->msg(ostr.str());
+		}
+#endif
+		if(updatable_variables.find(arg.who.variable) == updatable_variables.end()  // Variable is not updated...
+		   && unbounds_ready.find(arg.who.variable) == unbounds_ready.end()) { // and not already known as ready.
+		
+#ifdef cxsomLOG
+		  {
+		    std::ostringstream ostr;
+		    ostr << arg.who.variable << " is unbound... is it ready or busy ?";
+		    logger->msg(ostr.str());
+		  }
+#endif
+
+		  // Let us check the status of arg.
+		  data::Availability arg_status;
+		  arg.what->get([&arg_status](auto status, auto, auto&) {arg_status = status;});
+		  
+		  switch(arg_status) {
+		  case data::Availability::Busy:	
+#ifdef cxsomLOG
+		    logger->push();
+		    logger->msg("... it is busy, the timestep is to be blocked by unbounds.");
+		    logger->pop();
+#endif
+		    unbound_busy = true;
+		    that_update_has_unbound_busy = true;
+		    break;
+		  case data::Availability::Ready:	
+#ifdef cxsomLOG
+		    logger->push();
+		    logger->msg("... it is ready.");
+		    logger->pop();
+#endif
+		    unbounds_ready.insert(arg.who.variable);
+		    break;
+		  default:
+		    break;
+		  }
+		}
+	      }
+	    }
+
+	  if(that_update_has_unbound_busy) {
+#ifdef cxsomLOG
+	    logger->msg("The update has busy unbounds, it is kept in the 'new' queue.");
+#endif
+	    new_it++;
+	  }
+	  else {
+#ifdef cxsomLOG
+	    logger->msg("The update has no busy unbounds, it is moves to the 'unstable' queue.");
+#endif
+	    unstable_queue.push_back(u_bar);
+	    new_it = new_queue.erase(new_it);
+	  }
+	  
+#ifdef cxsomLOG
+	  logger->pop();
+#endif
+	  
+	}
+#ifdef cxsomLOG
+	{
+	  std::ostringstream ostr;
+	  if(unbound_busy)
+	    ostr << "Conclusion: We have found unbound busy variables.";
+	  else
+	    ostr << "Conclusion: We have found no blocking unbound variables.";
+	  logger->msg(ostr.str());
+	  logger->pop();
+	  logger->msg("");
+	}
+#endif
+	return unbound_busy;
+      }
+    };
     
     class Instance {
     private:
@@ -108,10 +230,9 @@ namespace cxsom {
       std::vector<symbol::TimeStep> new_blockers; // The blockers that have not been reported to an external manager.
       std::set<symbol::Variable> variables; // These are the variables handled in this time step.
 
-      std::array<std::list<content>, 4> queues;
+      std::array<std::list<content>, cxsomTIME_STEP_NB_QUEUES> queues;
+      UnboundManager unbound_manager;
 
-      std::optional<std::list<symbol::Variable>> unbounds; // These are the unbound variables of the timestep. It is optional, i.e. it is computed once and then set.
-      bool has_unbound_buzy = true; // This tells that there is still busy unbound variables.
 
 
       void move_queue_content(Queue from, Queue to) {
@@ -130,7 +251,9 @@ namespace cxsom {
 	ostr << "Timestep " << who << " status update : from " << status;
 #endif
 
-	if(has_unbound()) {
+	if(unbound_manager.busy_unbounds_found(queues[static_cast<unsigned int>(Queue::New)],
+					       queues[static_cast<unsigned int>(Queue::Unstable)],
+					       variables)) {
 	  status = Status::Unbound;
 #ifdef cxsomLOG
 	  ostr << " to " << status << '.';
@@ -196,7 +319,7 @@ namespace cxsom {
       Instance(Instance&&)                 = default;
       Instance& operator=(Instance&&)      = default;
 
-      Instance(const symbol::TimeStep& who) : who(who), unbounds(std::nullopt) {}
+      Instance(const symbol::TimeStep& who) : who(who) {}
       
       operator Status()           const {return status;}
       operator symbol::TimeStep() const {return who;}
@@ -288,65 +411,19 @@ namespace cxsom {
        * Adds an update without any test (should be done before by test_add).
        */
       void add(const content& update) {
-	queues[static_cast<unsigned int>(Queue::Unstable)].push_back(update);
+	queues[static_cast<unsigned int>(Queue::New)].push_back(update);
       }
 
       /** 
        * Trys to add the update. It performs test_add and add if relevant.
        */
       void operator+=(const content& update) {if(test_add(*(update.usual))) add(update);}
-
-      /**
-       * Tells wether unbound DIs are present in this timestep.
-       */
-      bool has_unbound() {
-#ifdef cxsomLOG
-	logger->msg("");
-	logger->msg("Checking for unbound DIs");
-	logger->push();
-#endif
-	// Un même timestep peut se faire nourrir d'updates en plusieurs fois.
-	// Donc faut tout revérifier... du moins pour les buzy.
-	// Bref, faut refair ça bien.
-	if(has_unbound_buzy) {
-	  if(!unbounds) {
-	    unbounds = std::list<symbol::Variable>();
-	    // We have to compute the unbound DIs. The updates are all
-	    // in the unstable queue at first.
-	    auto ubds_out = std::back_inserter(*unbounds);
-	    for(auto& u_bar : queues[static_cast<unsigned int>(Queue::Unstable)]) 
-	      for(auto u : {u_bar.init, u_bar.usual})
-		if(u)
-		  for(auto& arg : u->args_in)
-		    if(variables.find(arg.who.variable) == variables.end())
-		      *(ubds_out++) = arg.who.variable;
-#ifdef cxsomLOG
-	    {
-	      std::ostringstream ostr;
-	      ostr << "We determine unbound variables... found [ ";
-	      for(auto& v : *unbounds) ostr << v << ' ';
-	      ostr << ']';
-	      logger->msg(ostr.str());
-	    }
-#endif
-	  }
-	  /*
-	  ######
-	  bon.... ben là faut verifier la busyness... et virer de la liste ceux qui sont busy.
-	  */
-	  
-	}
-	
-#ifdef cxsomLOG
-	logger->pop();
-	logger->msg("");
-#endif
-	return false;
-      }
      
       // This sets the timestep status to Unbound if unbound DIs are found.
       void check_unbound() {
-	if(has_unbound())
+	if(unbound_manager.busy_unbounds_found(queues[static_cast<unsigned int>(Queue::New)],
+					       queues[static_cast<unsigned int>(Queue::Unstable)],
+					       variables))
 	  status = Status::Unbound;
       }
 
@@ -579,6 +656,7 @@ namespace cxsom {
       for(auto b : i.blockers) os << ' ' << b;
       os << std::endl;
       os << "  queues:" << std::endl
+	 << "    " << std::setw(10) << std::left << Queue::New        << " = " << i.queues[static_cast<unsigned int>(Queue::New)].size()        << std::endl
 	 << "    " << std::setw(10) << std::left << Queue::Unstable   << " = " << i.queues[static_cast<unsigned int>(Queue::Unstable)].size()   << std::endl
 	 << "    " << std::setw(10) << std::left << Queue::Impossible << " = " << i.queues[static_cast<unsigned int>(Queue::Impossible)].size() << std::endl
 	 << "    " << std::setw(10) << std::left << Queue::Stable     << " = " << i.queues[static_cast<unsigned int>(Queue::Stable)].size()     << std::endl

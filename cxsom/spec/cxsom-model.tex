@@ -176,7 +176,7 @@ The timestep structures $\cxDftTS$ at the simulator level have a status $$\cxSta
 
 \subsubsection{Timestep update queues}
 
-The timestep structures $\cxDftTS$ at the simulator level are doted each with 4~update queues, where the updates $\cxTSUpdt$ are stored. Each the $\cxTSupdtInSt$ belongs to one of the 4~queues of $\cxDftTS$.
+The timestep structures $\cxDftTS$ at the simulator level are doted each with 5~update queues, where the updates $\cxTSUpdt$ are stored. Each the $\cxTSupdtInSt$ belongs to one of the 4~queues of $\cxDftTS$.
 
 When a timestep is asked by the simulator to provide computation, it extracts updates from some of the queues. When the update is performed by the simulator, it is given back to the timestep, with the return status resulting from algorithm~\ref{algo:update}. According to this status, the update is stored in the appropriate queue, and some supplementary transfers from one queue to another queue may happen. This will be detailed further, as the \ConceptDef{timestep state machine}.
 
@@ -250,7 +250,7 @@ The reporting of an update makes the update to be inserted in a queue of the tim
     \STATE $\cxSetStatusTSChecking$ \COMMENT{$\cxDftTS$ updates are all stable, stability confirmation is in progress.}
     \ELSE
     \STATE \COMMENT{$\cxUpstatM$}
-    \STATE \COMMENT{Every update stability is confrmed. We can set all the results as $\cxReady$}
+    \STATE \COMMENT{Every update stability is confirmed. We can set all the results as $\cxReady$}
     \FORALL{$\cxUpstatN$}
     \STATE $\cxUpstatO$
     \ENDFOR
@@ -265,6 +265,7 @@ The reporting of an update makes the update to be inserted in a queue of the tim
 \begin{algorithm}
   \caption{$\cxUbdA$ \label{algo:ts_unbound}}
   \begin{algorithmic}[1]
+    \STATE \COMMENT{The readyness of the DIs that are unbound in-arguments of some update in the $\cxDftTSQn$ queue are checked. If the update has no $\cxBusy$ unbound in-arguments, it is moved into the $\cxDftTSQu$ queue.}
     \RETURN $\cxUbdB$
   \end{algorithmic}
 \end{algorithm}

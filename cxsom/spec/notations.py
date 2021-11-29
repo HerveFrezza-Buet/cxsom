@@ -49,6 +49,7 @@ TSF = time_step_free@(T, t)
 
 def TSQ(ts, queue):
     return nb.math.matrix(ts)@nb.rm(queue)
+TSQn = TSQ(TS, 'new')
 TSQu = TSQ(TS, 'unstable')
 TSQi = TSQ(TS, 'impossible')
 TSQs = TSQ(TS, 'stable')
@@ -104,6 +105,7 @@ with nb.files.defs('commands.tex') as defs:
     defs['DftUpdt'] = u
     defs['DftShift'] = dt
 
+    defs['DftTSQn'] = TSQn
     defs['DftTSQu'] = TSQu
     defs['DftTSQi'] = TSQi
     defs['DftTSQs'] = TSQs
@@ -206,6 +208,8 @@ with nb.files.defs('commands.tex') as defs:
     defs['TSupdtInSt'] = nb.sets.isin(u.bar, TS)
 
     defs['QDefs'] = nb.layout('l',
+                              [TSQn, ':', nb.sets.bydef(nb.sets.isin(u.bar, TS),
+                                                        nb.kat(status(u.bar), nb.text('Newly added to the queue.')))],
                               [TSQu, ':', nb.sets.bydef(nb.sets.isin(u.bar, TS),
                                                         nb.kat(status(u.bar), nb.text('needs to be known.')))],
                               [TSQi, ':', nb.sets.bydef(nb.sets.isin(u.bar, TS),

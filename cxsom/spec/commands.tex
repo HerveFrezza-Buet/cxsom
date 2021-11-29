@@ -24,6 +24,7 @@
 \newcommand{\cxDftTS}[0]{{{\cal S}}_{T}^{t}}
 \newcommand{\cxDftUpdt}[0]{u}
 \newcommand{\cxDftShift}[0]{\tau}
+\newcommand{\cxDftTSQn}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{new}}}
 \newcommand{\cxDftTSQu}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}
 \newcommand{\cxDftTSQi}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}
 \newcommand{\cxDftTSQs}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}
@@ -103,7 +104,7 @@
 \newcommand{\cxStatusTSUpdtUpToDate}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{uptodate}}}}
 \newcommand{\cxResUpdtReady}[0]{{{\mathrm{res}}_{\overline{u}}} = {\textcolor{statuscoul}{\mathtt{ready}}}}
 \newcommand{\cxTSupdtInSt}[0]{{\overline{u}} \in {{{\cal S}}_{T}^{t}}}
-\newcommand{\cxQDefs}[0]{\begin{array}{lll} {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{needs to be known.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{has been detected as}}\;{\textcolor{statuscoul}{\mathtt{impossible}}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{have been seen stable for the first time are here.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{for which stability is confirmed.}}\right\} \end{array}}
+\newcommand{\cxQDefs}[0]{\begin{array}{lll} {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{new}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{Newly added to the queue.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{needs to be known.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{has been detected as}}\;{\textcolor{statuscoul}{\mathtt{impossible}}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{have been seen stable for the first time are here.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{for which stability is confirmed.}}\right\} \end{array}}
 \newcommand{\cxJobsA}[0]{{\overline{u}} \in {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}}}
 \newcommand{\cxJobsB}[0]{{\left< \overline{u} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}}\right\}}}
 \newcommand{\cxReportA}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \cup {\left\{\overline{u}\right\}}}}
