@@ -335,9 +335,10 @@ namespace cxsom {
 	blockers.clear();
 	
 #ifdef cxsomLOG
-	logger->msg("Touching all arguments of the impossible updates.");
+	logger->msg("Touching all arguments of the new and impossible updates.");
 	logger->push();
 #endif
+	for(auto& c : queues[static_cast<unsigned int>(Queue::New)]) c()->sync_arguments_availability();
 	for(auto& c : queues[static_cast<unsigned int>(Queue::Impossible)]) c()->sync_arguments_availability();
 #ifdef cxsomLOG
 	logger->pop();

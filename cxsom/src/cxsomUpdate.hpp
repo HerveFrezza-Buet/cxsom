@@ -412,6 +412,13 @@ namespace cxsom {
 	}
 	logger->push();
 #endif
+
+	
+	
+#ifdef cxsomLOG
+	logger->msg("Sync out-args");
+	logger->push();
+#endif
 	for(auto& arg : args_out)
 	  if(arg.availability == cxsom::data::Availability::Busy) {
 	    arg.what->sync([&arg](auto status) {arg.notify_status(status);});
@@ -428,6 +435,38 @@ namespace cxsom {
 	    logger->msg(ostr.str());
 #endif
 	  }
+#ifdef cxsomLOG
+	logger->pop();
+#endif
+
+	
+	
+#ifdef cxsomLOG
+	logger->msg("Sync in-args");
+	logger->push();
+#endif
+	for(auto& arg : args_in)
+	  if(arg.availability == cxsom::data::Availability::Busy) {
+	    arg.what->sync([&arg](auto status) {arg.availability = status;});
+#ifdef cxsomLOG
+	    std::ostringstream ostr;
+	    ostr << "Arg " << arg.who << " was known as busy, we check it... it is " << arg.availability << ".";
+	    logger->msg(ostr.str());
+#endif
+	  }
+	  else {
+#ifdef cxsomLOG
+	    std::ostringstream ostr;
+	    ostr << "Arg " << arg.who << " was already known as ready, no file checking.";
+	    logger->msg(ostr.str());
+#endif
+	  }
+#ifdef cxsomLOG
+	logger->pop();
+#endif
+
+
+	
 #ifdef cxsomLOG
 	logger->pop();
 #endif
