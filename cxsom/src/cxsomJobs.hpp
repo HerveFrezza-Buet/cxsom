@@ -396,6 +396,11 @@ namespace cxsom {
 #endif
 	    kv.second->get_jobs(kv.second, std::back_inserter(tasks));
 #ifdef cxsomLOG
+	    {
+	      std::ostringstream ostr;
+	      ostr << *(kv.second);
+	      logger->_msg(ostr.str());
+	    }
 	    logger->msg(std::string("tasks size: ") + std::to_string(tasks.size()));
 #endif
 	  }
