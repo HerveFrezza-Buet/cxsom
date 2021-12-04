@@ -73,6 +73,30 @@ int main(int argc, char* argv[]) {
     "avgA" << fx::average(kwd::prev(kwd::ith(kwd::var("args", "A"), 5, 10)))                                         | kwd::use("walltime", 100);
   }
 
+  {
+    timeline t("namespaces");
+
+    // If a variable name *** do not start with / ***, its name is
+    // prefixed with current namespaces names. Otherwise, it is used
+    // directly as the full variable name. Namespaces concern variable
+    // names, not the timelines name that is the first prefix of the
+    // whole variable designation.
+    kwd::type("X", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED); // namespaces/X
+    {
+      name_space ns("ns1");
+      kwd::type("X", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED); // namespaces/ns1/X
+      {
+	name_space ns("ns2");
+	kwd::type("X", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED); // namespaces/ns1/ns2/X
+	"X" << fx::random()                                                                                          | kwd::use("walltime", 100);
+      }
+      kwd::type("Y", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED); // namespaces/ns1/Y
+      "X" << fx::average({"Y", "/X"})                                                                                | kwd::use("walltime", 100);
+      "Y" << fx::average({"X", "ns2/X"})                                                                             | kwd::use("walltime", 100);
+    }
+    
+  }
+
   // Have a look at the generated graph to understand which variables
   // names and which rules are defined with such expressions.
               
