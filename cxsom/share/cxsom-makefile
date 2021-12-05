@@ -4,8 +4,10 @@ cxsom-help:
 	@echo "--------------"
 	@echo
 	@echo "make cxsom-clean"
+	@echo
 	@echo "make cxsom-set-rootdir ROOT_DIR=<path>"
 	@echo "make cxsom-get-rootdir"
+	@echo "make cxsom-clear-rootdir"
 	@echo
 	@echo "make cxsom-set-processor-config NB_THREADS=<nb> PORT=<port>"
 	@echo "make cxsom-get-processor-config"
@@ -32,6 +34,10 @@ cxsom-set-rootdir:
 .PHONY: cxsom-get-rootdir
 cxsom-get-rootdir:
 	@cat $(ROOT_DIR_RECORD_FILE)
+
+.PHONY: cxsom-clear-rootdir
+cxsom-clear-rootdir:
+	@cxsom-ask "Do you really want to clear `cat $(ROOT_DIR_RECORD_FILE)` ?" || rm -rf `cat $(ROOT_DIR_RECORD_FILE)`/*
 
 .PHONY: cxsom-set-processor-config
 cxsom-set-processor-config:
