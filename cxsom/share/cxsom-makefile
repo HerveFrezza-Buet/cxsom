@@ -1,0 +1,47 @@
+cxsom-help:
+	@echo
+	@echo "cxsom commands"
+	@echo "--------------"
+	@echo
+	@echo "make cxsom-clean"
+	@echo "make cxsom-set-rootdir ROOT_DIR=<path>"
+	@echo "make cxsom-get-rootdir"
+	@echo
+	@echo "make cxsom-set-processor-config NB_THREADS=<nb> PORT=<port>"
+	@echo "make cxsom-get-processor-config"
+	@echo "make cxsom-kill-processor"
+	@echo
+	@echo
+
+ROOT_DIR_RECORD_FILE = .cxsom-rootdir-config
+PROCESSOR_RECORD_FILE = .cxsom-processor-config
+
+.PHONY: cxsom-clean
+cxsom-clean:
+	@rm -f $(ROOT_DIR_RECORD_FILE) $(PROCESSOR_RECORD_FILE)
+
+.PHONY: cxsom-set-rootdir
+cxsom-set-rootdir:
+	@rm -f $(ROOT_DIR_RECORD_FILE)
+	@echo $(ROOT_DIR) > $(ROOT_DIR_RECORD_FILE)
+
+.PHONY: cxsom-get-rootdir
+cxsom-get-rootdir:
+	@cat $(ROOT_DIR_RECORD_FILE)
+
+.PHONY: cxsom-set-processor-config
+cxsom-set-processor-config:
+	@rm -f $(PROCESSOR_RECORD_FILE)
+	@echo $(NB_THREADS) $(PORT) > $(PROCESSOR_RECORD_FILE)
+
+.PHONY: cxsom-get-processor-config
+cxsom-get-processor-config:
+	@cat $(PROCESSOR_RECORD_FILE)
+
+.PHONY: cxsom-kill-processor
+cxsom-kill-processor:
+	@killall -q cxsom-processor || echo 'Nothing to kill'
+	@sleep 1
+	@echo
+	@echo 'cxsom processor should be killed : '
+	@ps -aux | grep 'cxsom-processor'

@@ -58,20 +58,10 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-viewer.pc
 
 
 
-
-
-
-
-
-
-
-
-
-      
-
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(doc)
+add_subdirectory(share)
 
 
