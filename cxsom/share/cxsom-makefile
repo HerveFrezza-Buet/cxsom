@@ -9,8 +9,12 @@ cxsom-help:
 	@echo
 	@echo "make cxsom-set-processor-config NB_THREADS=<nb> PORT=<port>"
 	@echo "make cxsom-get-processor-config"
+	@echo "make cxsom-launch-processor"
+	@echo "make cxsom-processor-is-running"
 	@echo "make cxsom-kill-processor"
 	@echo
+	@echo "make cxsom-show_vars"
+	@echo "make cxsom-scan_vars"
 	@echo
 
 ROOT_DIR_RECORD_FILE = .cxsom-rootdir-config
@@ -38,10 +42,26 @@ cxsom-set-processor-config:
 cxsom-get-processor-config:
 	@cat $(PROCESSOR_RECORD_FILE)
 
+.PHONY: cxsom-launch-processor
+cxsom-launch-processor:
+	@cxsom-processor `cat $(ROOT_DIR_RECORD_FILE)` `cat $(PROCESSOR_RECORD_FILE)` &
+
+.PHONY: cxsom-processor-is-running
+cxsom-processor-is-running:
+	@ps -aux | grep 'cxsom-processor' | grep `cat $(ROOT_DIR_RECORD_FILE)` | wc -l
+
 .PHONY: cxsom-kill-processor
 cxsom-kill-processor:
 	@killall -q cxsom-processor || echo 'Nothing to kill'
 	@sleep 1
 	@echo
-	@echo 'cxsom processor should be killed : '
-	@ps -aux | grep 'cxsom-processor'
+	@echo 'cxsom processor should be killed : Is it running ?'
+	@make --quiet cxsom-processor-is-running
+
+.PHONY: cxsom-show-vars
+cxsom-show-vars:
+	@cxsom-all-instances `cat $(ROOT_DIR_RECORD_FILE)`
+
+.PHONY: cxsom-scan-vars
+cxsom-scan-vars:
+	@gnome-terminal --title='scanning variables' --working-directory=$(PWD) -- /bin/bash -c 'while sleep 1; do clear; make --quiet cxsom-show-vars; done'
