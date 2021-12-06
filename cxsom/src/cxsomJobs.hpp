@@ -292,6 +292,19 @@ namespace cxsom {
 	add_update(updt, check_and_get(updt.res));
       }
 
+      void clear() {
+	std::lock_guard<std::mutex> lock(integrity_mutex);
+#ifdef cxsomLOG
+	logger->msg("clearing everything !.");
+#endif
+	timesteps.clear();
+	tasks.clear();
+	patterns.clear();
+	terminated_ts.clear();
+	blockees.clear();
+	arg_types_tmp.clear();
+      }
+
       /**
        * This removes information about blocking (for ping). Every
        * impossible update become unstable, in order to be re-tested.

@@ -1117,6 +1117,11 @@ namespace cxsom {
 	  fs::create_directory(root_dir);
       }
 
+      void clear() {
+	std::lock_guard<std::mutex> lock(mutex);
+	variables.clear();
+      }
+
       instance_ref operator[](const symbol::Instance& var_inst) {
 	std::lock_guard<std::mutex> lock(mutex);
 	if(auto it = variables.find(var_inst); it != variables.end())

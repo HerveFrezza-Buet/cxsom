@@ -24,5 +24,12 @@ add_executable            (ping ping.cpp)
 target_link_libraries     (ping ${Boost_SYSTEM_LIBRARY} -lpthread)
 install                   (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ping RENAME ${CMAKE_PROJECT_NAME}-ping DESTINATION bin COMPONENT binary)
 
+add_executable            (clear clear.cpp) 
+target_link_libraries     (clear ${Boost_SYSTEM_LIBRARY} -lpthread)
+install                   (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/clear RENAME ${CMAKE_PROJECT_NAME}-clear DESTINATION bin COMPONENT binary)
+
 add_executable            (ask ask.cpp) 
 install                   (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ask RENAME ${CMAKE_PROJECT_NAME}-ask DESTINATION bin COMPONENT binary)
+
+add_executable            (conditional-message conditional-message.cpp) 
+install                   (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/conditional-message RENAME ${CMAKE_PROJECT_NAME}-conditional-message DESTINATION bin COMPONENT binary)

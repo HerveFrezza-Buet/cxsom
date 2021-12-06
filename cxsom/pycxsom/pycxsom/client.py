@@ -13,4 +13,17 @@ def ping(hostname, port):
         return None
     return line
     
+def clear(hostname, port):
+    """
+    returns None is clear has been sent, an error string otherwise.
+    """
+    line = 'Connection error'
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((hostname, port))
+        s.sendall(b'clear\n')
+        line = s.recv(1024).decode("utf-8").split('\n')[0]
+    if line == 'ok':
+        return None
+    return line
+    
 

@@ -38,6 +38,20 @@ private:
 #endif
   }
   
+  void process_clear() {
+#ifdef cxsomDEBUG_PROTOCOL
+    std::cout << ">> process_clear() >>>>" << std::endl;
+#endif
+    jobs_center.interaction_lock();
+    data_center.clear();
+    jobs_center.clear();
+    *p_socket << "ok" << std::endl;
+    jobs_center.interaction_release();
+#ifdef cxsomDEBUG_PROTOCOL
+    std::cout << "-- process_clear <<<<" << std::endl;
+#endif
+  }
+  
   void process_declare() {
 #ifdef cxsomDEBUG_PROTOCOL
     std::string buf;
@@ -182,6 +196,7 @@ public:
 	if     (command == "declare") process_declare();
 	else if(command == "updates") process_updates();
 	else if(command == "ping"   ) process_ping();
+	else if(command == "clear"  ) process_clear();
 	else
 	  socket << "error command \"" << command << "\" not implemented." << std::endl;
       }
@@ -214,7 +229,7 @@ int main(int argc, char* argv[]) try {
   boost::asio::ip::tcp::acceptor acceptor(ios, endpoint);
 
   while(true) {
-    std::thread service(ServiceThread(data_center, jobs_center,acceptor));
+    std::thread service(ServiceThread(data_center, jobs_center, acceptor));
     service.detach();
   }
   

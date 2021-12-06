@@ -1,60 +1,85 @@
 cxsom-help:
 	@echo
-	@echo "cxsom commands"
-	@echo "--------------"
+	@echo "##################"
+	@echo "#                #"
+	@echo "# cxsom commands #"
+	@echo "#                #"
+	@echo "##################"
 	@echo
-	@echo "make cxsom-clean"
+	@echo "# at both sides"
 	@echo
-	@echo "make cxsom-set-rootdir ROOT_DIR=<path>"
-	@echo "make cxsom-get-rootdir"
-	@echo "make cxsom-clear-rootdir"
+	@echo "  make cxsom-set-config ROOT_DIR=./root_dir HOSTNAME=localhost PORT=10000 NB_THREADS=4"
+	@echo "  make cxsom-show-config"
 	@echo
-	@echo "make cxsom-set-processor-config NB_THREADS=<nb> PORT=<port>"
-	@echo "make cxsom-get-processor-config"
-	@echo "make cxsom-launch-processor"
-	@echo "make cxsom-processor-is-running"
-	@echo "make cxsom-kill-processor"
+	@echo "  make cxsom-set-rootdir    ROOT_DIR=./root_dir"
+	@echo "  make cxsom-set-hostname   HOSTNAME=localhost"
+	@echo "  make cxsom-set-port       PORT=10000"
+	@echo "  make cxsom-set-nbthreads  NB_THREADS=4"
 	@echo
-	@echo "make cxsom-show_vars"
-	@echo "make cxsom-scan_vars"
+	@echo "  make cxsom-clear-rootdir"
+	@echo
+	@echo "# at server side"
+	@echo
+	@echo "  make cxsom-launch-processor"
+	@echo "  make cxsom-is-processor-running"
+	@echo "  make cxsom-kill-processor"
+	@echo
+	@echo "# at client side"
+	@echo
+	@echo "  make cxsom-clear-processor"
+	@echo "  make cxsom-ping-processor"
+	@echo "  make cxsom-scan_vars"
 	@echo
 
-ROOT_DIR_RECORD_FILE = .cxsom-rootdir-config
-PROCESSOR_RECORD_FILE = .cxsom-processor-config
+ROOTDIR_CONFIG_FILE   = .cxsom-rootdir-config
+HOSTNAME_CONFIG_FILE  = .cxsom-hostname-config
+PORT_CONFIG_FILE      = .cxsom-port-config
+NBTHREADS_CONFIG_FILE = .cxsom-nbthreads-config
 
-.PHONY: cxsom-clean
-cxsom-clean:
-	@rm -f $(ROOT_DIR_RECORD_FILE) $(PROCESSOR_RECORD_FILE)
+.PHONY: cxsom-show-config
+cxsom-show-config:
+	@echo
+	@echo "nb_threads        =" `cat $(NBTHREADS_CONFIG_FILE)`
+	@echo "port              =" `cat $(PORT_CONFIG_FILE)`
+	@echo "server hostname   =" `cat $(HOSTNAME_CONFIG_FILE)`
+	@echo "variables rootdir =" `cat $(ROOTDIR_CONFIG_FILE)`
+	@echo
+
 
 .PHONY: cxsom-set-rootdir
 cxsom-set-rootdir:
-	@rm -f $(ROOT_DIR_RECORD_FILE)
-	@echo $(ROOT_DIR) > $(ROOT_DIR_RECORD_FILE)
+	@rm -f $(ROOTDIR_CONFIG_FILE)
+	@echo $(ROOT_DIR) > $(ROOTDIR_CONFIG_FILE)
 
-.PHONY: cxsom-get-rootdir
-cxsom-get-rootdir:
-	@cat $(ROOT_DIR_RECORD_FILE)
+.PHONY: cxsom-set-hostname
+cxsom-set-hostname:
+	@rm -f $(HOSTNAME_CONFIG_FILE)
+	@echo $(HOSTNAME) > $(HOSTNAME_CONFIG_FILE)
+
+.PHONY: cxsom-set-port
+cxsom-set-port:
+	@rm -f $(PORT_CONFIG_FILE)
+	@echo $(PORT) > $(PORT_CONFIG_FILE)
+
+.PHONY: cxsom-set-nbthreads
+cxsom-set-nbthreads:
+	@rm -f $(NBTHREADS_CONFIG_FILE)
+	@echo $(NB_THREADS) > $(NBTHREADS_CONFIG_FILE)
+
+.PHONY: cxsom-set-config
+cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port cxsom-set-nbthreads
 
 .PHONY: cxsom-clear-rootdir
 cxsom-clear-rootdir:
-	@cxsom-ask "Do you really want to clear `cat $(ROOT_DIR_RECORD_FILE)` ?" || rm -rf `cat $(ROOT_DIR_RECORD_FILE)`/*
-
-.PHONY: cxsom-set-processor-config
-cxsom-set-processor-config:
-	@rm -f $(PROCESSOR_RECORD_FILE)
-	@echo $(NB_THREADS) $(PORT) > $(PROCESSOR_RECORD_FILE)
-
-.PHONY: cxsom-get-processor-config
-cxsom-get-processor-config:
-	@cat $(PROCESSOR_RECORD_FILE)
+	@cxsom-ask "Do you really want to clear `cat $(ROOTDIR_CONFIG_FILE)` ?" || rm -rf `cat $(ROOTDIR_CONFIG_FILE)`/*
 
 .PHONY: cxsom-launch-processor
 cxsom-launch-processor:
-	@cxsom-processor `cat $(ROOT_DIR_RECORD_FILE)` `cat $(PROCESSOR_RECORD_FILE)` &
+	@cxsom-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)`&
 
-.PHONY: cxsom-processor-is-running
-cxsom-processor-is-running:
-	@ps -aux | grep 'cxsom-processor' | grep `cat $(ROOT_DIR_RECORD_FILE)` | wc -l
+.PHONY: cxsom-is-processor-running
+cxsom-is-processor-running:
+	@ps -aux | grep 'cxsom-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "A cxsom-proccessor is currently running." "No cxsom-proccessor is running."; echo
 
 .PHONY: cxsom-kill-processor
 cxsom-kill-processor:
@@ -62,12 +87,20 @@ cxsom-kill-processor:
 	@sleep 1
 	@echo
 	@echo 'cxsom processor should be killed : Is it running ?'
-	@make --quiet cxsom-processor-is-running
+	@make --quiet cxsom-is-processor-running
+
+.PHONY: cxsom-ping-processor
+cxsom-ping-processor:
+	@cxsom-ping `cat $(HOSTNAME_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)`
+
+.PHONY: cxsom-clear-processor
+cxsom-clear-processor:
+	@cxsom-clear `cat $(HOSTNAME_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)`
 
 .PHONY: cxsom-show-vars
 cxsom-show-vars:
-	@cxsom-all-instances `cat $(ROOT_DIR_RECORD_FILE)`
+	@cxsom-all-instances `cat $(ROOTDIR_CONFIG_FILE)`
 
 .PHONY: cxsom-scan-vars
 cxsom-scan-vars:
-	@gnome-terminal --title='scanning variables' --working-directory=$(PWD) -- /bin/bash -c 'while sleep 1; do clear; make --quiet cxsom-show-vars; done'
+	@gnome-terminal --title='scanning '`cat $(ROOTDIR_CONFIG_FILE)` --working-directory=$(PWD) -- /bin/bash -c 'while sleep 1; do clear; make --quiet cxsom-show-vars; done'
