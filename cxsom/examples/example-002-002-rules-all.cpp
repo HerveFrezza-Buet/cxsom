@@ -187,6 +187,16 @@ int main(int argc, char* argv[]) {
       kwd::type("BMU", "Pos1D",      CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       kwd::type("NbSteps", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       kwd::at("BMU", 0) << fx::clear()                                                      | kwd::use("value", .5);
+      "BMU" << fx::toward_argmax(kwd::at(kwd::var("toward-weights", "Act"), 0), "BMU")      | kwd::use("walltime", 100), kwd::use("deadline", 100), kwd::use("random-bmu", 1.0), kwd::use("argmax-tol", 1e-8), kwd::use("epsilon", .01), kwd::use("delta", .05);
+      "NbSteps" << fx::converge({kwd::data("BMU")})                                         | kwd::use("walltime", 100) ;
+    }
+    
+    {
+      timeline t("toward-conv-bmu");
+
+      kwd::type("BMU", "Pos1D",      CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+      kwd::type("NbSteps", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+      kwd::at("BMU", 0) << fx::clear()                                                      | kwd::use("value", .5);
       "BMU" << fx::toward_conv_argmax(kwd::at(kwd::var("toward-weights", "Act"), 0), "BMU") | kwd::use("walltime", 100), kwd::use("deadline", 100), kwd::use("random-bmu", 1.0), kwd::use("argmax-tol", 1e-8), kwd::use("sigma", .05), kwd::use("epsilon", .01), kwd::use("delta", .05);
       "NbSteps" << fx::converge({kwd::data("BMU")})                                         | kwd::use("walltime", 100) ;
     }

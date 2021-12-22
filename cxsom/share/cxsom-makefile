@@ -28,7 +28,7 @@ cxsom-help:
 	@echo
 	@echo "  make cxsom-clear-processor"
 	@echo "  make cxsom-ping-processor"
-	@echo "  make cxsom-scan_vars"
+	@echo "  make cxsom-scan-vars"
 	@echo
 
 ROOTDIR_CONFIG_FILE   = .cxsom-rootdir-config

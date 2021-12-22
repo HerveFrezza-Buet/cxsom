@@ -37,6 +37,7 @@ namespace cxsom {
       LearnGaussian,
       Argmax,
       ConvArgmax,
+      TowardArgmax,
       TowardConvArgmax
     };
 
@@ -54,6 +55,7 @@ namespace cxsom {
       case Operation::LearnGaussian    : os << "learn-gaussian"    ; break;
       case Operation::Argmax           : os << "argmax"            ; break;
       case Operation::ConvArgmax       : os << "conv-argmax"       ; break;
+      case Operation::TowardArgmax     : os << "toward-argmax"     ; break;
       case Operation::TowardConvArgmax : os << "toward-conv-argmax"; break;
       }
       return os;
@@ -72,6 +74,7 @@ namespace cxsom {
       if(s == "learn-gaussian"    ) return Operation::LearnGaussian;
       if(s == "argmax"            ) return Operation::Argmax;
       if(s == "conv-argmax"       ) return Operation::ConvArgmax;
+      if(s == "toward-argmax")      return Operation::TowardArgmax;
       if(s == "toward-conv-argmax") return Operation::TowardConvArgmax;
       throw error::bad_operation(std::string("cxsom::jobs::operation(\"") + s + "\") : unhandled operation.");
     }

@@ -1337,6 +1337,111 @@ namespace cxsom {
     };
 
    
+   
+    //////////////////
+    //              //
+    // TowardArgmax // 
+    //              //
+    //////////////////
+
+    class TowardArgmax : public ArgmaxBase {
+    private:
+      double delta;
+      double delta2;
+
+      std::vector<double> data_content;
+      type::ref map_type = nullptr;
+      double current1;
+      std::array<double, 2> current2;      
+
+      void read_current(const data::Base& data) {
+	if(data.type->is_Pos1D())
+	  current1 = static_cast<const data::d1::Pos&>(data).x;
+	else
+	  current2 = static_cast<const data::d2::Pos&>(data).xy;
+      }
+      
+      void read_map(const data::Base& data) {
+	auto& vec = static_cast<const data::Map&>(data).content;
+	data_content.resize(vec.size());
+	std::copy(vec.begin(), vec.end(), data_content.begin());
+      }
+      
+    public:
+
+      TowardArgmax(data::Center& center,
+		       const update::arg& res,
+		       const std::vector<update::arg>& args,
+		       const std::map<std::string, std::string>& params,
+		       std::mt19937::result_type seed)
+	: ArgmaxBase(center, res, Operation::TowardArgmax, args, params, seed), delta(.05) {
+	if(auto it = params.find("delta");   it != params.end()) delta   = std::stod(it->second);
+	delta2 = delta*delta;
+      }
+      
+    protected:
+  
+      virtual void on_read_out_arg(const symbol::Instance&, unsigned int arg_num, const data::Base& data) override {
+	switch(arg_num) {
+	case 0 : read_map(data);     break;
+	case 1 : read_current(data); break;
+	}
+      }
+      
+      virtual void on_read_in_arg(const symbol::Instance&, unsigned int arg_num, const data::Base& data) override {
+	switch(arg_num) {
+	case 0 : read_map(data);     break;
+	case 1 : read_current(data); break;
+	}
+      }
+      
+      virtual bool on_write_result(data::Base& data) override {
+	tick();
+	auto argmax = find_argmax(data_content.begin(), size);
+	if(data.type->is_Pos1D()) {
+	  double bmu = argmax*coef;
+	  double d = std::fabs(bmu - current1);
+	  double tmp;
+	  if(d <= delta)          tmp = bmu;
+	  else if(current1 > bmu) tmp = current1 - delta;
+	  else                    tmp = current1 + delta;
+	  
+	  if(std::fabs(static_cast<data::d1::Pos&>(data).x - tmp) > epsilon) {
+	    static_cast<data::d1::Pos&>(data).x = tmp;
+	    return !expired();
+	  }
+	  else {
+	    static_cast<data::d1::Pos&>(data).x = tmp;
+	    return false;
+	  }
+	}
+	else {
+	  std::array<double, 2> bmu {(argmax % side)*coef, (argmax / side)*coef};
+	  double d2 = bmu[0] - current2[0];
+	  double dy = bmu[1] - current2[1];
+	  d2 = d2*d2 + dy*dy;
+	  std::array<double, 2> tmp;
+	  if(d2 <= delta2)
+	    tmp = bmu;
+	  else {
+	    double d_ = delta/std::sqrt(d2);
+	    tmp[0] = current2[0] + (bmu[0] - current2[0])*d_;
+	    tmp[1] = current2[1] + (bmu[1] - current2[1])*d_;
+	  }
+
+	  if(std::max(std::fabs(static_cast<data::d2::Pos&>(data).xy[0] - tmp[0]),
+		      std::fabs(static_cast<data::d2::Pos&>(data).xy[1] - tmp[1])) > epsilon) {
+	    static_cast<data::d2::Pos&>(data).xy = tmp;
+	    return !expired();
+	  }
+	  else {
+	    static_cast<data::d2::Pos&>(data).xy = tmp;
+	    return false;
+	  }
+	}
+      }
+    };
+    
     //////////////////////
     //                  //
     // TowardConvArgmax // 
@@ -1701,6 +1806,30 @@ namespace cxsom {
 	    if(*res == *(args[1]))
 	      return;
 	    else
+	      ostr << "Checking types for TowardArgmax : Result and second argument must have the same type. Here, "
+		   << "result has type " << res->name() << " while second argument is " << args[1]->name() << '.';
+	  }
+	  else
+	    ostr << "Checking types for TowardArgmax : Result must fit the map dimension. Here, result has type "
+		 << res->name() << " while first argument is " << args[0]->name() << '.';
+	}
+	else
+	  ostr << "Checking types for TowardArgmax : Argument have to be a map of scalar (" << args[0]->name() << " found).";
+      }
+      else
+	ostr << "Checking types for TowardArgmax : Exactly 2 arguments is expected (got " << args.size() << ").";
+      throw error::bad_typing(ostr.str());
+    }
+    
+    inline void check_types_toward_conv_argmax(type::ref res, const std::vector<type::ref>& args) {
+      std::ostringstream ostr;
+      if(args.size() == 2) {
+	if(args[0]->is_Map1D("Scalar") || args[0]->is_Map2D("Scalar")) {
+	  if((   res->is_Pos1D() && args[0]->is_Map1D("Scalar"))
+	     || (res->is_Pos2D() && args[0]->is_Map2D("Scalar"))) {
+	    if(*res == *(args[1]))
+	      return;
+	    else
 	      ostr << "Checking types for TowardConvArgmax : Result and second argument must have the same type. Here, "
 		   << "result has type " << res->name() << " while second argument is " << args[1]->name() << '.';
 	  }
@@ -1730,7 +1859,8 @@ namespace cxsom {
       case Operation::LearnGaussian    : check_types_learn              (res, args); break;
       case Operation::Argmax           : check_types_argmax             (res, args); break;
       case Operation::ConvArgmax       : check_types_argmax             (res, args); break;
-      case Operation::TowardConvArgmax : check_types_toward_argmax      (res, args); break;
+      case Operation::TowardArgmax     : check_types_toward_argmax      (res, args); break;
+      case Operation::TowardConvArgmax : check_types_toward_conv_argmax (res, args); break;
       default:
 	throw error::bad_operation("cxsom::job::check_types(op, ...) : report bug.");
 	break;
