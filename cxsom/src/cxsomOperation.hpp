@@ -1365,6 +1365,13 @@ namespace cxsom {
 	auto& vec = static_cast<const data::Map&>(data).content;
 	data_content.resize(vec.size());
 	std::copy(vec.begin(), vec.end(), data_content.begin());
+
+	if(!map_type) {
+	  map_type = data.type;
+	  side = static_cast<const type::Map*>(map_type.get())->side;
+	  size = static_cast<const type::Map*>(map_type.get())->size;
+	  coef = 1/(side - 1.0);
+	}
       }
       
     public:
@@ -1397,7 +1404,7 @@ namespace cxsom {
       
       virtual bool on_write_result(data::Base& data) override {
 	tick();
-	auto argmax = find_argmax(data_content.begin(), size);
+	auto argmax = find_argmax(std::data(data_content), size);
 	if(data.type->is_Pos1D()) {
 	  double bmu = argmax*coef;
 	  double d = std::fabs(bmu - current1);
@@ -1625,9 +1632,10 @@ namespace cxsom {
       case Operation::LearnGaussian    : return make_update_deterministic<LearnGaussian>   (center, res, args, params      ); break;
       case Operation::Argmax           : return make_update_random<Argmax>                 (center, res, args, params, seed); break;
       case Operation::ConvArgmax       : return make_update_random<ConvArgmax>             (center, res, args, params, seed); break;
+      case Operation::TowardArgmax     : return make_update_random<TowardArgmax>           (center, res, args, params, seed); break;
       case Operation::TowardConvArgmax : return make_update_random<TowardConvArgmax>       (center, res, args, params, seed); break;
       default:
-	throw error::bad_operation("cxsom::job::make_update(op, ...) : report bug.");
+	throw error::bad_operation(std::string("cxsom::job::make_update(op = ") + std::to_string(static_cast<unsigned int>(op)) + ", ...) : report bug.");
 	break;
       }
     }

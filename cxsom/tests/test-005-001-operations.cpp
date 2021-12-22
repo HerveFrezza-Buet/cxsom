@@ -1277,6 +1277,279 @@ namespace test {
     }
   };
   
+  // ################
+  // #              #
+  // # TowardArgmax # 
+  // #              #
+  // ################
+  
+  class TowardArgmax : public Base {
+  protected:
+
+    double noise;
+    double sigma;
+    double delta;
+    double tol;
+    
+  public:
+
+    TowardArgmax(const fs::path& root_dir,
+		 const std::string& name,
+		 unsigned int dim,
+		 double noise,
+		 double sigma,
+		 double delta,
+		 double tol)
+      : Base(root_dir, name, "toward_argmax", pos_of(dim), {map_of(dim, 101, "Scalar"), pos_of(dim)}),
+	noise(noise), sigma(sigma), delta(delta), tol(tol) {}
+
+    virtual void make_args() const override {
+      
+      fs::create_directories(root_dir / (name + "_args"));
+
+      auto bmu_type = cxsom::type::make(res);
+
+      if(bmu_type->is_Pos1D()) {
+	{
+	  cxsom::data::File file(root_dir, {name + "_args", "east"});
+	  file.realize(bmu_type, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	}
+	{
+	  cxsom::data::File file(root_dir, {name + "_args", "west"});
+	  file.realize(bmu_type, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	}
+      	cxsom::data::Variable e(root_dir, {name + "_args", "east"}, nullptr, std::nullopt, std::nullopt, true);
+      	cxsom::data::Variable w(root_dir, {name + "_args", "west"}, nullptr, std::nullopt, std::nullopt, true);
+	e[0]->set([](auto& status, auto&, auto& data) {
+		    status = cxsom::data::Availability::Ready;
+		    static_cast<cxsom::data::d1::Pos&>(data).x = 1.;
+		  });
+	w[0]->set([](auto& status, auto&, auto& data) {
+		    status = cxsom::data::Availability::Ready;
+		    static_cast<cxsom::data::d1::Pos&>(data).x = 0.;
+		  });
+      }
+      else if(bmu_type->is_Pos2D()) {
+	{
+	  cxsom::data::File file(root_dir, {name + "_args", "north"});
+	  file.realize(bmu_type, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	}
+	{
+	  cxsom::data::File file(root_dir, {name + "_args", "south"});
+	  file.realize(bmu_type, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	}
+	{
+	  cxsom::data::File file(root_dir, {name + "_args", "east"});
+	  file.realize(bmu_type, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	}
+	{
+	  cxsom::data::File file(root_dir, {name + "_args", "west"});
+	  file.realize(bmu_type, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	}
+	
+      	cxsom::data::Variable n(root_dir, {name + "_args", "north"}, nullptr, std::nullopt, std::nullopt, true);
+      	cxsom::data::Variable s(root_dir, {name + "_args", "south"}, nullptr, std::nullopt, std::nullopt, true);
+      	cxsom::data::Variable e(root_dir, {name + "_args", "east"},  nullptr, std::nullopt, std::nullopt, true);
+      	cxsom::data::Variable w(root_dir, {name + "_args", "west"},  nullptr, std::nullopt, std::nullopt, true);
+	n[0]->set([](auto& status, auto&, auto& data) {
+		    status = cxsom::data::Availability::Ready;
+		    static_cast<cxsom::data::d2::Pos&>(data).xy = {.5, 0.};
+		  });
+	s[0]->set([](auto& status, auto&, auto& data) {
+		    status = cxsom::data::Availability::Ready;
+		    static_cast<cxsom::data::d2::Pos&>(data).xy = {.5, 1.};
+		  });
+	e[0]->set([](auto& status, auto&, auto& data) {
+		    status = cxsom::data::Availability::Ready;
+		    static_cast<cxsom::data::d2::Pos&>(data).xy = {1., .5};
+		  });
+	w[0]->set([](auto& status, auto&, auto& data) {
+		    status = cxsom::data::Availability::Ready;
+		    static_cast<cxsom::data::d2::Pos&>(data).xy = {0., .5};
+		  });
+      }
+      
+
+      {
+	cxsom::data::File file(root_dir, {name + "_args", "x"});
+	file.realize(cxsom::type::make(args[0]), CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+      }
+      cxsom::data::Variable v(root_dir, {name + "_args", "x"}, nullptr, std::nullopt, std::nullopt, true);
+      v[0]->set([this](auto& status, auto&, auto& data) {
+		  status = cxsom::data::Availability::Ready;
+		  unsigned int side = static_cast<const cxsom::type::Map*>(data.type.get())->side;
+		  double coef = 1/(side - 1.0);
+		  auto& content = static_cast<cxsom::data::Map&>(data).content;
+
+		  std::random_device rd;
+		  std::mt19937 gen(rd());
+		  auto U = std::uniform_real_distribution<double>(0., this->noise);
+		  
+		  
+		  if(data.type->is_Map1D("Scalar")) {
+		    unsigned int i = 0;
+		    for(auto& e : content) e = U(gen) + .5 - std::fabs(.5 - coef * (i++));
+		  }
+		  if(data.type->is_Map2D("Scalar")) {
+		    auto it = content.begin();
+		    for(unsigned int i = 0; i < side; ++i) {
+		      double y = coef * i;
+		      double dy = y - .5;
+		      dy *= dy;
+		      for(unsigned int j = 0; j < side; ++j) {
+			double x = coef * j;
+			double dx = x - .5;
+			double d = std::min(std::sqrt(dx*dx + dy), .5);
+			*(it++) = U(gen) + .5 - d;
+		      }
+		    }
+		  }
+		});
+    }
+  
+  
+    virtual void send_computation() const override {
+      auto bmu_type = cxsom::type::make(res);
+      timeline t(name);
+      
+      if(bmu_type->is_Pos1D() || bmu_type->is_Pos2D()) {
+	kwd::type("east",  res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::type("west",  res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("east",  0) << fx::toward_argmax(kwd::at(kwd::var(name + "_args", "x"), 0), kwd::at(kwd::var(name + "_args", "east"),  0))   | kwd::use("random-bmu", 0), kwd::use("sigma", sigma), kwd::use("delta", delta);
+	kwd::at("west",  0) << fx::toward_argmax(kwd::at(kwd::var(name + "_args", "x"), 0), kwd::at(kwd::var(name + "_args", "west"),  0))   | kwd::use("random-bmu", 0), kwd::use("sigma", sigma), kwd::use("delta", delta);
+      }
+      
+      if(bmu_type->is_Pos2D()) {
+	kwd::type("north", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::type("south", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("north", 0) << fx::toward_argmax(kwd::at(kwd::var(name + "_args", "x"), 0), kwd::at(kwd::var(name + "_args", "north"), 0))   | kwd::use("random-bmu", 0), kwd::use("sigma", sigma), kwd::use("delta", delta);
+	kwd::at("south", 0) << fx::toward_argmax(kwd::at(kwd::var(name + "_args", "x"), 0), kwd::at(kwd::var(name + "_args", "south"), 0))   | kwd::use("random-bmu", 0), kwd::use("sigma", sigma), kwd::use("delta", delta);
+      }
+      
+    }
+  
+    virtual bool test_result() const override {
+      bool error_status = false;
+
+      try {
+	auto bmu_type = cxsom::type::make(res);
+
+	if(bmu_type->is_Pos1D()) {
+	  cxsom::data::Variable e(root_dir, {name, "east"}, nullptr, std::nullopt, std::nullopt, true);
+	  e[0]->get([&error_status, this](auto status, auto, auto& data) {
+		      if(status != cxsom::data::Availability::Ready) {
+			error_status = true;
+			return;
+		      }
+		      
+		      if(data.type->name() != this->args[1]) {
+			error_status = true;
+			return;
+		      }
+
+		      double x = static_cast<const cxsom::data::d1::Pos&>(data).x;
+		      error_status = std::fabs((1.-this->delta) - x) > this->tol;
+		    });
+	  
+	  cxsom::data::Variable w(root_dir, {name, "west"}, nullptr, std::nullopt, std::nullopt, true);
+	  w[0]->get([&error_status, this](auto status, auto, auto& data) {
+		      if(status != cxsom::data::Availability::Ready) {
+			error_status = true;
+			return;
+		      }
+		      
+		      if(data.type->name() != this->args[1]) {
+			error_status = true;
+			return;
+		      }
+
+		      double x = static_cast<const cxsom::data::d1::Pos&>(data).x;
+		      error_status = std::fabs(this->delta - x) > this->tol;
+		    });
+	}
+	else if(bmu_type->is_Pos2D()) {
+	  cxsom::data::Variable e(root_dir, {name, "east"}, nullptr, std::nullopt, std::nullopt, true);
+	  e[0]->get([&error_status, this](auto status, auto, auto& data) {
+		      if(status != cxsom::data::Availability::Ready) {
+			error_status = true;
+			return;
+		      }
+		      
+		      if(data.type->name() != this->args[1]) {
+			error_status = true;
+			return;
+		      }
+
+		      auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+		      error_status = (std::fabs((1.-this->delta) - xy[0]) > this->tol || std::fabs(.5 - xy[1]) > this->tol);
+		    });
+	  
+	  if(!error_status) {
+	    cxsom::data::Variable w(root_dir, {name, "west"}, nullptr, std::nullopt, std::nullopt, true);
+	    w[0]->get([&error_status, this](auto status, auto, auto& data) {
+			if(status != cxsom::data::Availability::Ready) {
+			  error_status = true;
+			  return;
+			}
+		      
+			if(data.type->name() != this->args[1]) {
+			  error_status = true;
+			  return;
+			}
+
+			auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+			error_status = (std::fabs(this->delta - xy[0]) > this->tol || std::fabs(.5 - xy[1]) > this->tol);
+		      });
+	  }
+	  
+	  if(!error_status){	  
+	    cxsom::data::Variable n(root_dir, {name, "north"}, nullptr, std::nullopt, std::nullopt, true);
+	    n[0]->get([&error_status, this](auto status, auto, auto& data) {
+			if(status != cxsom::data::Availability::Ready) {
+			  error_status = true;
+			  return;
+			}
+		      
+			if(data.type->name() != this->args[1]) {
+			  error_status = true;
+			  return;
+			}
+
+			auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+			error_status = (std::fabs(.5 - xy[0]) > this->tol || std::fabs(this->delta - xy[1]) > this->tol);
+		      });
+	  }
+
+	  
+	  if(!error_status) {
+	    cxsom::data::Variable s(root_dir, {name, "south"}, nullptr, std::nullopt, std::nullopt, true);
+	    s[0]->get([&error_status, this](auto status, auto, auto& data) {
+			if(status != cxsom::data::Availability::Ready) {
+			  error_status = true;
+			  return;
+			}
+		      
+			if(data.type->name() != this->args[1]) {
+			  error_status = true;
+			  return;
+			}
+
+			auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+			error_status = (std::fabs(.5 - xy[0]) > this->tol || std::fabs((1. - this->delta) - xy[1]) > this->tol);
+		      });
+	  }
+	}
+	else
+	  error_status = true;
+      } catch(std::exception& e) {
+	std::cout << "Exception : " << e.what() << std::endl;
+	error_status = true;
+      }
+      
+      return error_status;
+    }
+  };
+  
   // ####################
   // #                  #
   // # TowardConvArgmax # 
@@ -1636,6 +1909,11 @@ namespace test {
       
       *(out++) = new ConvArgmax(root_dir, "conv_argmax_1D",  1, .1, .1, .05);
       *(out++) = new ConvArgmax(root_dir, "conv_argmax_2D",  2, .1, .1, .05);
+
+      
+      *(out++) = new TowardArgmax(root_dir, "toward_argmax_1D",  1, .1, .1, .3, .05);
+      *(out++) = new TowardArgmax(root_dir, "toward_argmax_2D",  2, .1, .1, .3, .05);
+      
       
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_1D",  1, .1, .1, .3, .05);
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_2D",  2, .1, .1, .3, .05);

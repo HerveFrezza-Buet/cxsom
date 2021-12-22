@@ -355,6 +355,7 @@ namespace cxsom {
       inline update learn_gaussian(const kwd::data& v1, const kwd::data& v2, const kwd::data& v3) {return {"learn-gaussian", {(*ctx)(v1), (*ctx)(v2), (*ctx)(v3)}};}
       inline update argmax(const kwd::data& v) {return {"argmax", {(*ctx)(v)}};}
       inline update conv_argmax(const kwd::data& v) {return {"conv-argmax", {(*ctx)(v)}};}
+      inline update toward_argmax(const kwd::data& v1, const kwd::data& v2) {return {"toward-argmax", {(*ctx)(v1), (*ctx)(v2)}};}
       inline update toward_conv_argmax(const kwd::data& v1, const kwd::data& v2) {return {"toward-conv-argmax", {(*ctx)(v1), (*ctx)(v2)}};}
     }
     
