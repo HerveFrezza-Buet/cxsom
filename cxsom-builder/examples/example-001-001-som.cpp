@@ -52,7 +52,12 @@ int main(int argc, char* argv[]) {
   // description, that could be used in several architectures.
   auto map = cxsom::builder::map1D("SOM", MAP_SIZE, CACHE, TRACE, OPENED);
   map->argmax = fx::argmax; // default is fx::conv_argmax;
-  // map->toward_argmax is not used since we do not have context here.
+
+  // Next settings are the default ones
+  map->toward_argmax  = fx::toward_conv_argmax; // Not used here...
+  map->global_merge   = fx::merge;
+  map->context_merge  = fx::context_merge;
+  map->external_merge = fx::average;
 
   // We set the parameters for each computational step...
   map->p_external   = p_external;
