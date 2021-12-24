@@ -73,8 +73,13 @@ namespace cxsom {
 	    auto BMU = m->_BMU();
 	    bmus.push_back(kwd::var(BMU->timeline, BMU->varname));
 	  }
-	  kwd::var(timelines.relaxation, *relax_count) << fx::converge(bmus);
+	  kwd::var(timelines.relaxation, *relax_count) << fx::converge(bmus) | kwd::use("walltime", -1);
 	}
+      }
+
+      void expand_relax(const ExpandRelaxContext& ctx) const {
+	for(auto m : maps) m->expand_relax_definitions(ctx);
+	for(auto m : maps) m->expand_relax_updates(ctx);
       }
     };
 

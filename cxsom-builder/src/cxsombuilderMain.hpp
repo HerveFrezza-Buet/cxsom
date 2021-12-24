@@ -56,6 +56,22 @@ namespace cxsom {
       return std::make_shared<Variable>(timeline, varname, type, cache_size, file_size, kept_opened);
     }
 
+    struct ExpandRelaxContext {
+      std::string prefix;
+      std::size_t cache_size;
+      std::size_t file_size;
+      bool        kept_opened;
+      
+      ExpandRelaxContext(const std::string& prefix, std::size_t cache_size, std::size_t file_size, bool kept_opened)
+	: prefix(prefix), cache_size(cache_size), file_size(file_size), kept_opened(kept_opened) {}
+      
+      std::shared_ptr<Variable> operator()(std::shared_ptr<Variable> var) const {
+	return variable(prefix + "-" + var->timeline,
+			var->varname, var->type, cache_size, file_size, kept_opened);
+      }
+    };
+
+
     namespace timestep {
       auto absolute(unsigned int at) {return at;}
       auto relative(int shift)       {return rules::offset(shift);}

@@ -130,6 +130,13 @@ namespace cxsom {
 	  _A()->definition();
 	}
 
+	// Defines variables created by the layer.
+	virtual void expand_relax_definitions(const ExpandRelaxContext& erctx) const {
+	  erctx(_A())->definition();
+	}
+
+	
+
 	// Tells which is the input.
 	ref_variable _xi() const {
 	  if(std::holds_alternative<ref_variable>(xi)) return std::get<ref_variable>(xi);
@@ -149,6 +156,15 @@ namespace cxsom {
 	  
 	  kwd::var(A->timeline, A->varname) << match(dated(kwd::var(xi->timeline, xi->varname), at_input_read),
 						     dated(kwd::var(W->timeline,  W->varname ), at_weight_read)) | p_match;
+	}
+	
+	virtual void expand_relax_updates(const ExpandRelaxContext& erctx) const {
+	  auto W  = erctx(_W());
+	  auto A  = erctx(_A());
+	  auto xi = erctx(_xi());
+	  
+	  kwd::var(A->timeline, A->varname) << match(kwd::var(xi->timeline, xi->varname),
+						     kwd::var(W->timeline,  W->varname )) | p_match;
 	}
       };
 
@@ -200,7 +216,7 @@ namespace cxsom {
 	    << learn(dated(kwd::var(xi->timeline, xi->varname), at_input_read),
 		     dated(kwd::var(W->timeline,  W->varname ), at_weight_read),
 		     kwd::var(BMU->timeline, BMU->varname)) | p_learn;
-	}
+	}	
       };
 
       struct LocalAdaptiveLayer : public AdaptiveLayer {
@@ -237,6 +253,12 @@ namespace cxsom {
 	virtual void definitions() const override {
 	  this->Layer::definitions();
 	  _W()->definition();
+	}
+	
+	// Defines variables created by the layer.
+	virtual void expand_relax_definitions(const ExpandRelaxContext& erctx) const override {
+	  this->Layer::expand_relax_definitions(erctx);
+	  erctx(_W())->definition();
 	}  
       };
 
@@ -689,11 +711,9 @@ namespace cxsom {
 	return contextual(input, match, p_match, timestep::current(), weight, at_weight_read);
       }
 
-      void definitions() const {
-	_BMU()->definition();
-	output_BMU()->definition();
-	for(auto& ext : external_layers) ext->definitions();
-	for(auto& ctx : contextual_layers) ctx->definitions();
+    private:
+
+      void acts() const {
 
 	Ae        = nullptr;
 	Ac        = nullptr;
@@ -725,10 +745,34 @@ namespace cxsom {
 
 	if((Ae || Ae_single) && (Ac || Ac_single))
 	  A = _A();
+      }
+      
+    public:
+
+      void definitions() const {
+	_BMU()->definition();
+	output_BMU()->definition();
+	for(auto& ext : external_layers) ext->definitions();
+	for(auto& ctx : contextual_layers) ctx->definitions();
+
+	acts();
 
 	if(Ae) Ae->definition();
 	if(Ac) Ac->definition();
 	if(A)  A->definition();
+      }
+
+      void expand_relax_definitions(const ExpandRelaxContext& erctx) const {
+	erctx(_BMU())->definition();
+	erctx(output_BMU())->definition();
+	for(auto& ext : external_layers) ext->expand_relax_definitions(erctx);
+	for(auto& ctx : contextual_layers) ctx->expand_relax_definitions(erctx);
+
+	acts();
+
+	if(Ae) erctx(Ae)->definition();
+	if(Ac) erctx(Ac)->definition();
+	if(A ) erctx(A )->definition();
       }
 
       void internals_random_at(unsigned int at) {
@@ -824,6 +868,73 @@ namespace cxsom {
 	
 	  kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
 	}
+      }
+
+      void expand_relax_updates(const ExpandRelaxContext& erctx) const {
+	ref_variable BMU    = erctx(_BMU());
+	ref_variable output = erctx(output_BMU());
+		
+	// Let us merge the externals.
+
+	if(Ae) {
+	  std::vector<kwd::data> args;
+	  auto out_args = std::back_inserter(args);
+	  for(auto& ext : external_layers) {
+	    ext->expand_relax_updates(erctx);
+	    auto a = erctx(ext->_A());
+	    *(out_args++) = kwd::var(a->timeline, a->varname);
+	  }
+	  auto AAe = erctx(Ae);
+	  kwd::var(AAe->timeline, AAe->varname) << external_merge(args) | p_external;
+	}
+	else if(Ae_single) {
+	  (*(external_layers.begin()))->expand_relax_updates(erctx);
+	  Ae = Ae_single;
+	}
+		
+	// Let us merge the contextuals.
+
+	if(Ac) {
+	  std::vector<kwd::data> args;
+	  auto out_args = std::back_inserter(args);
+	  for(auto& ctx : contextual_layers) {
+	    ctx->expand_relax_updates(erctx);
+	    auto a = erctx(ctx->_A());
+	    *(out_args++) = kwd::var(a->timeline, a->varname);
+	  }
+	  auto AAc = erctx(Ac);
+	  kwd::var(AAc->timeline, AAc->varname) << external_merge(args) | p_contextual;
+	}
+	else if(Ac_single) {
+	  (*(contextual_layers.begin()))->expand_relax_updates(erctx);
+	  Ac = Ac_single;
+	}
+
+	// Let us merge both.
+	
+	if(A) {// We have both, let us merge them.
+	  auto AA  = erctx(A);
+	  auto AAe = erctx(Ae);
+	  auto AAc = erctx(Ac);
+	  kwd::var(AA->timeline, AA->varname) << global_merge(kwd::var(AAe->timeline, AAe->varname), kwd::var(AAc->timeline, AAc->varname)) | p_global;
+	}
+	else if(Ae)
+	  A = Ae;
+	else if(Ac)
+	  A = Ac;
+
+	// Let us compute the BMU.
+	// if(A) {
+	//   if(Ac) {
+	//     if(Ae)
+	//       (kwd::var(BMU->timeline, BMU->varname) <= argmax(kwd::var(Ae->timeline, Ae->varname))) | p_global;
+	//     kwd::var(BMU->timeline, BMU->varname) << toward_argmax(kwd::var(A->timeline, A->varname), kwd::var(BMU->timeline, BMU->varname)) | p_global;
+	//   }
+	//   else
+	//     kwd::var(BMU->timeline, BMU->varname) << argmax(kwd::var(A->timeline, A->varname)) | p_global;
+	
+	//   kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
+	// }
       }
 
       void operator=(const std::tuple<kwd::parameters, kwd::parameters, kwd::parameters>& params) {
