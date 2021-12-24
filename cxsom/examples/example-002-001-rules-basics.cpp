@@ -8,7 +8,7 @@ context* cxsom::rules::ctx = nullptr;
 
 // This example introduces the simulation rule definitions.
 
-#define WALLTIME      100 // This ends the pattern expansion
+#define WALLTIME      100 // This ends the pattern expansion. -1 means "never ending expansion".
 #define CACHE_SIZE     10 // This is the cache size at simulator/processor side
 #define BUF_SIZE     1000 // This is the file circular buffer size.
 #define KEPT_OPENED false // Keeping the file opened saves time but
