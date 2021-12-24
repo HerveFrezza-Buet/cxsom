@@ -48,6 +48,8 @@ int main(int argc, char* argv[]) {
   Ymap->contextual(Xmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
 
   archi << Xmap << Ymap;
+  
+  archi->relax_count = "Cvg"; // Let us count the relaxation steps.
   archi->realize();
   
   // Updates of weights reads weights at t-1... so timestep 0 cannot

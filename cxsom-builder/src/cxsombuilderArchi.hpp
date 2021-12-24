@@ -66,6 +66,15 @@ namespace cxsom {
       void realize() const {
 	for(auto m : maps) m->definitions();
 	for(auto m : maps) m->updates();
+	
+	if(relax_count) {
+	  std::vector<kwd::data> bmus;
+	  for(auto m : maps) {
+	    auto BMU = m->_BMU();
+	    bmus.push_back(kwd::var(BMU->timeline, BMU->varname));
+	  }
+	  kwd::var(timelines.relaxation, *relax_count) << fx::converge(bmus);
+	}
       }
     };
 

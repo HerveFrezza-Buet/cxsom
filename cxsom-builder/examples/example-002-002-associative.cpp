@@ -56,6 +56,8 @@ int main(int argc, char* argv[]) {
 
   
   archi << Xmap << Ymap << Amap;
+  
+  archi->relax_count = "Cvg"; // Let us count the relaxation steps.
   archi->realize();
   
   // Updates of weights reads weights at t-1... so timestep 0 connot
