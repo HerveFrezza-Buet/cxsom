@@ -82,6 +82,11 @@ int main(int argc, char* argv[]) {
   // Here, the architecture is made of a single map.
   archi << map;
 
+  // Let us notify wether we want a relaxation measurement
+  // variable. If we want some, we have to set the relax_attribute to
+  // the name of the variable (a std::string).
+  archi->relax_count = std::nullopt; // This is the default.
+
   // This has to be done once, when everything is ready. This
   // actually declares all the rules defined in the architecture.
   archi->realize();

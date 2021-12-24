@@ -37,6 +37,7 @@ namespace cxsom {
 	
       WriteDot write_dot;
       Timelines timelines;
+      std::optional<std::string> relax_count; //!< Set this optional to the name of the convergence count variable for adding the counting rule.
 
       Architecture() : write_dot(this), timelines("wgt", "rlx", "out") {}
 
