@@ -162,9 +162,13 @@ namespace cxsom {
 	  auto W  = erctx(_W());
 	  auto A  = erctx(_A());
 	  auto xi = erctx(_xi());
-	  
-	  kwd::var(A->timeline, A->varname) << match(kwd::var(xi->timeline, xi->varname),
-						     kwd::var(W->timeline,  W->varname )) | p_match;
+	  if(contextual && std::holds_alternative<rules::offset>(at_input_read) && std::get<rules::offset>(at_input_read).value == 0)
+	    // If the layer is contextual, and if the input is a pattern with a current BMU.
+	    kwd::var(A->timeline, A->varname) << match(kwd::prev(kwd::var(xi->timeline, xi->varname)),
+						       kwd::at(kwd::var(W->timeline,  W->varname ), 0)) | p_match;
+	  else
+	    kwd::var(A->timeline, A->varname) << match(kwd::at(kwd::var(xi->timeline, xi->varname), 0),
+						       kwd::at(kwd::var(W->timeline,  W->varname),  0)) | p_match;
 	}
       };
 
@@ -924,17 +928,20 @@ namespace cxsom {
 	  A = Ac;
 
 	// Let us compute the BMU.
-	// if(A) {
-	//   if(Ac) {
-	//     if(Ae)
-	//       (kwd::var(BMU->timeline, BMU->varname) <= argmax(kwd::var(Ae->timeline, Ae->varname))) | p_global;
-	//     kwd::var(BMU->timeline, BMU->varname) << toward_argmax(kwd::var(A->timeline, A->varname), kwd::var(BMU->timeline, BMU->varname)) | p_global;
-	//   }
-	//   else
-	//     kwd::var(BMU->timeline, BMU->varname) << argmax(kwd::var(A->timeline, A->varname)) | p_global;
+	if(A) {
+	  auto AA  = erctx(A);
+	  if(Ac) {
+	    if(Ae) {
+	      auto AAe = erctx(Ae);
+	      (kwd::var(BMU->timeline, BMU->varname) <= argmax(kwd::var(AAe->timeline, AAe->varname))) | p_global;
+	    }
+	    kwd::var(BMU->timeline, BMU->varname) << toward_argmax(kwd::var(AA->timeline, AA->varname), kwd::prev(kwd::var(BMU->timeline, BMU->varname))) | p_global;
+	  }
+	  else
+	    kwd::var(BMU->timeline, BMU->varname) << argmax(kwd::var(AA->timeline, AA->varname)) | p_global;
 	
-	//   kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
-	// }
+	  kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
+	}
       }
 
       void operator=(const std::tuple<kwd::parameters, kwd::parameters, kwd::parameters>& params) {

@@ -81,7 +81,7 @@ namespace cxsom {
     };
     
     struct offset {
-      int value;
+      int value = 0;
       bool operator< (const offset& arg) const {return value  < arg.value;}
       bool operator==(const offset& arg) const {return value == arg.value;}
       bool operator!=(const offset& arg) const {return value != arg.value;}

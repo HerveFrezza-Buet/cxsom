@@ -1,4 +1,4 @@
-# This provide tools for buildong up cxsom-based designs.
+# This provide tools for building up cxsom-based designs.
 
 ## Installation
 
