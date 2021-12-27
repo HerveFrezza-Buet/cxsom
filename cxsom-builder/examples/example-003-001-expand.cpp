@@ -111,9 +111,11 @@ int main(int argc, char* argv[]) {
     auto archi = make_architecture(true);
     archi->realize();
     for(auto map : archi->maps) map->internals_random_at(0);
-    
-    std::ofstream dot_file("XY-direct-archi.dot");
-    dot_file << archi->write_dot;  
+
+    if(c.argv[1] == "graph" || c.argv[1] == "graph-full") {
+      std::ofstream dot_file("archi.dot");
+      dot_file << archi->write_dot;
+    }
   }
 
   

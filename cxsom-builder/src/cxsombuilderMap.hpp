@@ -361,7 +361,7 @@ namespace cxsom {
 	@param input           The variable corresponding to the input.
 	@param match           The match function.
 	@param p_match         The match parameters.
-	@param at_input_read   The offset time for reading input.
+	@param at_input_read   The offset time for reading iand archi.pdf nput.
 	@param learn           The learning function.
 	@param p_learn         The learning parameters.
 	@param at_weight_read  The offset for reading the weights.
@@ -626,7 +626,7 @@ namespace cxsom {
 	Adds an adaptive layer, using remotely defined weights.
 	@param input           The map corresponding to the input.
 	@param match           The match function.
-	@param p_match         The match parameters.
+	@param p_match         The match parameters.and archi.pdf 
 	@param weight          The weight variable, not defined by the layer itself here.
 	@param learn           The learning function.
 	@param p_learn         The learning parameters.
@@ -878,7 +878,6 @@ namespace cxsom {
 
       void expand_relax_updates(const ExpandRelaxContext& erctx) const {
 	ref_variable BMU    = erctx(_BMU());
-	ref_variable output = erctx(output_BMU());
 		
 	// Let us merge the externals.
 
@@ -942,7 +941,7 @@ namespace cxsom {
 	  else
 	    kwd::var(BMU->timeline, BMU->varname) << argmax(kwd::var(AA->timeline, AA->varname)) | p_global;
 	
-	  kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
+	  // kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
 	}
       }
 
