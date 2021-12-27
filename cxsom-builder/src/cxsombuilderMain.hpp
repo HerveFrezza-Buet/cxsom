@@ -57,13 +57,14 @@ namespace cxsom {
     }
 
     struct ExpandRelaxContext {
-      std::string prefix;
-      std::size_t cache_size;
-      std::size_t file_size;
-      bool        kept_opened;
+      std::string  prefix;
+      std::size_t  cache_size;
+      std::size_t  file_size;
+      bool         kept_opened;
+      unsigned int at;
       
-      ExpandRelaxContext(const std::string& prefix, std::size_t cache_size, std::size_t file_size, bool kept_opened)
-	: prefix(prefix), cache_size(cache_size), file_size(file_size), kept_opened(kept_opened) {}
+      ExpandRelaxContext(const std::string& prefix, std::size_t cache_size, std::size_t file_size, bool kept_opened, unsigned int at)
+	: prefix(prefix), cache_size(cache_size), file_size(file_size), kept_opened(kept_opened), at(at) {}
       
       std::shared_ptr<Variable> operator()(std::shared_ptr<Variable> var) const {
 	return variable(prefix + "-" + var->timeline,

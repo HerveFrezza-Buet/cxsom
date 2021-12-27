@@ -13,4 +13,5 @@
   @example example-001-002-recsom.cpp
   @example example-002-001-direct.cpp
   @example example-002-002-associative.cpp
+  @example example-003-001-expand.cpp
  */

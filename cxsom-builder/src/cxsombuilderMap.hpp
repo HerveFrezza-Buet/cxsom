@@ -169,6 +169,8 @@ namespace cxsom {
 	  else
 	    kwd::var(A->timeline, A->varname) << match(kwd::at(kwd::var(xi->timeline, xi->varname), 0),
 						       kwd::at(kwd::var(W->timeline,  W->varname),  0)) | p_match;
+
+	  kwd::at(kwd::var(W->timeline,  W->varname ), 0) << fx::copy(kwd::at(kwd::var(_W()->timeline, _W()->varname), erctx.at));
 	}
       };
 

@@ -33,7 +33,9 @@ int main(int argc, char* argv[]) {
     std::cout << "You are not allowed to provide user arguments." << std::endl;
     c.notify_user_argv_error(); // Do this to avoid irrelevant default behavior when your program exists.
     return 0;
-  }   
+  }
+
+  // The arguments before "--" are stored in c.argv
 
   {
     timeline t("main"); // We work in the timeline "main".

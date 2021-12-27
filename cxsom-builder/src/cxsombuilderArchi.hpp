@@ -68,12 +68,16 @@ namespace cxsom {
 	for(auto m : maps) m->updates();
 	
 	if(relax_count) {
+	  std::size_t max_file_size = 0;
+	  for(auto m : maps) if(auto size = m->file_size; size > max_file_size) max_file_size = size;
+	  auto Cvg = variable(timelines.relaxation, *relax_count, "Scalar", 2, max_file_size, false);
+	  Cvg->definition();
 	  std::vector<kwd::data> bmus;
 	  for(auto m : maps) {
 	    auto BMU = m->_BMU();
 	    bmus.push_back(kwd::var(BMU->timeline, BMU->varname));
 	  }
-	  kwd::var(timelines.relaxation, *relax_count) << fx::converge(bmus) | kwd::use("walltime", -1);
+	  kwd::var(Cvg->timeline, Cvg->varname) << fx::converge(bmus) | kwd::use("walltime", -1);
 	}
       }
 
@@ -81,6 +85,7 @@ namespace cxsom {
 	for(auto m : maps) m->expand_relax_definitions(ctx);
 	for(auto m : maps) m->expand_relax_updates(ctx);
       }
+
     };
 
     inline auto architecture() {return std::make_shared<Architecture>();}
