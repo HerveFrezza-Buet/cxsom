@@ -13,14 +13,14 @@
 #include <sstream>
 
 
-#define CACHE       2
-#define TRACE   10000
-#define OPENED   true
-#define FORGET      0
-#define WALLTIME   -1 // Infinite walltime
-#define DEADLINE  200
+#define CACHE        2
+#define TRACE   100000
+#define OPENED    true
+#define FORGET       0
+#define WALLTIME    -1 // Infinite walltime
+#define DEADLINE   200
 
-#define MAP_SIZE 500
+#define MAP_SIZE   500
 
 // cxsom declarations
 using namespace cxsom::rules;
