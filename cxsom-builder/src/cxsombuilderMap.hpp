@@ -264,7 +264,9 @@ namespace cxsom {
 	// Defines variables created by the layer.
 	virtual void expand_relax_definitions(const ExpandRelaxContext& erctx) const override {
 	  this->Layer::expand_relax_definitions(erctx);
-	  erctx(_W())->definition();
+	  auto W = erctx(_W());
+	  W->file_size = 1;
+	  W->definition();
 	}  
       };
 
@@ -770,7 +772,6 @@ namespace cxsom {
 
       void expand_relax_definitions(const ExpandRelaxContext& erctx) const {
 	erctx(_BMU())->definition();
-	erctx(output_BMU())->definition();
 	for(auto& ext : external_layers) ext->expand_relax_definitions(erctx);
 	for(auto& ctx : contextual_layers) ctx->expand_relax_definitions(erctx);
 

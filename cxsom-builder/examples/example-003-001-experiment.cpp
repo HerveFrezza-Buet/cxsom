@@ -121,12 +121,12 @@ int main(int argc, char* argv[]) {
   
   if(mode == Mode::Relax) {
     auto archi = make_architecture(false);
-    auto X = cxsom::builder::variable(expand_prefix + "-in", cxsom::builder::name("X"), "Scalar", CACHE, TRACE, OPENED);
-    auto Y = cxsom::builder::variable(expand_prefix + "-in", cxsom::builder::name("Y"), "Scalar", CACHE, TRACE, OPENED);
+    auto X = cxsom::builder::variable(expand_prefix + "-in", cxsom::builder::name("X"), "Scalar", 1, 1, OPENED);
+    auto Y = cxsom::builder::variable(expand_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, 1, OPENED);
     X->definition();
     Y->definition();
     
-    archi->expand_relax({expand_prefix, CACHE, TRACE, OPENED, weight_time});
+    archi->expand_relax({expand_prefix, CACHE, DEADLINE, OPENED, weight_time});
   }
 
   
