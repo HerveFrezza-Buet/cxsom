@@ -224,6 +224,7 @@ namespace cxsom {
 	    else {
 	      logger->push();
 	      std::ostringstream ostr;
+	      logger->msg("Instanciating update from pattern (may raise an exception)");
 	      auto u = pattern::at(updt, at);
 	      ostr << "inserting update from pattern: " << std::endl
 		   << u;
@@ -240,7 +241,7 @@ namespace cxsom {
 	catch(const error::negative_time&) {
 #ifdef cxsomLog
 	  logger->indentation = indent;
-	  logger->msg("realization has negative time : aborted.");
+	  logger->msg("Exception caught : realization has negative time : aborted.");
 #endif
 	}
       }
