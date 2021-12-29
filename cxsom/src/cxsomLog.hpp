@@ -14,13 +14,14 @@ namespace cxsom {
 
   private:
 
-    std::size_t indentation = 0;
     std::ostream* os;
 
     std::string indent() {return std::string(indentation*2, ' ');}
 
   public:
 
+    std::size_t indentation = 0;
+    
     Log() : indentation(0), os(&std::cout) {}
 
     void push() {++indentation;}

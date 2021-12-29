@@ -156,35 +156,38 @@ namespace cxsom {
 	}
 	
 #ifdef cxsomLOG
-	  logger->msg("Earliest updates in timelines have been found:");
-	  logger->push();
-	  for(auto& kv : min_update_time_in_timeline) {
-	    std::ostringstream ostr;
-	    ostr << "timeline(" << kv.first << ")@" << kv.second;
-	    logger->msg(ostr.str());
-	  }
-	  logger->pop();
+	logger->msg("Earliest updates in timelines have been found:");
+	logger->push();
+	for(auto& kv : min_update_time_in_timeline) {
+	  std::ostringstream ostr;
+	  ostr << "timeline(" << kv.first << ")@" << kv.second;
+	  logger->msg(ostr.str());
+	}
+	logger->pop();
 #endif
 	
 
 	  
 #ifdef cxsomLOG
-	  logger->push();
+	logger->push();
 #endif
-	  for(auto& kv : patterns)
-	    if(auto iter = min_update_time_in_timeline.find(kv.first.timeline);
-	       iter != min_update_time_in_timeline.end())
-	      unprotected_realize(kv.second, iter->second);
+	for(auto& kv : patterns)
+	  if(auto iter = min_update_time_in_timeline.find(kv.first.timeline);
+	     iter != min_update_time_in_timeline.end())
+	    unprotected_realize(kv.second, iter->second);
 #ifdef cxsomLOG
-	  logger->pop();
+	logger->pop();
 #endif
 	  
 #ifdef cxsomLOG
-	  logger->pop();
+	logger->pop();
 #endif
       }
       
       void unprotected_realize(const pattern::Update& updt, std::size_t min_at) {
+#ifdef cxsomLOG
+	std::size_t indent = logger->indentation;
+#endif
 	try {
 	  auto at = data_center.history_length(updt.res);
 #ifdef cxsomLOG
@@ -219,12 +222,14 @@ namespace cxsom {
 	    if(hs)
 	      logger->_msg("  ... ignoring patten.");
 	    else {
+	      logger->push();
 	      std::ostringstream ostr;
 	      auto u = pattern::at(updt, at);
 	      ostr << "inserting update from pattern: " << std::endl
 		   << u;
-	      logger->_msg(ostr.str());
+	      logger->msg(ostr.str());
 	      add_update(u, ts);
+	      logger->pop();
 	    }
 	    logger->pop();
 #else
@@ -234,6 +239,7 @@ namespace cxsom {
 	}
 	catch(const error::negative_time&) {
 #ifdef cxsomLog
+	  logger->indentation = indent;
 	  logger->msg("realization has negative time : aborted.");
 #endif
 	}
@@ -373,7 +379,7 @@ namespace cxsom {
 	  {
 	    std::ostringstream ostr;
 	    ostr << std::endl
-		    << "# Tasks";
+		 << "# Tasks";
 	    logger->msg(ostr.str());
 	  }
 	  for(auto& task : tasks) {
@@ -456,15 +462,15 @@ namespace cxsom {
 	logger->pop();
 #endif
 	return [this, task]() mutable {
-	  task([this](auto        me) {this->integrity_notify_blocked(me);},
-	       [this](const auto& me) {this->integrity_notify_done(me);   });
+		 task([this](auto        me) {this->integrity_notify_blocked(me);},
+		      [this](const auto& me) {this->integrity_notify_done(me);   });
 #ifdef cxsomLOG
-	  logger->msg("status after task execution:");
-	  std::ostringstream ostr;
-	  ostr << task;
-	  logger->_msg(ostr.str());
+		 logger->msg("status after task execution:");
+		 std::ostringstream ostr;
+		 ostr << task;
+		 logger->_msg(ostr.str());
 #endif
-	};
+	       };
 
       }
 
