@@ -20,6 +20,12 @@ set_target_properties     (processor PROPERTIES COMPILE_FLAGS "${PROJECT_CFLAGS}
 target_link_libraries     (processor ${Boost_SYSTEM_LIBRARY} ${FFTCONV_LIBRARIES} -lpthread)
 install                   (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/processor RENAME ${CMAKE_PROJECT_NAME}-processor DESTINATION bin COMPONENT binary)
 
+add_executable            (verbose-processor processor.cpp) 
+target_include_directories(verbose-processor PUBLIC ${FFTCONV_INCLUDE_DIRS})    
+set_target_properties     (verbose-processor PROPERTIES COMPILE_FLAGS "${PROJECT_CFLAGS} -I${CMAKE_CURRENT_SOURCE_DIR} -DcxsomLOG") 
+target_link_libraries     (verbose-processor ${Boost_SYSTEM_LIBRARY} ${FFTCONV_LIBRARIES} -lpthread)
+install                   (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/verbose-processor RENAME ${CMAKE_PROJECT_NAME}-verbose-processor DESTINATION bin COMPONENT binary)
+
 add_executable            (ping ping.cpp) 
 target_link_libraries     (ping ${Boost_SYSTEM_LIBRARY} -lpthread)
 install                   (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ping RENAME ${CMAKE_PROJECT_NAME}-ping DESTINATION bin COMPONENT binary)

@@ -161,18 +161,14 @@ namespace cxsom {
 		  switch(arg_status) {
 		  case data::Availability::Busy:	
 #ifdef cxsomLOG
-		    logger->push();
-		    logger->msg("... it is busy, the timestep is to be blocked by unbounds.");
-		    logger->pop();
+		    logger->_msg("... it is busy, the timestep is to be blocked by unbounds.");
 #endif
 		    unbound_busy = true;
 		    that_update_has_unbound_busy = true;
 		    break;
 		  case data::Availability::Ready:	
 #ifdef cxsomLOG
-		    logger->push();
-		    logger->msg("... it is ready.");
-		    logger->pop();
+		    logger->_msg("... it is ready.");
 #endif
 		    unbounds_ready.insert(arg.who.variable);
 		    break;
@@ -180,6 +176,16 @@ namespace cxsom {
 		    break;
 		  }
 		}
+		
+#ifdef cxsomLOG
+		else {
+		    std::ostringstream ostr;
+		    ostr << arg.who.variable << " is bound.";
+		    logger->msg(ostr.str());
+		}
+#endif
+
+		
 	      }
 	    }
 

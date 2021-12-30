@@ -149,7 +149,7 @@ namespace cxsom {
 	  else {
 	    int offset = std::get<int>(t);
 	    if(offset < 0 && (unsigned int)(-offset) > ref_time) 
-	      throw error::negative_time("");
+	      throw error::negative_time(std::string("negative time : ") + std::to_string(ref_time) + std::to_string(offset));
 	    return {variable, (unsigned int)(ref_time + offset)};
 	  }
 	}

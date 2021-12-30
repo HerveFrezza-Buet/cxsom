@@ -22,7 +22,7 @@ namespace cxsom {
 
     std::size_t indentation = 0;
     
-    Log() : indentation(0), os(&std::cout) {}
+    Log() : os(&std::cout), indentation(0)  {}
 
     void push() {++indentation;}
     void pop() {--indentation;}

@@ -204,8 +204,9 @@ namespace cxsom {
 	    else if(at != min_at)
 	      ostr << "... ignored since previous timesteps need to be done in the timeline.";
 	    logger->msg(ostr.str());
-	  }												    
+	  }											      
 #endif
+	  
 	  if(at <= updt.walltime && at == min_at) {
 	    auto         res  = symbol::Instance(updt.res, at);
 	    auto         ts   = check_and_get(res);
@@ -238,10 +239,10 @@ namespace cxsom {
 #endif
 	  }
 	}
-	catch(const error::negative_time&) {
-#ifdef cxsomLog
+	catch(const error::negative_time& e) {
+#ifdef cxsomLOG
 	  logger->indentation = indent;
-	  logger->msg("Exception caught : realization has negative time : aborted.");
+	  logger->_msg(std::string("Exception caught : ") + e.what() + " update addition aborted.");
 #endif
 	}
       }
