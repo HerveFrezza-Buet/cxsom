@@ -37,9 +37,9 @@ namespace cxsom {
       std::size_t cache_size;
       std::size_t file_size;
       bool        kept_opened;
-      rules::kwd::parameters p_external;
-      rules::kwd::parameters p_contextual;
-      rules::kwd::parameters p_global;
+      mutable rules::kwd::parameters p_external;
+      mutable rules::kwd::parameters p_contextual;
+      mutable rules::kwd::parameters p_global;
       
 
       std::size_t bmu_file_size; //!< This can be used to set the filesize of the output variable.
@@ -162,10 +162,14 @@ namespace cxsom {
 	  auto W  = erctx(_W());
 	  auto A  = erctx(_A());
 	  auto xi = erctx(_xi());
-	  if(contextual && std::holds_alternative<rules::offset>(at_input_read) && std::get<rules::offset>(at_input_read).value == 0)
+	  if(contextual && std::holds_alternative<rules::offset>(at_input_read) && std::get<rules::offset>(at_input_read).value == 0) {
 	    // If the layer is contextual, and if the input is a pattern with a current BMU.
 	    kwd::var(A->timeline, A->varname) << match(kwd::prev(kwd::var(xi->timeline, xi->varname)),
 						       kwd::at(kwd::var(W->timeline,  W->varname ), 0)) | p_match;
+
+	    // As the previous generic rule involves a previous time instant, it has to be sepecialized for the 0 timestep.
+	    kwd::at(kwd::var(A->timeline, A->varname), 0) << fx::clear() | kwd::use("value", 1.0);
+	  }
 	  else
 	    kwd::var(A->timeline, A->varname) << match(kwd::at(kwd::var(xi->timeline, xi->varname), 0),
 						       kwd::at(kwd::var(W->timeline,  W->varname),  0)) | p_match;
@@ -878,6 +882,10 @@ namespace cxsom {
       }
 
       void expand_relax_updates(const ExpandRelaxContext& erctx) const {
+	p_external   | kwd::use("walltime", (double)(erctx.file_size));
+	p_contextual | kwd::use("walltime", (double)(erctx.file_size));
+	p_global     | kwd::use("walltime", (double)(erctx.file_size));
+	
 	ref_variable BMU    = erctx(_BMU());
 		
 	// Let us merge the externals.
