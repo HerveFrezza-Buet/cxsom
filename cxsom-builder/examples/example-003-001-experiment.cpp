@@ -18,7 +18,8 @@
 #define OPENED    true
 #define FORGET       0
 #define WALLTIME    -1 // Infinite walltime
-#define DEADLINE   200
+//#define DEADLINE   200
+#define DEADLINE   2
 
 #define MAP_SIZE   500
 

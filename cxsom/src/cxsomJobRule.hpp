@@ -174,6 +174,11 @@ namespace cxsom {
 	Update(const Update&)            = default;
 	Update& operator=(const Update&) = default;
       };
+
+      std::string walltime_to_string(unsigned int walltime) {
+	if(walltime == std::numeric_limits<unsigned int>::max()) return "infinity";
+	else                                                     return std::to_string(walltime);
+      }
       
       std::ostream& operator<<(std::ostream& os, const Update& u) {
 	std::ostringstream ostr; 

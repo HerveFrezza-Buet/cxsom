@@ -64,10 +64,17 @@ namespace cxsom {
 	  if(timestep::Status(*(curr->second)) == timestep::Status::Done) {
 #ifdef cxsomLOG
 	    std::ostringstream ostr;
-	    ostr << "Removing timestep " << symbol::TimeStep(*(curr->second)) << ", it is done.";
+	    ostr << "Removing timestep " << symbol::TimeStep(*(curr->second)) << ", since its status is done.";
 	    logger->msg(ostr.str());
 #endif
 	    timesteps.erase(curr);
+	  }
+	  else {
+#ifdef cxsomLOG
+	    std::ostringstream ostr;
+	    ostr << "Keeping  timestep " << symbol::TimeStep(*(curr->second)) << ", since its status is " << timestep::Status(*(curr->second)) << '.';
+	    logger->msg(ostr.str());
+#endif
 	  }
 	}
       }
@@ -136,16 +143,47 @@ namespace cxsom {
 	logger->push();
 #endif
 	std::map<std::string, std::size_t> min_update_time_in_timeline;
+#ifdef cxsomLOG
+	logger->msg("Finding the earliest updates in timelines");
+	logger->push();
+#endif
 	for(auto& kv : patterns) {
 	  const auto& timeline = kv.first.timeline;
 	  auto at = data_center.history_length(kv.second.res);
+#ifdef cxsomLOG
+	  std::ostringstream ostr1;
+	  ostr1 << "Considering pattern updating " << kv.second.res << " in timeline " << kv.first.timeline << " : history length = " << at;
+	  logger->msg(ostr1.str());
+	  logger->push();
+#endif
 	  if(at <= kv.second.walltime) {
 	    if(auto iter = min_update_time_in_timeline.find(timeline); iter == min_update_time_in_timeline.end())
 	      min_update_time_in_timeline[timeline] = at;
 	    else
 	      iter->second = std::min(iter->second, at);
+#ifdef cxsomLOG	    
+	    std::ostringstream ostr2; 
+	    ostr2 << "since history length (" << at << ") <= walltime (" << pattern::walltime_to_string(kv.second.walltime)
+		  << "), earliest update time is re-evaluated : result is finally " << min_update_time_in_timeline[timeline] << '.';
+	    logger->msg(ostr2.str());
+#endif
 	  }
+	  else {
+#ifdef cxsomLOG
+	    std::ostringstream ostr2;
+	    ostr2 << "History length (" << at << ") > walltime (" << pattern::walltime_to_string(kv.second.walltime) << ')';
+	    logger->msg(ostr2.str());
+#endif
+	  }
+
+	  
+#ifdef cxsomLOG
+	  logger->pop();
+#endif
 	}
+#ifdef cxsomLOG
+	  logger->pop();
+#endif
 
 	if(min_update_time_in_timeline.size() == 0) {
 #ifdef cxsomLOG
