@@ -18,8 +18,7 @@
 #define OPENED    true
 #define FORGET       0
 #define WALLTIME    -1 // Infinite walltime
-//#define DEADLINE   200
-#define DEADLINE   2
+#define DEADLINE   200
 
 #define MAP_SIZE   500
 
@@ -127,7 +126,7 @@ int main(int argc, char* argv[]) {
     X->definition();
     Y->definition();
     
-    archi->expand_relax({expand_prefix, CACHE, DEADLINE, OPENED, weight_time});
+    archi->expand_relax({expand_prefix, CACHE, DEADLINE + 1, OPENED, weight_time});
   }
 
   

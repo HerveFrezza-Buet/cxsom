@@ -882,9 +882,10 @@ namespace cxsom {
       }
 
       void expand_relax_updates(const ExpandRelaxContext& erctx) const {
-	p_external   | kwd::use("walltime", (double)(erctx.file_size));
-	p_contextual | kwd::use("walltime", (double)(erctx.file_size));
-	p_global     | kwd::use("walltime", (double)(erctx.file_size));
+	double walltime = (double)(erctx.file_size) - 1;
+	p_external   | kwd::use("walltime", walltime);
+	p_contextual | kwd::use("walltime", walltime);
+	p_global     | kwd::use("walltime", walltime);
 	
 	ref_variable BMU    = erctx(_BMU());
 		
@@ -894,6 +895,7 @@ namespace cxsom {
 	  std::vector<kwd::data> args;
 	  auto out_args = std::back_inserter(args);
 	  for(auto& ext : external_layers) {
+	    ext->p_match | kwd::use("walltime", walltime);
 	    ext->expand_relax_updates(erctx);
 	    auto a = erctx(ext->_A());
 	    *(out_args++) = kwd::var(a->timeline, a->varname);
@@ -902,7 +904,9 @@ namespace cxsom {
 	  kwd::var(AAe->timeline, AAe->varname) << external_merge(args) | p_external;
 	}
 	else if(Ae_single) {
-	  (*(external_layers.begin()))->expand_relax_updates(erctx);
+	  auto& ext = (*(external_layers.begin()));
+	  ext->p_match | kwd::use("walltime", walltime);
+	  ext->expand_relax_updates(erctx);
 	  Ae = Ae_single;
 	}
 		
@@ -912,6 +916,7 @@ namespace cxsom {
 	  std::vector<kwd::data> args;
 	  auto out_args = std::back_inserter(args);
 	  for(auto& ctx : contextual_layers) {
+	    ctx->p_match | kwd::use("walltime", walltime);
 	    ctx->expand_relax_updates(erctx);
 	    auto a = erctx(ctx->_A());
 	    *(out_args++) = kwd::var(a->timeline, a->varname);
@@ -920,7 +925,9 @@ namespace cxsom {
 	  kwd::var(AAc->timeline, AAc->varname) << external_merge(args) | p_contextual;
 	}
 	else if(Ac_single) {
-	  (*(contextual_layers.begin()))->expand_relax_updates(erctx);
+	  auto& ctx = (*(contextual_layers.begin()));
+	  ctx->p_match | kwd::use("walltime", walltime);
+	  ctx->expand_relax_updates(erctx);
 	  Ac = Ac_single;
 	}
 

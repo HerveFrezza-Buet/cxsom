@@ -328,6 +328,14 @@ namespace cxsom {
 	  patterns.try_emplace(updt.res, updt);
 	else
 	  it->second = updt;
+#ifdef cxsomLOG
+	logger->msg("Add pattern:");
+	{
+	  std::ostringstream ostr;
+	  ostr << updt;
+	  logger->_msg(ostr.str());
+	}
+#endif
       }
       
       void operator+=(const Update& updt) {

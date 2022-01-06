@@ -954,6 +954,7 @@ namespace cxsom {
 
       std::size_t history_length() {
 	std::lock_guard<std::mutex> lock(mutex);
+	file.sync();
 	return file.get_next_time();
       }
 
