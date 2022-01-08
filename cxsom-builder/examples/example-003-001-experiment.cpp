@@ -51,6 +51,12 @@ auto make_architecture(bool define_inputs) {
   auto Ymap = cxsom::builder::map1D("Y", MAP_SIZE, CACHE, TRACE, OPENED);
   *Xmap     = {p_external, p_contextual, p_global};
   *Ymap     = {p_external, p_contextual, p_global};
+
+  Xmap->argmax        = fx::argmax;
+  Ymap->argmax        = fx::argmax;
+  Xmap->toward_argmax = fx::toward_argmax;
+  Ymap->toward_argmax = fx::toward_argmax;
+  
   
   Xmap->external  (X,    fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
   Xmap->contextual(Ymap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
