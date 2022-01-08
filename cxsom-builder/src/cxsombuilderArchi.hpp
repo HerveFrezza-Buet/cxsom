@@ -63,10 +63,9 @@ namespace cxsom {
 	m->output_timeline     = timelines.output;
       }
 
-      void realize() const {
-	for(auto m : maps) m->definitions();
-	for(auto m : maps) m->updates();
-	
+    private:
+
+      void add_convergence_checkings() const {
 	if(relax_count) {
 	  std::size_t max_file_size = 0;
 	  for(auto m : maps) if(auto size = m->file_size; size > max_file_size) max_file_size = size;
@@ -81,9 +80,36 @@ namespace cxsom {
 	}
       }
 
-      void expand_relax(const ExpandRelaxContext& ctx) const {
+      void add_convergence_checkings(const AnalysisContext& ctx) const {
+	if(relax_count) {
+	  auto Cvg = ctx(variable(timelines.relaxation, *relax_count, "Scalar", 2, 0, false));
+	  Cvg->definition();
+	  std::vector<kwd::data> bmus;
+	  for(auto m : maps) {
+	    auto BMU = ctx(m->_BMU());
+	    bmus.push_back(kwd::var(BMU->timeline, BMU->varname));
+	  }
+	  kwd::var(Cvg->timeline, Cvg->varname) << fx::converge(bmus) | kwd::use("walltime", double(ctx.file_size - 1));
+	}
+      }
+
+    public:
+
+      void realize() const {
+	for(auto m : maps) m->definitions();
+	for(auto m : maps) m->updates();
+	add_convergence_checkings();
+      }
+
+      void expand_relax(const AnalysisContext& ctx) const {
 	for(auto m : maps) m->expand_relax_definitions(ctx);
 	for(auto m : maps) m->expand_relax_updates(ctx);
+      }
+
+      void frozen(const AnalysisContext& ctx) const {
+	for(auto m : maps) m->frozen_definitions(ctx);
+	for(auto m : maps) m->frozen_updates(ctx);
+	add_convergence_checkings(ctx);
       }
 
     };

@@ -131,8 +131,13 @@ namespace cxsom {
 	}
 
 	// Defines variables created by the layer.
-	virtual void expand_relax_definitions(const ExpandRelaxContext& erctx) const {
-	  erctx(_A())->definition();
+	virtual void expand_relax_definitions(const AnalysisContext& analysis) const {
+	  analysis(_A())->definition();
+	}
+
+	// Defines variables created by the layer.
+	virtual void frozen_definitions(const AnalysisContext& analysis) const {
+	  analysis(_A())->definition();
 	}
 
 	
@@ -158,10 +163,10 @@ namespace cxsom {
 						     dated(kwd::var(W->timeline,  W->varname ), at_weight_read)) | p_match;
 	}
 	
-	virtual void expand_relax_updates(const ExpandRelaxContext& erctx) const {
-	  auto W  = erctx(_W());
-	  auto A  = erctx(_A());
-	  auto xi = erctx(_xi());
+	virtual void expand_relax_updates(const AnalysisContext& analysis) const {
+	  auto W  = analysis(_W());
+	  auto A  = analysis(_A());
+	  auto xi = analysis(_xi());
 	  if(contextual && std::holds_alternative<rules::offset>(at_input_read) && std::get<rules::offset>(at_input_read).value == 0) {
 	    // If the layer is contextual, and if the input is a pattern with a current BMU.
 	    kwd::var(A->timeline, A->varname) << match(kwd::prev(kwd::var(xi->timeline, xi->varname)),
@@ -174,8 +179,19 @@ namespace cxsom {
 	    kwd::var(A->timeline, A->varname) << match(kwd::at(kwd::var(xi->timeline, xi->varname), 0),
 						       kwd::at(kwd::var(W->timeline,  W->varname),  0)) | p_match;
 
-	  kwd::at(kwd::var(W->timeline,  W->varname ), 0) << fx::copy(kwd::at(kwd::var(_W()->timeline, _W()->varname), erctx.at));
+	  kwd::at(kwd::var(W->timeline,  W->varname ), 0) << fx::copy(kwd::at(kwd::var(_W()->timeline, _W()->varname), analysis.at));
 	}
+	
+	virtual void frozen_updates(const AnalysisContext& analysis) const {
+	  auto W  = analysis(_W());
+	  auto A  = analysis(_A());
+	  auto xi = analysis(_xi());
+	  
+	  kwd::var(A->timeline, A->varname) << match(dated(kwd::var(xi->timeline, xi->varname), at_input_read),
+						     kwd::at(kwd::var(W->timeline,  W->varname), 0)) | p_match;
+	  kwd::at(kwd::var(W->timeline,  W->varname ), 0) << fx::copy(kwd::at(kwd::var(_W()->timeline, _W()->varname), analysis.at));
+	}
+	
       };
 
       struct StaticLayer : public Layer {
@@ -266,9 +282,17 @@ namespace cxsom {
 	}
 	
 	// Defines variables created by the layer.
-	virtual void expand_relax_definitions(const ExpandRelaxContext& erctx) const override {
-	  this->Layer::expand_relax_definitions(erctx);
-	  auto W = erctx(_W());
+	virtual void expand_relax_definitions(const AnalysisContext& analysis) const override {
+	  this->Layer::expand_relax_definitions(analysis);
+	  auto W = analysis(_W());
+	  W->file_size = 1;
+	  W->definition();
+	}  
+	
+	// Defines variables created by the layer.
+	virtual void frozen_definitions(const AnalysisContext& analysis) const override {
+	  this->Layer::frozen_definitions(analysis);
+	  auto W = analysis(_W());
 	  W->file_size = 1;
 	  W->definition();
 	}  
@@ -764,6 +788,7 @@ namespace cxsom {
       void definitions() const {
 	_BMU()->definition();
 	output_BMU()->definition();
+	
 	for(auto& ext : external_layers) ext->definitions();
 	for(auto& ctx : contextual_layers) ctx->definitions();
 
@@ -774,16 +799,31 @@ namespace cxsom {
 	if(A)  A->definition();
       }
 
-      void expand_relax_definitions(const ExpandRelaxContext& erctx) const {
-	erctx(_BMU())->definition();
-	for(auto& ext : external_layers) ext->expand_relax_definitions(erctx);
-	for(auto& ctx : contextual_layers) ctx->expand_relax_definitions(erctx);
+      void expand_relax_definitions(const AnalysisContext& analysis) const {
+	analysis(_BMU())->definition();
+	
+	for(auto& ext : external_layers) ext->expand_relax_definitions(analysis);
+	for(auto& ctx : contextual_layers) ctx->expand_relax_definitions(analysis);
 
 	acts();
 
-	if(Ae) erctx(Ae)->definition();
-	if(Ac) erctx(Ac)->definition();
-	if(A ) erctx(A )->definition();
+	if(Ae) analysis(Ae)->definition();
+	if(Ac) analysis(Ac)->definition();
+	if(A ) analysis(A )->definition();
+      }
+
+      void frozen_definitions(const AnalysisContext& analysis) const {
+	analysis(_BMU())->definition();
+	analysis(output_BMU())->definition();
+	
+	for(auto& ext : external_layers) ext->frozen_definitions(analysis);
+	for(auto& ctx : contextual_layers) ctx->frozen_definitions(analysis);
+
+	acts();
+
+	if(Ae) analysis(Ae)->definition();
+	if(Ac) analysis(Ac)->definition();
+	if(A ) analysis(A )->definition();
       }
 
       void internals_random_at(unsigned int at) {
@@ -881,13 +921,13 @@ namespace cxsom {
 	}
       }
 
-      void expand_relax_updates(const ExpandRelaxContext& erctx) const {
-	double walltime = (double)(erctx.file_size) - 1;
+      void expand_relax_updates(const AnalysisContext& analysis) const {
+	double walltime = (double)(analysis.file_size) - 1;
 	p_external   | kwd::use("walltime", walltime);
 	p_contextual | kwd::use("walltime", walltime);
 	p_global     | kwd::use("walltime", walltime);
 	
-	ref_variable BMU    = erctx(_BMU());
+	ref_variable BMU    = analysis(_BMU());
 		
 	// Let us merge the externals.
 
@@ -896,17 +936,17 @@ namespace cxsom {
 	  auto out_args = std::back_inserter(args);
 	  for(auto& ext : external_layers) {
 	    ext->p_match | kwd::use("walltime", walltime);
-	    ext->expand_relax_updates(erctx);
-	    auto a = erctx(ext->_A());
+	    ext->expand_relax_updates(analysis);
+	    auto a = analysis(ext->_A());
 	    *(out_args++) = kwd::var(a->timeline, a->varname);
 	  }
-	  auto AAe = erctx(Ae);
+	  auto AAe = analysis(Ae);
 	  kwd::var(AAe->timeline, AAe->varname) << external_merge(args) | p_external;
 	}
 	else if(Ae_single) {
 	  auto& ext = (*(external_layers.begin()));
 	  ext->p_match | kwd::use("walltime", walltime);
-	  ext->expand_relax_updates(erctx);
+	  ext->expand_relax_updates(analysis);
 	  Ae = Ae_single;
 	}
 		
@@ -917,26 +957,26 @@ namespace cxsom {
 	  auto out_args = std::back_inserter(args);
 	  for(auto& ctx : contextual_layers) {
 	    ctx->p_match | kwd::use("walltime", walltime);
-	    ctx->expand_relax_updates(erctx);
-	    auto a = erctx(ctx->_A());
+	    ctx->expand_relax_updates(analysis);
+	    auto a = analysis(ctx->_A());
 	    *(out_args++) = kwd::var(a->timeline, a->varname);
 	  }
-	  auto AAc = erctx(Ac);
+	  auto AAc = analysis(Ac);
 	  kwd::var(AAc->timeline, AAc->varname) << external_merge(args) | p_contextual;
 	}
 	else if(Ac_single) {
 	  auto& ctx = (*(contextual_layers.begin()));
 	  ctx->p_match | kwd::use("walltime", walltime);
-	  ctx->expand_relax_updates(erctx);
+	  ctx->expand_relax_updates(analysis);
 	  Ac = Ac_single;
 	}
 
 	// Let us merge both.
 	
 	if(A) {// We have both, let us merge them.
-	  auto AA  = erctx(A);
-	  auto AAe = erctx(Ae);
-	  auto AAc = erctx(Ac);
+	  auto AA  = analysis(A);
+	  auto AAe = analysis(Ae);
+	  auto AAc = analysis(Ac);
 	  kwd::var(AA->timeline, AA->varname) << global_merge(kwd::var(AAe->timeline, AAe->varname), kwd::var(AAc->timeline, AAc->varname)) | p_global;
 	}
 	else if(Ae)
@@ -946,20 +986,101 @@ namespace cxsom {
 
 	// Let us compute the BMU.
 	if(A) {
-	  auto AA  = erctx(A);
-	  if(Ac) {
-	    if(Ae) {
-	      auto AAe = erctx(Ae);
-	      (kwd::var(BMU->timeline, BMU->varname) <= argmax(kwd::var(AAe->timeline, AAe->varname))) | p_global;
-	    }
+	  auto AA  = analysis(A);
+	  if(Ac) 
 	    kwd::var(BMU->timeline, BMU->varname) << toward_argmax(kwd::var(AA->timeline, AA->varname), kwd::prev(kwd::var(BMU->timeline, BMU->varname))) | p_global;
-	  }
 	  else
 	    kwd::var(BMU->timeline, BMU->varname) << argmax(kwd::var(AA->timeline, AA->varname)) | p_global;
 	
 	  // kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
 	}
       }
+      
+      void frozen_updates(const AnalysisContext& analysis) const {
+	double walltime = (double)(analysis.file_size) - 1;
+	p_external   | kwd::use("walltime", walltime);
+	p_contextual | kwd::use("walltime", walltime);
+	p_global     | kwd::use("walltime", walltime);
+	
+	ref_variable BMU    = analysis(_BMU());
+	ref_variable output = analysis(output_BMU());
+
+	if(Ae) {
+	  std::vector<kwd::data> args;
+	  auto out_args = std::back_inserter(args);
+	  for(auto& ext : external_layers) {
+	    ext->p_match | kwd::use("walltime", walltime);
+	    ext->frozen_updates(analysis);
+	    auto a = analysis(ext->_A());
+	    *(out_args++) = kwd::var(a->timeline, a->varname);
+	  }
+	  auto AAe = analysis(Ae);
+	  kwd::var(AAe->timeline, AAe->varname) << external_merge(args) | p_external;
+	}
+	else if(Ae_single) {
+	  auto& ext = (*(external_layers.begin()));
+	  ext->p_match | kwd::use("walltime", walltime);
+	  ext->frozen_updates(analysis);
+	  Ae = Ae_single;
+	}
+		
+	// Let us merge the contextuals.
+
+	if(Ac) {
+	  std::vector<kwd::data> args;
+	  auto out_args = std::back_inserter(args);
+	  for(auto& ctx : contextual_layers) {
+	    ctx->p_match | kwd::use("walltime", walltime);
+	    ctx->frozen_updates(analysis);
+	    auto a = analysis(ctx->_A());
+	    *(out_args++) = kwd::var(a->timeline, a->varname);
+	  }
+	  auto AAc = analysis(Ac);
+	  kwd::var(AAc->timeline, AAc->varname) << external_merge(args) | p_contextual;
+	}
+	else if(Ac_single) {
+	  auto& ctx = (*(contextual_layers.begin()));
+	  ctx->p_match | kwd::use("walltime", walltime);
+	  ctx->frozen_updates(analysis);
+	  Ac = Ac_single;
+	}
+
+	// Let us merge both.
+	
+	if(A) {// We have both, let us merge them.
+	  auto AA  = analysis(A);
+	  auto AAe = analysis(Ae);
+	  auto AAc = analysis(Ac);
+	  kwd::var(AA->timeline, AA->varname) << global_merge(kwd::var(AAe->timeline, AAe->varname), kwd::var(AAc->timeline, AAc->varname)) | p_global;
+	}
+	else if(Ae)
+	  A = Ae;
+	else if(Ac)
+	  A = Ac;
+
+	// Let us compute the BMU.
+	if(A) {
+	  auto AA  = analysis(A);
+	  if(Ac) {
+	    if(Ae) {
+	      auto AAe = analysis(Ae);
+	      (kwd::var(BMU->timeline, BMU->varname) <= argmax(kwd::var(AAe->timeline, AAe->varname))) | p_global;
+	    }
+	    kwd::var(BMU->timeline, BMU->varname) << toward_argmax(kwd::var(AA->timeline, AA->varname), kwd::var(BMU->timeline, BMU->varname)) | p_global;
+	  }
+	  else
+	    kwd::var(BMU->timeline, BMU->varname) << argmax(kwd::var(AA->timeline, AA->varname)) | p_global;
+	
+	  kwd::var(output->timeline, output->varname) << fx::copy(kwd::var(BMU->timeline, BMU->varname)) | p_global;
+	}
+      }
+
+
+      
+
+
+
+      
 
       void operator=(const std::tuple<kwd::parameters, kwd::parameters, kwd::parameters>& params) {
 	std::tie(p_external, p_contextual, p_global) = params;

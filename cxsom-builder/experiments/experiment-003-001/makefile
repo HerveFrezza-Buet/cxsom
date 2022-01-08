@@ -5,6 +5,7 @@ help:
 	@echo
 	@echo "make main-figs                                     <-- generate figures for main rules"
 	@echo "make relax-figs                                    <-- generate figures for expanded relaxation rules"
+	@echo "make frozen-figs                                   <-- generate figures for frozen rules"
 	@echo
 	@echo "make send-main-rules                               <-- sends the main rules"
 	@echo "make send-relax-rules TIMESTEP=<time>              <-- sends the relax rules"
@@ -20,8 +21,9 @@ help:
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
 
-RULES = cxsom-builder-example-003-001-experiment
-RELAX_PREFIX = zrlx
+RULES         = cxsom-builder-example-003-001-experiment
+RELAX_PREFIX  = zrlx
+FROZEN_PREFIX = zfrz
 
 .PHONY: main-figs
 main-figs:
@@ -44,6 +46,17 @@ relax-figs:
 	@echo
 	@echo
 	@echo "relax-inits.pdf and relax-updates.pdf have been generated."
+	@echo
+
+.PHONY: frozen-figs
+frozen-figs:
+	@${RULES} graph frozen -- frozen $(FROZEN_PREFIX) 1234
+	@dot -Tpdf frozen-inits.dot -o frozen-inits.pdf
+	@dot -Tpdf frozen-updates.dot -o frozen-updates.pdf
+	@rm frozen-inits.dot frozen-updates.dot 
+	@echo
+	@echo
+	@echo "frozen-inits.pdf and frozen-updates.pdf have been generated."
 	@echo
 
 .PHONY: send-main-rules
