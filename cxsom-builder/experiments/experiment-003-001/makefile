@@ -9,10 +9,12 @@ help:
 	@echo
 	@echo "make send-main-rules                               <-- sends the main rules"
 	@echo "make send-relax-rules TIMESTEP=<time>              <-- sends the relax rules"
+	@echo "make send-frozen-rules TIMESTEP=<time>             <-- sends the frozen rules"
 	@echo
 	@echo "make feed-main-inputs                              <-- feeds X and Y"
 	@echo "make feed-relax-inputs TIMESTEP=<time>...          <-- feeds the X,Y pair for relaxation at <time>"
 	@echo "     ... THETA=<deg> [XBMU=<xbmu> YBMU=<ybmu>]"
+	@echo "make feed-frozen-inputs TIMESTEP=<time>            <-- feeds the X,Y pair for relaxation at <time>"
 	@echo
 	@echo "make view-weights                                  <-- shows the weight evolution."
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
@@ -82,3 +84,11 @@ feed-relax-inputs:
 .PHONY: view-relaxation
 view-relaxation:
 	@python3 view-relaxation.py `cat .cxsom-rootdir-config` ${TIMESTEP}
+
+.PHONY: send-frozen-rules
+send-frozen-rules:
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- frozen $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP}
+
+.PHONY: feed-frozen-inputs
+feed-frozen-inputs:
+	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}`

@@ -156,10 +156,12 @@ int main(int argc, char* argv[]) {
     auto archi = make_architecture(false);
     auto X = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("X"), "Scalar", 1, FROZEN_TRACE, OPENED);
     auto Y = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, FROZEN_TRACE, OPENED);
+    auto U = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("U"), "Scalar", 1, FROZEN_TRACE, OPENED);
     X->definition();
     Y->definition();
+    U->definition();
     
-    archi->frozen({analysis_prefix, CACHE, FROZEN_TRACE , OPEN_AS_NEEDED, weight_time});
+    archi->frozen({analysis_prefix, CACHE, FROZEN_TRACE, OPEN_AS_NEEDED, weight_time});
    }
 
   

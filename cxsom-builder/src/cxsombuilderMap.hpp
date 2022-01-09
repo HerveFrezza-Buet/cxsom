@@ -188,7 +188,7 @@ namespace cxsom {
 
 	// Defines variables created by the layer.
 	virtual void frozen_definitions(const AnalysisContext& analysis) const {
-	  analysis(_A())->definition();
+	  analysis[_A()]->definition();
 	}
 
 	
@@ -864,7 +864,7 @@ namespace cxsom {
       }
 
       void frozen_definitions(const AnalysisContext& analysis) const {
-	analysis(_BMU())->definition();
+	analysis[_BMU()]->definition();
 	analysis(output_BMU())->definition();
 	
 	for(auto& ext : external_layers) ext->frozen_definitions(analysis);
@@ -872,9 +872,9 @@ namespace cxsom {
 
 	acts();
 
-	if(Ae) analysis(Ae)->definition();
-	if(Ac) analysis(Ac)->definition();
-	if(A ) analysis(A )->definition();
+	if(Ae) analysis[Ae]->definition();
+	if(Ac) analysis[Ac]->definition();
+	if(A ) analysis[A ]->definition();
       }
 
       void internals_random_at(unsigned int at) {

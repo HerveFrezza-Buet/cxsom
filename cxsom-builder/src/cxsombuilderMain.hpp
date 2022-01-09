@@ -70,6 +70,11 @@ namespace cxsom {
 	return variable(prefix + "-" + var->timeline,
 			var->varname, var->type, cache_size, file_size, kept_opened);
       }
+      
+      std::shared_ptr<Variable> operator[](std::shared_ptr<Variable> var) const {
+	return variable(prefix + "-" + var->timeline,
+			var->varname, var->type, cache_size, 0, kept_opened);
+      }
     };
 
 
