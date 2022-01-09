@@ -29,21 +29,21 @@ int main(int argc, char* argv[]) {
   p_contextual | p_main;
   p_global     | p_main, kwd::use("random-bmu", 1), kwd::use("sigma", .01), kwd::use("beta", .5), kwd::use("delta", .01), kwd::use("deadline", 100);
 
-  
+  auto map_settings = cxsom::builder::map::make_settings();
+  map_settings.map_size      = MAP_SIZE;
+  map_settings.cache_size    = CACHE;
+  map_settings.file_size     = TRACE;
+  map_settings.kept_opened   = OPENED;
+  map_settings               = {p_external, p_contextual, p_global};
+
   auto X = cxsom::builder::variable("in", cxsom::builder::name("X"), "Scalar", CACHE, TRACE, OPENED);
   auto Y = cxsom::builder::variable("in", cxsom::builder::name("Y"), "Scalar", CACHE, TRACE, OPENED);
   X->definition();
   Y->definition();
 
-  auto Xmap = cxsom::builder::map1D("X", MAP_SIZE, CACHE, TRACE, OPENED);
-  *Xmap     = {p_external, p_contextual, p_global};
-
-  auto Ymap = cxsom::builder::map1D("Y", MAP_SIZE, CACHE, TRACE, OPENED);
-  *Ymap     = {p_external, p_contextual, p_global};
-
-  auto Amap = cxsom::builder::map1D("Assoc", MAP_SIZE, CACHE, TRACE, OPENED);
-  *Amap     = {p_external, p_contextual, p_global};
-
+  auto Xmap = cxsom::builder::map::make_1D("X");
+  auto Ymap = cxsom::builder::map::make_1D("Y");
+  auto Amap = cxsom::builder::map::make_1D("Assoc");
 
   Xmap->external  (X,    fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
   Xmap->contextual(Amap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
@@ -54,8 +54,8 @@ int main(int argc, char* argv[]) {
   Amap->contextual(Xmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
   Amap->contextual(Ymap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
 
-  
   archi << Xmap << Ymap << Amap;
+  *archi = map_settings;
   
   archi->relax_count = "Cvg"; // Let us count the relaxation steps.
   archi->realize();

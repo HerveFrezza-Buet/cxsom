@@ -112,6 +112,8 @@ namespace cxsom {
 	add_convergence_checkings(ctx);
       }
 
+      void operator=(const MapSettings& settings) {for(auto m : maps) *m = settings;}
+
     };
 
     inline auto architecture() {return std::make_shared<Architecture>();}

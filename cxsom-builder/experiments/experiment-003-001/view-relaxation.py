@@ -19,10 +19,11 @@ wgt_timeline = timeline_prefix + 'wgt'
 rlx_timeline = timeline_prefix + 'rlx'
 
 class MapView(cx.tkviewer.At):
-    def __init__(self, master, me, other, figsize=(8, 5), dpi=100):
-        super().__init__(master, "Relaxation in map {}".format(me), figsize, dpi)
+    def __init__(self, master, me, other, at_weight, figsize=(8, 5), dpi=100):
+        super().__init__(master, "Map {} at {}".format(me, at_weight), figsize, dpi)
         self.me    = me
         self.other = other
+        self.at_weight = at_weight;
         self.We_path  = cx.variable.path_from(root_dir, wgt_timeline, me    + '/We-0')
         self.Wc_path  = cx.variable.path_from(root_dir, wgt_timeline, me    + '/Wc-0')
         self.Ae_path  = cx.variable.path_from(root_dir, rlx_timeline, me    + '/Ae-0')
@@ -52,7 +53,7 @@ class MapView(cx.tkviewer.At):
         ax = self.fig.gca()
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
-        ax.set_title('Relaxation in map {} at {}'.format(self.me, at))
+        ax.set_title('Relaxation step #{} in map {} at {}'.format(at, self.me, self.at_weight))
         ax.plot(self.X, self.We, alpha=.5, ls='--', label='We')
         ax.plot(self.X, self.Wc, alpha=.5, ls='--', label='Wc')
         ax.plot(self.X,      Ae,           label='Ae')
@@ -69,8 +70,8 @@ slider = cx.tkviewer.HistoryFromVariableSlider(root,
                                                cx.variable.path_from(root_dir, rlx_timeline, 'X/BMU'))
 
 hbox = tk.Frame(root)
-v1   = MapView(hbox, 'X', 'Y')
-v2   = MapView(hbox, 'Y', 'X')
+v1   = MapView(hbox, 'X', 'Y', timestep)
+v2   = MapView(hbox, 'Y', 'X', timestep)
 
 slider.widget().pack(side=tk.TOP,  fill=tk.BOTH)
 hbox.pack           (side=tk.TOP,  fill=tk.BOTH)

@@ -26,20 +26,26 @@ int main(int argc, char* argv[]) {
   p_external   | p_main;
   p_contextual | p_main;
   p_global     | p_main, kwd::use("random-bmu", 1), kwd::use("sigma", .0125);
+
+  auto map_settings = cxsom::builder::map::make_settings();
+  map_settings.map_size      = MAP_SIZE;
+  map_settings.cache_size    = CACHE;
+  map_settings.file_size     = TRACE;
+  map_settings.kept_opened   = OPENED;
+  map_settings               = {p_external, p_contextual, p_global};
+  map_settings.bmu_file_size = TRACE; 
   
   auto input = cxsom::builder::variable("in", cxsom::builder::name("obs"), "Scalar", CACHE, TRACE, OPENED);
   input->definition();
 
-  auto map = cxsom::builder::map1D("recSOM", MAP_SIZE, CACHE, TRACE, OPENED);
-  *map     = {p_external, p_contextual, p_global};
-  
-  map->bmu_file_size = TRACE; // Default is 0.
+  auto map = cxsom::builder::map::make_1D("recSOM");
 
   map->external(input, fx::match_triangle, p_match, fx::learn_triangle, p_learn);
   map->external(map,   fx::match_triangle, p_match, cxsom::builder::timestep::previous(), fx::learn_triangle, p_learn);
    
   archi << map;
-  
+
+  *archi = map_settings; // We apply the settings to all maps (ok... a single map here).
   archi->realize();
 
   // Once the architecture is realized, we can add specific

@@ -50,7 +50,13 @@ int main(int argc, char* argv[]) {
   
   // Architectures are made of maps. Here, we create a map
   // description, that could be used in several architectures.
-  auto map = cxsom::builder::map1D("SOM", MAP_SIZE, CACHE, TRACE, OPENED);
+  auto map = cxsom::builder::map::make_1D("SOM");
+
+  // This is how you can customize the map.
+  map->map_size = MAP_SIZE;
+  map->cache_size = CACHE;
+  map->file_size = TRACE;
+  map->kept_opened = OPENED;
   map->argmax = fx::argmax; // default is fx::conv_argmax;
 
   // Next settings are the default ones
@@ -72,6 +78,21 @@ int main(int argc, char* argv[]) {
   // BMUs.
   map->bmu_file_size = 1000; // Default is 0.
 
+  // A better way to register map settings is to setup a setting object.
+  auto map_settings = cxsom::builder::map::make_settings();
+  // The settings has no setting requests yet. Let us define what we want to set.
+  map_settings.map_size      = MAP_SIZE;
+  map_settings.cache_size    = CACHE;
+  map_settings.file_size     = TRACE;
+  map_settings.kept_opened   = OPENED;
+  map_settings.argmax        = fx::argmax; 
+  map_settings               = {p_external, p_contextual, p_global};
+  map_settings.bmu_file_size = 1000;
+
+  // Then, instead of the previous setting of the map, we couls have
+  // written this.
+  *map = map_settings;
+
   // There are many ways to declare external inputs, this one is the
   // simplest, but other ones enable to customize the computation. See
   // the documentation.
@@ -81,6 +102,11 @@ int main(int argc, char* argv[]) {
   
   // Here, the architecture is made of a single map.
   archi << map;
+
+  // Here, we can apply a setting to all the maps. Here, we have a
+  // single map, that is already set, bet let us do it again for the
+  // sake of illustration.
+  *archi = map_settings;
 
   // Let us notify wether we want a relaxation measurement
   // variable. If we want some, we have to set the relax_attribute to

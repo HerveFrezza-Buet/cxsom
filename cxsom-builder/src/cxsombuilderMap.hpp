@@ -25,30 +25,81 @@ namespace cxsom {
 
     using layer_input = std::variant<ref_variable, ref_map>;
 
+    struct MapSettings {
+
+      std::optional<std::size_t>            map_size;
+      std::optional<std::string>            relaxation_timeline;
+      std::optional<std::string>            weights_timeline;
+      std::optional<std::string>            output_timeline;
+      std::optional<std::size_t>            cache_size;
+      std::optional<std::size_t>            file_size;
+      std::optional<bool>                   kept_opened;
+      std::optional<rules::kwd::parameters> p_external;
+      std::optional<rules::kwd::parameters> p_contextual;
+      std::optional<rules::kwd::parameters> p_global;
+
+      std::optional<std::size_t>            bmu_file_size; 
+      std::optional<argmax_func>            argmax;
+      std::optional<toward_argmax_func>     toward_argmax;
+      std::optional<global_merge_func>      global_merge;
+      std::optional<context_merge_func>     context_merge;
+      std::optional<external_merge_func>    external_merge;
+      
+
+      MapSettings() = default;
+      MapSettings(const MapSettings&) = default;
+      MapSettings& operator=(const MapSettings&) = default;
+      
+      void operator=(const std::tuple<kwd::parameters, kwd::parameters, kwd::parameters>& params) {
+	std::tie(p_external, p_contextual, p_global) = params;
+      }
+    };
+
+    
     
     struct Map : public Dot {
 
       std::string map_name;
       std::size_t map_dim;
-      std::size_t map_size;
-      std::string relaxation_timeline;
-      std::string weights_timeline;
-      std::string output_timeline;
-      std::size_t cache_size;
-      std::size_t file_size;
-      bool        kept_opened;
+      std::size_t map_size = 100;
+      std::string relaxation_timeline = "rlx";
+      std::string weights_timeline = "wgt";
+      std::string output_timeline = "out";
+      std::size_t cache_size = 2;
+      std::size_t file_size = 100;
+      bool        kept_opened = false;
       mutable rules::kwd::parameters p_external;
       mutable rules::kwd::parameters p_contextual;
       mutable rules::kwd::parameters p_global;
       
 
-      std::size_t bmu_file_size; //!< This can be used to set the filesize of the output variable.
+      std::size_t bmu_file_size = 0; //!< This can be used to set the filesize of the output variable.
 
       argmax_func         argmax         = fx::conv_argmax;
       toward_argmax_func  toward_argmax  = fx::toward_conv_argmax;
       global_merge_func   global_merge   = fx::merge;
       context_merge_func  context_merge  = fx::context_merge;
       external_merge_func external_merge = fx::average;
+
+      Map& operator=(const MapSettings& settings) {
+	if(settings.map_size)            map_size            = *(settings.map_size);
+	if(settings.relaxation_timeline) relaxation_timeline = *(settings.relaxation_timeline);
+	if(settings.weights_timeline)    weights_timeline    = *(settings.weights_timeline);
+	if(settings.output_timeline)     output_timeline     = *(settings.output_timeline);
+	if(settings.cache_size)          cache_size          = *(settings.cache_size);
+	if(settings.file_size)           file_size           = *(settings.file_size);
+	if(settings.kept_opened)         kept_opened         = *(settings.kept_opened);
+	if(settings.p_external)          p_external          = *(settings.p_external);
+	if(settings.p_contextual)        p_contextual        = *(settings.p_contextual);
+	if(settings.p_global)            p_global            = *(settings.p_global);
+	if(settings.bmu_file_size)       bmu_file_size       = *(settings.bmu_file_size); 
+	if(settings.argmax)              argmax              = *(settings.argmax);
+	if(settings.toward_argmax)       toward_argmax       = *(settings.toward_argmax);
+	if(settings.global_merge)        global_merge        = *(settings.global_merge);
+	if(settings.context_merge)       context_merge       = *(settings.context_merge);
+	if(settings.external_merge)      external_merge      = *(settings.external_merge);
+	return *this;
+      }
 
       static kwd::data dated(kwd::data d, rules::step s) {d.id.date = s; return d;}
       
@@ -330,9 +381,9 @@ namespace cxsom {
       mutable ref_variable Ac_single;
       mutable ref_variable A;
       
-      Map(const std::string& map_name, std::size_t map_dim, std::size_t map_size, std::size_t cache_size, std::size_t file_size, bool kept_opened)
+      Map(const std::string& map_name, std::size_t map_dim)
 	: Dot("m", "ellipse", "filled", "#ff88aa", map_name, {}),
-	  map_name(map_name), map_dim(map_dim), map_size(map_size), cache_size(cache_size), file_size(file_size), kept_opened(kept_opened), bmu_file_size(0) {}
+	  map_name(map_name), map_dim(map_dim) {}
 
       /**
 	Adds an adaptive layer, using remotely defined weights.
@@ -1087,8 +1138,11 @@ namespace cxsom {
       }
     };
 
-    inline auto map1D(const std::string& map_name, std::size_t map_size, std::size_t cache_size, std::size_t file_size, bool kept_opened) {return std::make_shared<Map>(map_name, 1, map_size, cache_size, file_size, kept_opened);}
-    inline auto map2D(const std::string& map_name, std::size_t map_size, std::size_t cache_size, std::size_t file_size, bool kept_opened) {return std::make_shared<Map>(map_name, 2, map_size, cache_size, file_size, kept_opened);}
+    namespace map {
+      inline auto make_1D(const std::string& map_name) {return std::make_shared<Map>(map_name, 1);}
+      inline auto make_2D(const std::string& map_name) {return std::make_shared<Map>(map_name, 2);}
+      inline auto make_settings() {return MapSettings();}
+    }
 
   }
 }
