@@ -18,6 +18,7 @@ help:
 	@echo
 	@echo "make view-weights                                  <-- shows the weight evolution."
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
+	@echo "make view-frozen TIMESTEP=<time>                   <-- shows the frozen analysis."
 	@echo
 
 # Adapt this path if needed.
@@ -92,3 +93,7 @@ send-frozen-rules:
 .PHONY: feed-frozen-inputs
 feed-frozen-inputs:
 	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}`
+
+.PHONY: view-frozen
+view-frozen:
+	@python3 view-frozen.py `cat .cxsom-rootdir-config` ${TIMESTEP}
