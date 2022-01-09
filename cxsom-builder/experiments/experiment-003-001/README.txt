@@ -1,5 +1,9 @@
 Follow the following instruction to run the tutorial. The symbol '~>' is the prompt, do not type it.
 
+## Description
+
+This experiments builds up 2 1D maps, each receiving a scalar input, and connected one with the others. The two scalar inputs are dependent, they lie on a circle.
+
 ## Setup the demo
 
 First setup a root-dir directory for our variables.
