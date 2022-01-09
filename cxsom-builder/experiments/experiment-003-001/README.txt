@@ -1,4 +1,9 @@
-Follow the following instruction to run the tutorial. The symbol '~>' is the prompt, do not type it.
+Follow the following instruction to run the tutorial. The symbol '~>'
+is the prompt, do not type it.
+
+The cxsom-builder-example-003-001-experiment.cpp shows the
+architecture definition. The makefile used here is also an example, as
+the *.py files.
 
 ## Description
 
@@ -13,6 +18,10 @@ First setup a root-dir directory for our variables.
 ~> mkdir root-dir
 ~> make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 NB_THREADS=4
 
+You can get help by only typing
+
+~> make
+
 Then we can launch a processor, and scan the root-dir.
 
 ~> make cxsom-launch-processor
@@ -25,7 +34,8 @@ do so, we have first to send the computing rules to the processor.
 
 ~> make send-main-rules
 
-We can generate the dot figures corresponding to those rules
+We can generate the dot figures corresponding to those rules. View the
+pdf files generated.
 
 ~> make main-figs
 
@@ -84,7 +94,7 @@ BMU. The X,Y inputs are coordinates of a point in a circle
 Now, the statistics for timestep step 90000 have been computed in
 timelines zfrz-0090000-*, let us visualize it.
 
-~> make view-frozenation TIMESTEP=90000
+~> make view-frozen TIMESTEP=90000
 
 
 
