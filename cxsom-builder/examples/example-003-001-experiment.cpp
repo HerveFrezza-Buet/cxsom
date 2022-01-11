@@ -19,7 +19,7 @@
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
-#define WALLTIME          -1 // Infinite walltime
+#define FOREVER           -1 // Infinite walltime
 #define DEADLINE         200
 
 #define MAP_SIZE         500
@@ -33,7 +33,7 @@ auto make_architecture(bool define_inputs) {
   auto archi = cxsom::builder::architecture();
   
   kwd::parameters p_main, p_match, p_learn, p_learn_e, p_learn_c, p_external, p_contextual, p_global;
-  p_main       | kwd::use("walltime", WALLTIME), kwd::use("epsilon", 0);
+  p_main       | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
   p_match      | p_main,  kwd::use("sigma", .2);
   p_learn      | p_main,  kwd::use("alpha", .05);
   p_learn_e    | p_learn, kwd::use("r", .25 );
