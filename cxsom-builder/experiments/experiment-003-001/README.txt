@@ -100,6 +100,11 @@ timelines zfrz-0029999-*, let us visualize it.
 ~> make view-frozen TIMESTEP=29999
 ~> evince evince snap-029999.pdf
 
+Ok, now, let us make a nice movie...
+
+~> make movie
+
+
 
 
 

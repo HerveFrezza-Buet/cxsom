@@ -21,6 +21,8 @@ help:
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
 	@echo "make view-frozen TIMESTEP=<time> [FRAME=<id>]      <-- shows the frozen analysis."
 	@echo
+	@echo "make movie                                         <-- compute a movie from frozen tests"
+	@echo
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -102,3 +104,8 @@ feed-frozen-inputs:
 .PHONY: view-frozen
 view-frozen:
 	@python3 view-frozen.py `cat .cxsom-rootdir-config` ${TIMESTEP} ${FRAME}
+
+./PHONY: movie
+movie:
+	@rm -f frame-*.png
+	@python3 make-movie.py `cat .cxsom-rootdir-config`

@@ -148,7 +148,7 @@ plot_input_fit(ax, 'Y')
 ax = fig.add_subplot(gs[2, 4])
 plot_in_space(ax, 'Y')
 
-if frame_id:
+if frame_id != None:
     plt.savefig('frame-{:06d}.png'.format(frame_id), bbox_inches='tight')
 else:
     plt.savefig('snap-{:06d}.pdf'.format(timestep), bbox_inches='tight')
