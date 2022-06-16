@@ -96,8 +96,10 @@ def plot_map_match(ax, map_name):
     A = INs[map_name]
     B = INs[other(map_name)]
     BMU = BMUs[map_name]
-    plt.scatter(BMU, A, label = map_name)
-    plt.scatter(BMU, B, label = other(map_name))
+    alpha = .2
+    plt.scatter(BMU, A, alpha = alpha, label = map_name)
+    plt.scatter(BMU, B, alpha = alpha, label = other(map_name))
+    plt.scatter(BMU, np.zeros_like(BMU) - .1, alpha = alpha, color='k',label = 'BMU')
     plt.legend()
 
 
