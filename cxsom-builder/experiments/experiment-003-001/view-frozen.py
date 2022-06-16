@@ -97,14 +97,26 @@ def plot_map_match(ax, map_name):
     B = INs[other(map_name)]
     BMU = BMUs[map_name]
     alpha = .2
-    plt.scatter(BMU, A, alpha = alpha, label = map_name)
-    plt.scatter(BMU, B, alpha = alpha, label = other(map_name))
-    plt.scatter(BMU, np.zeros_like(BMU) - .1, alpha = alpha, color='k',label = 'BMU')
-    plt.legend()
+    ax.scatter(BMU, A, alpha = alpha, label = map_name)
+    ax.scatter(BMU, B, alpha = alpha, label = other(map_name))
+    ax.scatter(BMU, np.zeros_like(BMU) - .1, alpha = alpha, color='k',label = 'BMU')
+    ax.legend()
+
+def plot_in_space(ax, map_name):
+    ax.set_xlabel('map ' + map_name + ' in input space')
+    I = np.argsort(BMUs[map_name])
+    Bx = BMUs['X'][I]
+    By = BMUs['Y'][I]
+    Wx = We_fun['X']
+    Wy = We_fun['Y']
+    
+    ax.scatter(INs['X'], INs['Y'], s=10, alpha=.1, zorder=0)
+    ax.plot([Wx(bmu) for bmu in Bx], [Wy(bmu) for bmu in By], c='k', zorder=1)
+    
+    
 
 
-
-fig = plt.figure(figsize=(12,9), constrained_layout=True)
+fig = plt.figure(figsize=(15,9), constrained_layout=True)
 gs = GridSpec(3, 5, figure=fig)
 
 ax = fig.add_subplot(gs[0, 0])
@@ -118,6 +130,8 @@ ax = fig.add_subplot(gs[1, 2])
 plot_bmu_vs_u(ax, 'X')
 ax = fig.add_subplot(gs[1, 3])
 plot_input_fit(ax, 'X')
+ax = fig.add_subplot(gs[1, 4])
+plot_in_space(ax, 'X')
 
 ax = fig.add_subplot(gs[2, 0:2])
 plot_map_match(ax, 'Y')
@@ -125,6 +139,8 @@ ax = fig.add_subplot(gs[2, 2])
 plot_bmu_vs_u(ax, 'Y')
 ax = fig.add_subplot(gs[2, 3])
 plot_input_fit(ax, 'Y')
+ax = fig.add_subplot(gs[2, 4])
+plot_in_space(ax, 'Y')
 
 plt.show()
 
