@@ -81,6 +81,7 @@ namespace cxsom {
       }
 
       void add_convergence_checkings(const AnalysisContext& ctx) const {
+	ctx.external_prefix_mode = false;
 	if(relax_count) {
 	  auto Cvg = ctx(variable(timelines.relaxation, *relax_count, "Scalar", 2, 0, false));
 	  Cvg->definition();

@@ -56,21 +56,21 @@ different set of rules. These rules can be viewed.
 
 ~> make relax-figs
 
-Let us send them to the processor, for timestep 90000
+Let us send them to the processor, for timestep 29999
 
-~> make send-relax-rules TIMESTEP=90000
+~> make send-relax-rules TIMESTEP=29999
 
-Few rlx-0090000-* timelines are now avialable for running a
+Few rlx-0029999-* timelines are now avialable for running a
 relaxation, you have to feed the X,Y input, and eventually the
 BMU. The X,Y inputs are coordinates of a point in a circle, so the
 angle theta (in degree) is required for them.
 
-~> make feed-relax-inputs TIMESTEP=90000 THETA=45 XBMU=.5 YBMU=.5
+~> make feed-relax-inputs TIMESTEP=29999 THETA=45 XBMU=.5 YBMU=.5
 
-Now, relaxation for timestep step 90000 has been expanded in timelines
-zrlx-0090000-*, let us visualize it.
+Now, relaxation for timestep step 29999 has been expanded in timelines
+zrlx-0029999-*, let us visualize it.
 
-~> make view-relaxation TIMESTEP=90000
+~> make view-relaxation TIMESTEP=29999
 
 
 ## Analyse the map
@@ -81,20 +81,24 @@ rules can be viewed.
 
 ~> make frozen-figs
 
-Let us send them to the processor, for timestep 90000
+Let us build up a bunch of inputs for testings. The X,Y inputs are
+coordinates of a point in a circle
 
-~> make send-frozen-rules TIMESTEP=90000
+~> make declare-frozen-inputs
+~> make feed-frozen-inputs
 
-Few zfrz-0090000-* timelines are now avialable for running a
-relaxation, you have to feed the X,Y input, and eventually the
-BMU. The X,Y inputs are coordinates of a point in a circle
+Now, we can make a frozen test at some specific timestep.
+Let us send the corresponding gules to the processor, for timestep 29999
 
-~> make feed-frozen-inputs TIMESTEP=90000
+~> make send-frozen-rules TIMESTEP=29999
 
-Now, the statistics for timestep step 90000 have been computed in
-timelines zfrz-0090000-*, let us visualize it.
 
-~> make view-frozen TIMESTEP=90000
+Now, the statistics for timestep step 29999 have been computed in
+timelines zfrz-0029999-*, let us visualize it.
+
+~> make view-frozen TIMESTEP=29999
+~> evince evince snap-029999.pdf
+
 
 
 

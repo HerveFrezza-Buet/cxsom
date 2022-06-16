@@ -9,16 +9,17 @@ help:
 	@echo
 	@echo "make send-main-rules                               <-- sends the main rules"
 	@echo "make send-relax-rules TIMESTEP=<time>              <-- sends the relax rules"
+	@echo "make declare-frozen-inputs                         <-- sends the rules for frozen inputs declaration"
 	@echo "make send-frozen-rules TIMESTEP=<time>             <-- sends the frozen rules"
 	@echo
 	@echo "make feed-main-inputs                              <-- feeds X and Y"
 	@echo "make feed-relax-inputs TIMESTEP=<time>...          <-- feeds the X,Y pair for relaxation at <time>"
 	@echo "     ... THETA=<deg> [XBMU=<xbmu> YBMU=<ybmu>]"
-	@echo "make feed-frozen-inputs TIMESTEP=<time>            <-- feeds the X,Y pair for relaxation at <time>"
+	@echo "make feed-frozen-inputs                            <-- feeds the X,Y pairs for frozen tests"
 	@echo
 	@echo "make view-weights                                  <-- shows the weight evolution."
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
-	@echo "make view-frozen TIMESTEP=<time>                   <-- shows the frozen analysis."
+	@echo "make view-frozen TIMESTEP=<time> [FRAME=<id>]      <-- shows the frozen analysis."
 	@echo
 
 # Adapt this path if needed.
@@ -53,7 +54,7 @@ relax-figs:
 
 .PHONY: frozen-figs
 frozen-figs:
-	@${RULES} graph frozen -- frozen $(FROZEN_PREFIX) 1234
+	@${RULES} graph frozen -- frozen SHARED LOCAL 1234
 	@dot -Tpdf frozen-inits.dot -o frozen-inits.pdf
 	@dot -Tpdf frozen-updates.dot -o frozen-updates.pdf
 	@rm frozen-inits.dot frozen-updates.dot 
@@ -86,14 +87,18 @@ feed-relax-inputs:
 view-relaxation:
 	@python3 view-relaxation.py `cat .cxsom-rootdir-config` ${TIMESTEP}
 
+.PHONY: declare-frozen-inputs
+declare-frozen-inputs:
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(FROZEN_PREFIX) 
+
 .PHONY: send-frozen-rules
 send-frozen-rules:
-	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- frozen $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP}
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- frozen $(FROZEN_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP}
 
 .PHONY: feed-frozen-inputs
 feed-frozen-inputs:
-	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}`
+	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(FROZEN_PREFIX)
 
 .PHONY: view-frozen
 view-frozen:
-	@python3 view-frozen.py `cat .cxsom-rootdir-config` ${TIMESTEP}
+	@python3 view-frozen.py `cat .cxsom-rootdir-config` ${TIMESTEP} ${FRAME}

@@ -14,13 +14,13 @@
 
 
 #define CACHE              2
-#define TRACE         100000
+#define TRACE          30000
 #define FROZEN_TRACE    1000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
 #define FOREVER           -1 // Infinite walltime
-#define DEADLINE         200
+#define DEADLINE         100
 
 #define MAP_SIZE         500
 
@@ -35,12 +35,12 @@ auto make_architecture(bool define_inputs) {
   kwd::parameters p_main, p_match, p_learn, p_learn_e, p_learn_c, p_external, p_contextual, p_global;
   p_main       | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
   p_match      | p_main,  kwd::use("sigma", .2);
-  p_learn      | p_main,  kwd::use("alpha", .05);
-  p_learn_e    | p_learn, kwd::use("r", .25 );
-  p_learn_c    | p_learn, kwd::use("r", .075);
+  p_learn      | p_main,  kwd::use("alpha", .1);
+  p_learn_e    | p_learn, kwd::use("r", .2 );
+  p_learn_c    | p_learn, kwd::use("r", .02);
   p_external   | p_main;
   p_contextual | p_main;
-  p_global     | p_main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .01), kwd::use("deadline", DEADLINE);
+  p_global     | p_main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
   
   auto map_settings = cxsom::builder::map::make_settings();
   map_settings.map_size      = MAP_SIZE;
@@ -73,11 +73,12 @@ auto make_architecture(bool define_inputs) {
   return archi;
 }
 
-enum class Mode : char {Main, Relax, Frozen};
+enum class Mode : char {Main, Relax, Frozen, Test};
 
 int main(int argc, char* argv[]) {
   context c(argc, argv);
   Mode mode = Mode::Main;
+  std::string input_prefix;
   std::string analysis_prefix;
   unsigned int weight_time;
 
@@ -92,7 +93,8 @@ int main(int argc, char* argv[]) {
 	      << "e.g:" << std::endl
 	      << "  " << prefix.str() << "main                            <-- sends the main rules." << std::endl
 	      << "  " << prefix.str() << "relax <timeline-prefix> <time>  <-- sends relaxation rules for weights at time." << std::endl
-	      << "  " << prefix.str() << "frozen <timeline-prefix> <time> <-- sends 'frozen' rules for weights at time." << std::endl;
+	      << "  " << prefix.str() << "test <input-timeline-prefix>  <-- sends 'frozen' input declaration rules." << std::endl
+	      << "  " << prefix.str() << "frozen <input-timeline-prefix> <timeline-prefix> <time> <-- sends 'frozen' rules for weights at time." << std::endl;
     c.notify_user_argv_error(); 
     return 0;
   }
@@ -110,14 +112,24 @@ int main(int argc, char* argv[]) {
     weight_time = stoul(c.user_argv[2]);
   }
   else if(c.user_argv[0] == "frozen") {
-    if(c.user_argv.size() != 3) {
-      std::cout << "The 'frozen' mode expects 2 arguments"  << std::endl;
+    if(c.user_argv.size() != 4) {
+      std::cout << "The 'frozen' mode expects 3 arguments"  << std::endl;
       c.notify_user_argv_error(); 
       return 0;
     }
     mode = Mode::Frozen;
-    analysis_prefix = c.user_argv[1];
-    weight_time = stoul(c.user_argv[2]);
+    input_prefix = c.user_argv[1];
+    analysis_prefix = c.user_argv[2];
+    weight_time = stoul(c.user_argv[3]);
+  }
+  else if(c.user_argv[0] == "test") {
+    if(c.user_argv.size() != 2) {
+      std::cout << "The 'test' mode expects 1 arguments"  << std::endl;
+      c.notify_user_argv_error(); 
+      return 0;
+    }
+    mode = Mode::Test;
+    input_prefix = c.user_argv[1];
   }
   
   else {
@@ -148,20 +160,25 @@ int main(int argc, char* argv[]) {
     X->definition();
     Y->definition();
     
-    archi->expand_relax({analysis_prefix, CACHE, DEADLINE + 1, OPEN_AS_NEEDED, weight_time});
+    archi->expand_relax({std::string(), analysis_prefix, CACHE, DEADLINE + 1, OPEN_AS_NEEDED, weight_time});
   }
 
-  
-  if(mode == Mode::Frozen) {
-    auto archi = make_architecture(false);
-    auto X = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("X"), "Scalar", 1, FROZEN_TRACE, OPENED);
-    auto Y = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, FROZEN_TRACE, OPENED);
-    auto U = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("U"), "Scalar", 1, FROZEN_TRACE, OPENED);
+  if(mode == Mode::Test) {
+    auto X = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("X"), "Scalar", 1, FROZEN_TRACE, OPENED);
+    auto Y = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, FROZEN_TRACE, OPENED);
+    auto U = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("U"), "Scalar", 1, FROZEN_TRACE, OPENED);
     X->definition();
     Y->definition();
     U->definition();
+  }
+  
+  if(mode == Mode::Frozen) {
+    auto archi = make_architecture(false);
+    auto X = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("X"), "Scalar", 1, FROZEN_TRACE, OPENED);
+    auto Y = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, FROZEN_TRACE, OPENED);
+    auto U = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("U"), "Scalar", 1, FROZEN_TRACE, OPENED);
     
-    archi->frozen({analysis_prefix, CACHE, FROZEN_TRACE, OPEN_AS_NEEDED, weight_time});
+    archi->frozen({input_prefix, analysis_prefix, CACHE, FROZEN_TRACE, OPEN_AS_NEEDED, weight_time});
    }
 
   

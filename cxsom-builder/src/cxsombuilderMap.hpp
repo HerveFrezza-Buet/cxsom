@@ -236,7 +236,10 @@ namespace cxsom {
 	virtual void frozen_updates(const AnalysisContext& analysis) const {
 	  auto W  = analysis(_W());
 	  auto A  = analysis(_A());
+	  
+	  analysis = kind;
 	  auto xi = analysis(_xi());
+	  analysis.external_prefix_mode = false;
 	  
 	  kwd::var(A->timeline, A->varname) << match(dated(kwd::var(xi->timeline, xi->varname), at_input_read),
 						     kwd::at(kwd::var(W->timeline,  W->varname), 0)) | p_match;
