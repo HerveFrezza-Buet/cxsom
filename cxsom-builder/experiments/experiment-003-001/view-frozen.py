@@ -117,7 +117,10 @@ def plot_in_space(ax, map_name):
     Wy = We_fun['Y']
     
     ax.scatter(INs['X'], INs['Y'], s = s, alpha=.1, zorder=0)
-    ax.plot([Wx(bmu) for bmu in Bx], [Wy(bmu) for bmu in By], c='k', zorder=1)
+    X = np.array([Wx(bmu) for bmu in Bx])
+    Y = np.array([Wy(bmu) for bmu in By])
+    ax.plot(X, Y, c='k', alpha=.1, zorder=1)
+    ax.scatter(X, Y, s = s, c='k', alpha=.1, zorder=2)
     
     
 
