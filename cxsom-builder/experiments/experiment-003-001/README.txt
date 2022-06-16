@@ -91,6 +91,7 @@ Now, we can make a frozen test at some specific timestep.
 Let us send the corresponding gules to the processor, for timestep 29999
 
 ~> make send-frozen-rules TIMESTEP=29999
+~> make cxsom-ping-processor
 
 
 Now, the statistics for timestep step 29999 have been computed in

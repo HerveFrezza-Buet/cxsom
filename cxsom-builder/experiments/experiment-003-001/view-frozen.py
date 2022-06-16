@@ -16,8 +16,9 @@ timestep = int(sys.argv[2])
 frame_id = None
 if len(sys.argv) == 4:
     frame_id = int(sys.argv[3])
+input_prefix = 'zfrz-'
 timeline_prefix = 'zfrz-{:08d}-'.format(timestep)
-in_timeline  = timeline_prefix + 'in'
+in_timeline  = input_prefix + 'in'
 wgt_timeline = timeline_prefix + 'wgt'
 rlx_timeline = timeline_prefix + 'rlx'
 out_timeline = timeline_prefix + 'out'
@@ -148,7 +149,7 @@ ax = fig.add_subplot(gs[2, 4])
 plot_in_space(ax, 'Y')
 
 if frame_id:
-    plt.savefig('frame-{:06d}.ppm'.format(frame_id), bbox_inches='tight')
+    plt.savefig('frame-{:06d}.png'.format(frame_id), bbox_inches='tight')
 else:
     plt.savefig('snap-{:06d}.pdf'.format(timestep), bbox_inches='tight')
     plt.show()
