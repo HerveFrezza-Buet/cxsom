@@ -105,7 +105,7 @@ def plot_map_match(ax, map_name):
 
 
 fig = plt.figure(figsize=(12,9), constrained_layout=True)
-gs = GridSpec(3, 4, figure=fig)
+gs = GridSpec(3, 5, figure=fig)
 
 ax = fig.add_subplot(gs[0, 0])
 plot_inputs(ax)
