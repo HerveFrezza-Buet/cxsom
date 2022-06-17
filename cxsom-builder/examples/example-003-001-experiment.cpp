@@ -14,7 +14,7 @@
 
 
 #define CACHE              2
-#define TRACE          30000
+#define TRACE          10000
 #define FROZEN_TRACE    1000
 #define OPENED          true
 #define OPEN_AS_NEEDED false

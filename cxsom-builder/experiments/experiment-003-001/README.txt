@@ -56,21 +56,21 @@ different set of rules. These rules can be viewed.
 
 ~> make relax-figs
 
-Let us send them to the processor, for timestep 29999
+Let us send them to the processor, for timestep 9999
 
-~> make send-relax-rules TIMESTEP=29999
+~> make send-relax-rules TIMESTEP=9999
 
-Few rlx-0029999-* timelines are now avialable for running a
+Few rlx-009999-* timelines are now avialable for running a
 relaxation, you have to feed the X,Y input, and eventually the
 BMU. The X,Y inputs are coordinates of a point in a circle, so the
 angle theta (in degree) is required for them.
 
-~> make feed-relax-inputs TIMESTEP=29999 THETA=45 XBMU=.5 YBMU=.5
+~> make feed-relax-inputs TIMESTEP=9999 THETA=45 XBMU=.5 YBMU=.5
 
-Now, relaxation for timestep step 29999 has been expanded in timelines
-zrlx-0029999-*, let us visualize it.
+Now, relaxation for timestep step 9999 has been expanded in timelines
+zrlx-009999-*, let us visualize it.
 
-~> make view-relaxation TIMESTEP=29999
+~> make view-relaxation TIMESTEP=9999
 
 
 ## Analyse the map
@@ -88,21 +88,21 @@ coordinates of a point in a circle
 ~> make feed-frozen-inputs
 
 Now, we can make a frozen test at some specific timestep.
-Let us send the corresponding gules to the processor, for timestep 29999
+Let us send the corresponding gules to the processor, for timestep 9999
 
-~> make send-frozen-rules TIMESTEP=29999
+~> make send-frozen-rules TIMESTEP=9999
 ~> make cxsom-ping-processor
 
 
-Now, the statistics for timestep step 29999 have been computed in
-timelines zfrz-0029999-*, let us visualize it.
+Now, the statistics for timestep step 9999 have been computed in
+timelines zfrz-009999-*, let us visualize it.
 
-~> make view-frozen TIMESTEP=29999
-~> evince evince snap-029999.pdf
+~> make view-frozen TIMESTEP=9999
+~> evince snap-00009999.pdf
 
-Ok, now, let us make a nice movie...
+Ok, now, let us make a nice movie, with 1 frame every 50 timesteps.
 
-~> make movie
+~> make movie EVERY=10
 
 
 

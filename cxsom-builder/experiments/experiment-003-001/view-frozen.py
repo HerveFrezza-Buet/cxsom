@@ -170,7 +170,7 @@ plot_in_space(ax, 'Y')
 if frame_id != None:
     plt.savefig('frame-{:06d}.png'.format(frame_id), bbox_inches='tight')
 else:
-    plt.savefig('snap-{:06d}.pdf'.format(timestep), bbox_inches='tight')
+    plt.savefig('snap-{:08d}.pdf'.format(timestep), bbox_inches='tight')
     plt.show()
 
 
