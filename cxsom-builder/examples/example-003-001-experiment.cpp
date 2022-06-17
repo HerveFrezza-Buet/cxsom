@@ -14,7 +14,7 @@
 
 
 #define CACHE              2
-#define TRACE          10000
+#define TRACE          15000
 #define FROZEN_TRACE    1000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 	      << "e.g:" << std::endl
 	      << "  " << prefix.str() << "main                            <-- sends the main rules." << std::endl
 	      << "  " << prefix.str() << "relax <timeline-prefix> <time>  <-- sends relaxation rules for weights at time." << std::endl
-	      << "  " << prefix.str() << "test <input-timeline-prefix>  <-- sends 'frozen' input declaration rules." << std::endl
+	      << "  " << prefix.str() << "test <input-timeline-prefix>    <-- sends 'frozen' input declaration rules." << std::endl
 	      << "  " << prefix.str() << "frozen <input-timeline-prefix> <timeline-prefix> <time> <-- sends 'frozen' rules for weights at time." << std::endl;
     c.notify_user_argv_error(); 
     return 0;

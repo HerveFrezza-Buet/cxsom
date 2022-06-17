@@ -14,11 +14,12 @@ help:
 	@echo
 	@echo "make feed-main-inputs                              <-- feeds X and Y"
 	@echo "make feed-relax-inputs TIMESTEP=<time>...          <-- feeds the X,Y pair for relaxation at <time>"
-	@echo "     ... THETA=<deg> [XBMU=<xbmu> YBMU=<ybmu>]"
+	@echo "     ... U=<u in [0, 1]> [XBMU=<xbmu> YBMU=<ybmu>]"
 	@echo "make feed-frozen-inputs                            <-- feeds the X,Y pairs for frozen tests"
 	@echo
 	@echo "make view-weights                                  <-- shows the weight evolution."
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
+	@echo "make view-frozen-inputs                            <-- shows the frozen input samples."
 	@echo "make view-frozen TIMESTEP=<time> [FRAME=<id>]      <-- shows the frozen analysis."
 	@echo
 	@echo "make movie EVERY=50                                <-- compute a movie from frozen tests, 1 frame each EVERY step."
@@ -84,7 +85,7 @@ send-relax-rules:
 
 .PHONY: feed-relax-inputs
 feed-relax-inputs:
-	@python3 feed-relax.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(RELAX_PREFIX)-`printf %08d ${TIMESTEP}` ${THETA} ${XBMU} ${YBMU}
+	@python3 feed-relax.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(RELAX_PREFIX)-`printf %08d ${TIMESTEP}` ${U} ${XBMU} ${YBMU}
 
 .PHONY: view-relaxation
 view-relaxation:
@@ -92,7 +93,8 @@ view-relaxation:
 
 .PHONY: declare-frozen-inputs
 declare-frozen-inputs:
-	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(TEST_PREFIX) 
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(TEST_PREFIX)
+
 
 .PHONY: send-frozen-rules
 send-frozen-rules:
@@ -101,6 +103,10 @@ send-frozen-rules:
 .PHONY: feed-frozen-inputs
 feed-frozen-inputs:
 	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(TEST_PREFIX)
+
+.PHONY: view-frozen-inputs
+view-frozen-inputs:
+	@python3 view-frozen-inputs.py `cat .cxsom-rootdir-config` $(TEST_PREFIX)
 
 .PHONY: view-frozen
 view-frozen:

@@ -2,11 +2,12 @@ import os
 import sys
 import pycxsom as cx
 import numpy as np
+import sample
 
 if len(sys.argv) < 6:
     print()
     print('Usage:')
-    print('  {} <root_dir> <hostname> <port> <expand-timeline-prefix> <theta> [Xbmu Ybmu]'.format(sys.argv[0]))
+    print('  {} <root_dir> <hostname> <port> <expand-timeline-prefix> <U> [Xbmu Ybmu]'.format(sys.argv[0]))
     print()
     sys.exit(0)
 
@@ -15,7 +16,7 @@ root_dir = sys.argv[1]
 hostname = sys.argv[2]
 port     = int(sys.argv[3])
 timeline = sys.argv[4]
-theta    = float(sys.argv[5])
+u        = float(sys.argv[5])
 
 x_var_path = cx.variable.path_from(root_dir, timeline + '-in', 'X')
 y_var_path = cx.variable.path_from(root_dir, timeline + '-in', 'Y')
@@ -23,9 +24,7 @@ y_var_path = cx.variable.path_from(root_dir, timeline + '-in', 'Y')
 
 with cx.variable.Realize(x_var_path) as X:
     with cx.variable.Realize(y_var_path) as Y:
-        t = theta*np.pi/180.0
-        X[0] = .5 * (np.cos(t) + 1)
-        Y[0] = .5 * (np.sin(t) + 1)
+        X[0], Y[0] = sample.get(u)
 
 
 if len(sys.argv) == 8:

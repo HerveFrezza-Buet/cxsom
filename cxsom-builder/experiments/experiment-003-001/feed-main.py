@@ -2,6 +2,7 @@ import os
 import sys
 import pycxsom as cx
 import numpy as np
+import sample
 
 if len(sys.argv) < 4:
     print()
@@ -29,10 +30,10 @@ with cx.variable.Realize(x_var_path) as X:
         else:
             nb_to_write = X.file_size
         for _ in range(nb_to_write):
-            t = np.random.random()*2*np.pi
-            X += .5 * (np.cos(t) + 1)
-            Y += .5 * (np.sin(t) + 1)
-        
+            x, y = sample.get(np.random.random())
+            X += x
+            Y += y
+            
 print('Sending "ping" to {}:{}'.format(hostname, port))
 if cx.client.ping(hostname, port):
     print('Something went wrong.')

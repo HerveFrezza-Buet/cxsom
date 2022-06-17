@@ -90,7 +90,7 @@ def plot_bmu_vs_u(ax, map_name):
     ax.scatter(BMUs[map_name], Us, s = s)
     if frame_id != None:
         ax.set_xlim(-.05,1.05)
-        ax.set_ylim(-.3,6.7)
+        ax.set_ylim(-.05,1.05)
     
 def plot_input_fit(ax, map_name):
     ax.set_xlabel(map_name)

@@ -2,6 +2,7 @@ import os
 import sys
 import pycxsom as cx
 import numpy as np
+import sample
 
 if len(sys.argv) < 5:
     print()
@@ -33,10 +34,10 @@ with cx.variable.Realize(x_var_path) as X:
                 nb_to_write = U.file_size
             if nb_to_write > 0:
                 idx = np.flip(U.file_size - 1 - np.arange(nb_to_write)) / U.file_size
-                t = 2 * np.pi * idx
-                for u in t:
-                    X += .5 * (np.cos(u) + 1)
-                    Y += .5 * (np.sin(u) + 1)
+                for u in idx:
+                    x, y = sample.get(u)
+                    X += x
+                    Y += y
                     U += u
         
 print('Sending "ping" to {}:{}'.format(hostname, port))
