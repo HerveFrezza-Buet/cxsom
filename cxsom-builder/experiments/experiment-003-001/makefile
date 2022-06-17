@@ -110,5 +110,5 @@ view-frozen:
 movie:
 	@rm -f frame-*.png
 	@python3 make-movie.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY)
-	@rm movie-expe-003-001.ogg
+	@rm -f movie-expe-003-001.ogg
 	@ffmpeg -i frame-%06d.png -b:v 2M movie-expe-003-001.ogg
