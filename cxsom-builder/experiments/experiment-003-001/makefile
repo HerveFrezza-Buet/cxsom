@@ -21,7 +21,7 @@ help:
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
 	@echo "make view-frozen TIMESTEP=<time> [FRAME=<id>]      <-- shows the frozen analysis."
 	@echo
-	@echo "make movie                                         <-- compute a movie from frozen tests"
+	@echo "make movie EVERY=50                                <-- compute a movie from frozen tests, 1 frame each EVERY step."
 	@echo
 
 # Adapt this path if needed.
@@ -30,6 +30,7 @@ include /usr/share/cxsom/cxsom-makefile
 RULES         = cxsom-builder-example-003-001-experiment
 RELAX_PREFIX  = zrlx
 FROZEN_PREFIX = zfrz
+TEST_PREFIX   = test
 
 .PHONY: main-figs
 main-figs:
@@ -91,21 +92,21 @@ view-relaxation:
 
 .PHONY: declare-frozen-inputs
 declare-frozen-inputs:
-	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(FROZEN_PREFIX) 
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(TEST_PREFIX) 
 
 .PHONY: send-frozen-rules
 send-frozen-rules:
-	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- frozen $(FROZEN_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP}
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- frozen $(TEST_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP}
 
 .PHONY: feed-frozen-inputs
 feed-frozen-inputs:
-	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(FROZEN_PREFIX)
+	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(TEST_PREFIX)
 
 .PHONY: view-frozen
 view-frozen:
-	@python3 view-frozen.py `cat .cxsom-rootdir-config` ${TIMESTEP} ${FRAME}
+	@python3 view-frozen.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP} ${FRAME}
 
 ./PHONY: movie
 movie:
 	@rm -f frame-*.png
-	@python3 make-movie.py `cat .cxsom-rootdir-config`
+	@python3 make-movie.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY)

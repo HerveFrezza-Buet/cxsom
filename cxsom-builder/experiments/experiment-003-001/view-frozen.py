@@ -4,24 +4,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
     print()
     print('Usage:')
-    print('  {} <root_dir> <timestep> [frame-id]'.format(sys.argv[0]))
+    print('  {} <root_dir> <test-prefix> <frozen-prefix> <timestep> [frame-id]'.format(sys.argv[0]))
     print()
     sys.exit(0)
 
 root_dir = sys.argv[1]
-timestep = int(sys.argv[2])
+test_prefix = sys.argv[2]
+frozen_prefix = sys.argv[3]
+timestep = int(sys.argv[4])
 frame_id = None
-if len(sys.argv) == 4:
-    frame_id = int(sys.argv[3])
-input_prefix = 'zfrz-'
-timeline_prefix = 'zfrz-{:08d}-'.format(timestep)
-in_timeline  = input_prefix + 'in'
-wgt_timeline = timeline_prefix + 'wgt'
-rlx_timeline = timeline_prefix + 'rlx'
-out_timeline = timeline_prefix + 'out'
+if len(sys.argv) == 6:
+    frame_id = int(sys.argv[5])
+in_timeline  = test_prefix + '-in'
+wgt_timeline = frozen_prefix + '-wgt'
+rlx_timeline = frozen_prefix + '-rlx'
+out_timeline = frozen_prefix + '-out'
 
 s = 10 # scatter point size
 
@@ -80,11 +80,17 @@ def plot_inputs(ax):
 def plot_convergence_histogram(ax):
     ax.set_title('Number of relaxation steps, {} samples used.'.format(len(CVGs)))
     ax.hist(CVGs, 100)
+    if frame_id != None:
+        ax.set_xlim(0,105)
+        ax.set_ylim(0,500)
 
 def plot_bmu_vs_u(ax, map_name):
     ax.set_xlabel(map_name + '/BMU')
     ax.set_ylabel('U')
     ax.scatter(BMUs[map_name], Us, s = s)
+    if frame_id != None:
+        ax.set_xlim(-.05,1.05)
+        ax.set_ylim(-.3,6.7)
     
 def plot_input_fit(ax, map_name):
     ax.set_xlabel(map_name)
@@ -94,6 +100,9 @@ def plot_input_fit(ax, map_name):
     BMU = BMUs[map_name]
     FIN = [W(bmu) for bmu in BMU]
     ax.scatter(IN, FIN, s = s)
+    if frame_id != None:
+        ax.set_xlim(-.1,1.1)
+        ax.set_ylim(-.1,1.1)
 
 def plot_map_match(ax, map_name):
     ax.set_xlabel('map ' + map_name)
@@ -106,7 +115,11 @@ def plot_map_match(ax, map_name):
     ax.scatter(BMU, A, alpha = alpha, s = s, label = map_name)
     ax.scatter(BMU, B, alpha = alpha, s = s, label = other(map_name))
     ax.scatter(BMU, np.zeros_like(BMU) - .1, alpha = alpha, color='k', s = s, label = 'BMU')
-    ax.legend()
+    if frame_id != None:
+        ax.set_xlim(-.05,1.05)
+        ax.set_ylim(-.2,1.1)
+    if frame_id == None:
+        ax.legend()
 
 def plot_in_space(ax, map_name):
     ax.set_xlabel('map ' + map_name + ' in input space')
@@ -121,6 +134,9 @@ def plot_in_space(ax, map_name):
     Y = np.array([Wy(bmu) for bmu in By])
     ax.plot(X, Y, c='k', alpha=.1, zorder=1)
     ax.scatter(X, Y, s = s, c='k', alpha=.1, zorder=2)
+    if frame_id != None:
+        ax.set_xlim(-.1,1.1)
+        ax.set_ylim(-.1,1.1)
     
     
 
