@@ -27,5 +27,9 @@ INs    = {'X': array_of_var(paths['X']),
           'Y': array_of_var(paths['Y'])}
 
 plt.figure()
-plt.scatter(INs['X'], INs['Y'], s=10)
+ax = plt.gca()
+ax.set_aspect('equal')
+ax.set_xlim(-.05, 1.05)
+ax.set_ylim(-.05, 1.05)
+ax.scatter(INs['X'], INs['Y'], alpha = .1, s = 10)
 plt.show()
