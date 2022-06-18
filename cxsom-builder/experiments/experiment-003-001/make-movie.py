@@ -4,6 +4,7 @@ import time
 import numpy as np
 import pycxsom as cx
 from pathlib import Path
+import threading
 
 
 PACK = 10
@@ -21,6 +22,13 @@ test_prefix = sys.argv[2]
 frozen_prefix = sys.argv[3]
 EVERY = int(sys.argv[4])
 
+
+class System (threading.Thread):
+   def __init__(self, command):
+       threading.Thread.__init__(self)
+       self.command = command
+   def run(self):
+       os.system(self.command)
 
 def wait_frozen_until(prefix, name, last):
     with cx.variable.Realize(cx.variable.path_from(root_dir, prefix, name)) as V:
@@ -52,12 +60,21 @@ for chunk in simu:
         os.system(f'make send-frozen-rules TIMESTEP={timestep}')
     os.system(f'make cxsom-ping-processor')
 
+    threads = []
     for frame_id, timestep in chunk:
         prefix = '{}-{:08d}'.format(frozen_prefix, timestep)
         wait_frozen_until(prefix + '-out', 'X/BMU', test_last)
         wait_frozen_until(prefix + '-out', 'Y/BMU', test_last)
         wait_frozen_until(prefix + '-rlx', 'Cvg', test_last)
-        os.system(f'make view-frozen TIMESTEP={timestep} FRAME={frame_id}')
+        thread = System(f'make view-frozen TIMESTEP={timestep} FRAME={frame_id}')
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
+        del(thread)
+        
+    for frame_id, _ in chunk:
         print(f'#### frame {frame_id} generated.')
     
     

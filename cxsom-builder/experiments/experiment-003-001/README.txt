@@ -100,7 +100,9 @@ timelines zfrz-014999-*, let us visualize it.
 ~> make view-frozen TIMESTEP=14999
 ~> evince snap-00014999.pdf
 
-Ok, now, let us make a nice movie, with 1 frame every 50 timesteps.
+Ok, now, let us make a nice movie, with 1 frame every 50
+timesteps. This uses python3 threading. Be sure you have it enabled on
+your system. If not "pip3 install thread6" should install it.
 
 ~> make movie EVERY=10
 
