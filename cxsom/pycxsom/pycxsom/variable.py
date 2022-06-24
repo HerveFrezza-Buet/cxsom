@@ -76,6 +76,8 @@ class Realize:
                 raise error.Unspecified('cache_size for {}'.format(self.path))
             if file_size == None:
                 raise error.Unspecified('file_size for {}'.format(self.path))
+            if t == None:
+                raise error.Unspecified('type for {}'.format(self.path))
             dir_path = os.path.dirname(path)
             if not os.path.exists(dir_path):
                 os.makedirs(os.path.dirname(path))
