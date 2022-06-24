@@ -16,6 +16,7 @@
 
 
 #include <optional>
+#include <typeinfo>
 
 #include <cxsomRuleDefs.hpp>
 #include <cxsomProtocolClient.hpp>
@@ -575,9 +576,9 @@ inline void cxsom::rules::context::handle_answer(boost::asio::ip::tcp::iostream&
 }
 
 inline void cxsom::rules::context::send(const std::string& hostname, int port) {
+  boost::asio::ip::tcp::iostream socket;
+  socket.exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
   try {
-    boost::asio::ip::tcp::iostream socket;
-    socket.exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
     socket.connect(hostname, std::to_string(port));
 
     for(auto& kv : declared_types) {
@@ -606,9 +607,9 @@ inline void cxsom::rules::context::send(const std::string& hostname, int port) {
     }
     
     socket.close();
-  }			    
+  }		
   catch(std::exception& e) {
-    std::cerr << "Exception caught : " << e.what() << std::endl;
+    std::cerr << "Exception caught : " << e.what() << " --> " << typeid(e).name()<< std::endl;
   }
 }
 

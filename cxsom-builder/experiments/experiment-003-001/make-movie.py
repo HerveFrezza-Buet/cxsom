@@ -55,15 +55,26 @@ def __wait_frozen_until(prefix, name, last):
             else:
                 _, end = r
             print(f'  end = {end}')
-            
+
+
+ugly_file_size = None
 def wait_frozen_until(prefix, name, last):
+    global ugly_file_size
     last_size = -1
     path = cx.variable.path_from(root_dir, prefix, name)
     size = os.stat(str(path)).st_size
-    while size == 0 or size != last_size:
-        time.sleep(2.0)
-        last_size = size
-        size = os.stat(str(path)).st_size
+    if size == ugly_file_size:
+        return
+    if ugly_file_size == None:
+        while size == 0 or size != last_size:
+            time.sleep(2.0)
+            last_size = size
+            size = os.stat(str(path)).st_size
+        ugly_file_size = size # we set the desired file size to the first stable one that we find... this is ugly.
+        print(f'File sized estimated in the ugly way : {ugly_file_size}')
+    else:
+        while os.stat(str(path)).st_size < ugly_file_size:
+            time.sleep(2.0)
         
     
     

@@ -201,8 +201,12 @@ public:
 	  socket << "error command \"" << command << "\" not implemented." << std::endl;
       }
     }
+    catch(std::ios_base::failure& e) {
+      
+      // I ignore this. It occurs systematically without generating any further troubles.
+    }
     catch(std::exception& e) {
-      std::cout << "Exception caught : " << e.what() << std::endl;
+      std::cout << "Exception caught : " << e.what() << " --> " << typeid(e).name() << std::endl;
     }
   }
 };
