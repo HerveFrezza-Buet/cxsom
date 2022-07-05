@@ -11,6 +11,7 @@ This experiments builds up 2 1D maps, each receiving a scalar input,
 and connected one with the others. The two scalar inputs are
 dependent, they lie on a circle.
 
+
 ## Setup the demo
 
 First setup a root-dir directory for our variables.
@@ -22,17 +23,28 @@ You can get help by only typing
 
 ~> make
 
+You can check the config
+
+~> make cxsom-show-config
+
 Then we can launch a processor, and scan the root-dir.
 
 ~> make cxsom-launch-processor
 ~> make cxsom-scan-vars
+
+## Clearing all
+
+If you need to restart everything, you have to kill an eventual running processor and clear the content of the root-dir directory.
+
+~> make cxsom-kill-processor
+~> make cxsom-clear-rootdir
 
 ## Compute the data
 
 Now, let us start a simulation. See cxsom-builder example 003-001. To
 do so, we have first to send the computing rules to the processor.
 
-~> make send-main-rules
+~> make send-main-rules DURATION=5000
 
 We can generate the dot figures corresponding to those rules. View the
 pdf files generated.
@@ -43,11 +55,17 @@ OK, the computation is stalled since it needs to be fed with
 inputs. Let us use the feed-main.py script to do so. It is invoked by
 our makefile.
 
-~> make feed-main-inputs
+~> make feed-main-inputs SHAPE=banana
+
+The computation starts
 
 We can view the weight evolution thanks to view-weights.py
 
 ~> make view-weights
+
+Once computation is done, it could be a good idea to flush the computing rules that are handled by the processor.
+
+~> make cxsom-clear-processor 
 
 ## See a relaxation
 
@@ -56,20 +74,25 @@ different set of rules. These rules can be viewed.
 
 ~> make relax-figs
 
-Let us send them to the processor, for timestep 14999
+Let us send them to the processor, for timestep 100
 
-~> make send-relax-rules TIMESTEP=14999
+~> make send-relax-rules TIMESTEP=100
 
-Few rlx-014999-* timelines are now avialable for running a
+Few rlx-04999-* timelines are now avialable for running a
 relaxation, you have to feed the X,Y input, and eventually the
 BMU. The X,Y inputs are dependent on U, so we provide some U.
 
-~> make feed-relax-inputs TIMESTEP=14999 U=.5 XBMU=.5 YBMU=.5
+~> make feed-relax-inputs TIMESTEP=100 U=.5 XBMU=.5 YBMU=.5
 
-Now, relaxation for timestep step 14999 has been expanded in timelines
-zrlx-014999-*, let us visualize it.
+Now, relaxation for timestep step 100 has been expanded in timelines
+zrlx-00000100-*, let us visualize it.
 
-~> make view-relaxation TIMESTEP=14999
+~> make view-relaxation TIMESTEP=100
+
+You can try any other timestep (from 0 tà 4999). When you ar done, you can clean everything.
+
+~> make cxsom-clear-processor
+~> make clean-relaxation
 
 
 ## Analyse the map
@@ -83,26 +106,45 @@ rules can be viewed.
 Let us build up a bunch of inputs for testings. The X,Y inputs are
 coordinates of a point in a circle
 
+~> make cxsom-clear-processor
 ~> make declare-frozen-inputs
-~> make feed-frozen-inputs
+~> make feed-frozen-inputs SHAPE=circle
 ~> make view-frozen-inputs
 
 Now, we can make a frozen test at some specific timestep.
-Let us send the corresponding gules to the processor, for timestep 14999
+Let us send the corresponding rules to the processor, for timestep 4999
 
-~> make send-frozen-rules TIMESTEP=14999
+~> make send-frozen-rules TIMESTEP=4999
 ~> make cxsom-ping-processor
 
 
-Now, the statistics for timestep step 14999 have been computed in
-timelines zfrz-014999-*, let us visualize it.
+Now, the statistics for timestep step 4999 have been computed in
+timelines zfrz-04999-*, let us visualize it (it may be weird, since we
+fed with a circle while we have learnt from a banana).
 
-~> make view-frozen TIMESTEP=14999
-~> evince snap-00014999.pdf
+~> make view-frozen TIMESTEP=4999
+~> evince snap-0004999.pdf
 
-Ok, now, let us make a nice movie, with 1 frame every 50
+You can restart and see another shape (the appropriate one here)
+~> make cxsom-clear-processor
+~> make clear-frozen-inputs
+~> make clear-frozen
+~> make declare-frozen-inputs
+~> make feed-frozen-inputs SHAPE=banana
+~> make view-frozen-inputs
+~> make send-frozen-rules TIMESTEP=4999
+~> make cxsom-ping-processor
+~> make view-frozen TIMESTEP=4999
+~> evince snap-0004999.pdf
+
+Ok, now, let us make a nice movie, with 1 frame every 10
 timesteps. This uses python3 threading. Be sure you have it enabled on
 your system. If not "pip3 install thread6" should install it.
+
+~> make cxsom-clear-processor
+~> make clear-frozen
+
+You can close the variable scanning windows, since it reads the files periodically.
 
 ~> make movie EVERY=10
 

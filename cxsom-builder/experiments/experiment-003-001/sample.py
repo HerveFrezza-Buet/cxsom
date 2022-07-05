@@ -1,6 +1,5 @@
 import numpy as np
-
-mode = 'banana'
+import sys
 
 banana_r     = .5
 banana_r_2   = banana_r / 2.0
@@ -19,7 +18,7 @@ banana_l5    = banana_l4 + banana_L5
 
 
 
-def get(U):
+def get(U, mode):
     if mode == 'circle':
         t = 2 * np.pi * U
         return (.5 * (1 + np.cos(t)),
@@ -51,4 +50,11 @@ def get(U):
             y =  banana_r_3 * np.sin(theta)
         y *= y_coef
         return x + banana_r, y + banana_r
+    else:
+        print()
+        print()
+        print(f'Bad mode "{mode}"')
+        print()
+        print()
+        sys.exit(0)
             

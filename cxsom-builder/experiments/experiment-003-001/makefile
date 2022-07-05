@@ -7,15 +7,15 @@ help:
 	@echo "make relax-figs                                    <-- generate figures for expanded relaxation rules"
 	@echo "make frozen-figs                                   <-- generate figures for frozen rules"
 	@echo
-	@echo "make send-main-rules                               <-- sends the main rules"
+	@echo "make send-main-rules DURATION=<nb-steps>           <-- sends the main rules"
 	@echo "make send-relax-rules TIMESTEP=<time>              <-- sends the relax rules"
 	@echo "make declare-frozen-inputs                         <-- sends the rules for frozen inputs declaration"
 	@echo "make send-frozen-rules TIMESTEP=<time>             <-- sends the frozen rules"
 	@echo
-	@echo "make feed-main-inputs                              <-- feeds X and Y"
+	@echo "make feed-main-inputs SHAPE=<shape>                <-- feeds X and Y"
 	@echo "make feed-relax-inputs TIMESTEP=<time>...          <-- feeds the X,Y pair for relaxation at <time>"
 	@echo "     ... U=<u in [0, 1]> [XBMU=<xbmu> YBMU=<ybmu>]"
-	@echo "make feed-frozen-inputs                            <-- feeds the X,Y pairs for frozen tests"
+	@echo "make feed-frozen-inputs SHAPE=<shape>              <-- feeds the X,Y pairs for frozen tests"
 	@echo
 	@echo "make view-weights                                  <-- shows the weight evolution."
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
@@ -35,7 +35,7 @@ TEST_PREFIX   = test
 
 .PHONY: main-figs
 main-figs:
-	@${RULES} graph main -- main
+	@${RULES} graph main -- main 0
 	@dot -Tpdf main-inits.dot -o main-inits.pdf
 	@dot -Tpdf main-updates.dot -o main-updates.pdf
 	@dot -Tpdf archi.dot -o archi.pdf
@@ -69,11 +69,11 @@ frozen-figs:
 
 .PHONY: send-main-rules
 send-main-rules:
-	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- main
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- main $(DURATION)
 
 .PHONY: feed-main-inputs
 feed-main-inputs:
-	@python3 feed-main.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` 
+	@python3 feed-main.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` ${SHAPE}
 
 .PHONY: view-weights
 view-weights:
@@ -91,9 +91,13 @@ feed-relax-inputs:
 view-relaxation:
 	@python3 view-relaxation.py `cat .cxsom-rootdir-config` ${TIMESTEP}
 
+.PHONY: clear-relaxation
+clear-relaxation:
+	@rm -rf `cat .cxsom-rootdir-config`/zrlx-*
+
 .PHONY: declare-frozen-inputs
 declare-frozen-inputs:
-	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(TEST_PREFIX)
+	@${RULES} send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(TEST_PREFIX) $(SHAPE)
 
 
 .PHONY: send-frozen-rules
@@ -102,7 +106,7 @@ send-frozen-rules:
 
 .PHONY: feed-frozen-inputs
 feed-frozen-inputs:
-	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(TEST_PREFIX)
+	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(TEST_PREFIX) $(SHAPE)
 
 .PHONY: view-frozen-inputs
 view-frozen-inputs:
@@ -111,6 +115,14 @@ view-frozen-inputs:
 .PHONY: view-frozen
 view-frozen:
 	@python3 view-frozen.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP} ${FRAME}
+
+.PHONY: clear-frozen-inputs
+clear-frozen-inputs:
+	@rm -rf `cat .cxsom-rootdir-config`/test-in/*
+
+.PHONY: clear-frozen
+clear-frozen:
+	@rm -rf `cat .cxsom-rootdir-config`/zfrz-*
 
 ./PHONY: movie
 movie:

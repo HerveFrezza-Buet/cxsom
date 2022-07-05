@@ -1,10 +1,8 @@
 /*
 
-  Here, we show how to expand the rules in order to exhibit the
-  relaxation process. We consider 2 connexted maps with external
-  inputs.
-
-  See the assorted stuff in the 'experiment' section.
+  Here, we consider 2 connexted maps with external inputs. This serves
+  as a rule generator for the experiment 003-001 in the experimental
+  section.
 
 */
 
@@ -14,7 +12,7 @@
 
 
 #define CACHE              2
-#define TRACE          15000
+#define UNDEFINED_TRACE 1000
 #define FROZEN_TRACE    1000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
@@ -28,7 +26,7 @@
 using namespace cxsom::rules;
 context* cxsom::rules::ctx = nullptr;
 
-auto make_architecture(bool define_inputs) {
+auto make_architecture(bool define_inputs, unsigned int trace) {
 
   auto archi = cxsom::builder::architecture();
   
@@ -45,14 +43,14 @@ auto make_architecture(bool define_inputs) {
   auto map_settings = cxsom::builder::map::make_settings();
   map_settings.map_size      = MAP_SIZE;
   map_settings.cache_size    = CACHE;
-  map_settings.file_size     = TRACE;
+  map_settings.file_size     = trace;
   map_settings.kept_opened   = OPENED;
   map_settings               = {p_external, p_contextual, p_global};
   map_settings.argmax        = fx::argmax;
   map_settings.toward_argmax = fx::toward_argmax;
 
-  auto X = cxsom::builder::variable("in", cxsom::builder::name("X"), "Scalar", CACHE, TRACE, OPENED);
-  auto Y = cxsom::builder::variable("in", cxsom::builder::name("Y"), "Scalar", CACHE, TRACE, OPENED);
+  auto X = cxsom::builder::variable("in", cxsom::builder::name("X"), "Scalar", CACHE, trace, OPENED);
+  auto Y = cxsom::builder::variable("in", cxsom::builder::name("Y"), "Scalar", CACHE, trace, OPENED);
   if(define_inputs) {
     X->definition();
     Y->definition();
@@ -81,6 +79,7 @@ int main(int argc, char* argv[]) {
   std::string input_prefix;
   std::string analysis_prefix;
   unsigned int weight_time;
+  unsigned int trace = 0;
 
 
   // We analyse the arguments and identify the mode.
@@ -91,7 +90,7 @@ int main(int argc, char* argv[]) {
   if(c.user_argv.size() == 0) {
     std::cout << "You have to provide user arguments." << std::endl
 	      << "e.g:" << std::endl
-	      << "  " << prefix.str() << "main                            <-- sends the main rules." << std::endl
+	      << "  " << prefix.str() << "main <trace>                    <-- sends the main rules." << std::endl
 	      << "  " << prefix.str() << "relax <timeline-prefix> <time>  <-- sends relaxation rules for weights at time." << std::endl
 	      << "  " << prefix.str() << "test <input-timeline-prefix>    <-- sends 'frozen' input declaration rules." << std::endl
 	      << "  " << prefix.str() << "frozen <input-timeline-prefix> <timeline-prefix> <time> <-- sends 'frozen' rules for weights at time." << std::endl;
@@ -99,8 +98,15 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  if(c.user_argv[0] == "main")
-    mode = Mode::Main;
+  if(c.user_argv[0] == "main") {
+    if(c.user_argv.size() != 2) {
+      std::cout << "The 'main' mode expects 1 arguments"  << std::endl;
+      c.notify_user_argv_error(); 
+      return 0;
+    }
+    mode  = Mode::Main;
+    trace = stoul(c.user_argv[1]);
+  }
   else if(c.user_argv[0] == "relax") {
     if(c.user_argv.size() != 3) {
       std::cout << "The 'relax' mode expects 2 arguments"  << std::endl;
@@ -142,7 +148,7 @@ int main(int argc, char* argv[]) {
   // Now, according to the mode, let us send rules.
 
   if(mode == Mode::Main) {
-    auto archi = make_architecture(true);
+    auto archi = make_architecture(true, trace);
     archi->realize();
     for(auto map : archi->maps) map->internals_random_at(0);
 
@@ -154,7 +160,7 @@ int main(int argc, char* argv[]) {
 
   
   if(mode == Mode::Relax) {
-    auto archi = make_architecture(false);
+    auto archi = make_architecture(false, UNDEFINED_TRACE);
     auto X = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("X"), "Scalar", 1, 1, OPENED);
     auto Y = cxsom::builder::variable(analysis_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, 1, OPENED);
     X->definition();
@@ -173,7 +179,7 @@ int main(int argc, char* argv[]) {
   }
   
   if(mode == Mode::Frozen) {
-    auto archi = make_architecture(false);
+    auto archi = make_architecture(false, UNDEFINED_TRACE);
     auto X = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("X"), "Scalar", 1, FROZEN_TRACE, OPENED);
     auto Y = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, FROZEN_TRACE, OPENED);
     auto U = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("U"), "Scalar", 1, FROZEN_TRACE, OPENED);

@@ -4,16 +4,17 @@ import pycxsom as cx
 import numpy as np
 import sample
 
-if len(sys.argv) < 4:
+if len(sys.argv) < 5:
     print()
     print('Usage:')
-    print('  {} <root_dir> <hostname> <port>'.format(sys.argv[0]))
+    print('  {} <root_dir> <hostname> <port> <shape>'.format(sys.argv[0]))
     print()
     sys.exit(0)
     
 root_dir = sys.argv[1]
 hostname = sys.argv[2]
 port     = int(sys.argv[3])
+mode     = sys.argv[4]
 
 x_var_path = cx.variable.path_from(root_dir, 'in', 'X')
 y_var_path = cx.variable.path_from(root_dir, 'in', 'Y')
@@ -30,7 +31,7 @@ with cx.variable.Realize(x_var_path) as X:
         else:
             nb_to_write = X.file_size
         for _ in range(nb_to_write):
-            x, y = sample.get(np.random.random())
+            x, y = sample.get(np.random.random(), mode)
             X += x
             Y += y
             
