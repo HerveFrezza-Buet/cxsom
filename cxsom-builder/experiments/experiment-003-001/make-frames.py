@@ -10,10 +10,10 @@ import threading
 PACK = 10
 
 
-if len(sys.argv) != 5:
+if len(sys.argv) != 6:
     print()
     print('Usage:')
-    print('  {} <root_dir> <test-prefix> <frozen-prefix> <every>'.format(sys.argv[0]))
+    print('  {} <root_dir> <test-prefix> <frozen-prefix> <every> <next-frame>'.format(sys.argv[0]))
     print()
     sys.exit(0)
 
@@ -21,6 +21,7 @@ root_dir = sys.argv[1]
 test_prefix = sys.argv[2]
 frozen_prefix = sys.argv[3]
 EVERY = int(sys.argv[4])
+next_frame = int(sys.argv[5])
 
 
 class System (threading.Thread):
@@ -94,8 +95,12 @@ simu = np.array_split(simu, nb_splits)
 os.system('make --quiet cxsom-launch-processor')
 time.sleep(1)
 for chunk in simu:
+    first, last = chunk[0][0], chunk[-1][0]
+    if chunk[-1][0] < next_frame:
+        print(f'skipping frames [{first}... {last}]')
+        continue
     os.system('make --quiet cxsom-clear-processor')
-    os.system(f'rm -rf {root_dir}/{frozen_prefix}*')
+    os.system(f'make --quiet clear-frozen')
     time.sleep(.5)
     for _, timestep in chunk:
         os.system(f'make --quiet send-frozen-rules TIMESTEP={timestep}')
@@ -103,6 +108,7 @@ for chunk in simu:
 
     threads = []
     print(f'---- waiting the computation of {test_last+1} test steps.')
+    print(f'     for frames [{first}... {last}].')
     for frame_id, timestep in chunk:
         prefix = '{}-{:08d}'.format(frozen_prefix, timestep)
         wait_frozen_until(prefix + '-out', 'X/BMU', test_last)

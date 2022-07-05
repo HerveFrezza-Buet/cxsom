@@ -22,7 +22,8 @@ help:
 	@echo "make view-frozen-inputs                            <-- shows the frozen input samples."
 	@echo "make view-frozen TIMESTEP=<time> [FRAME=<id>]      <-- shows the frozen analysis."
 	@echo
-	@echo "make movie EVERY=50                                <-- compute a movie from frozen tests, 1 frame each EVERY step."
+	@echo "make frames EVERY=50 NEXT_FRAME=0                   <-- compute the movie frames from frozen tests, 1 frame each EVERY step, (re)starting at NEXT_FRAME"
+	@echo "make movie                                          <-- makes a movie from the frames."
 	@echo
 
 # Adapt this path if needed.
@@ -124,9 +125,12 @@ clear-frozen-inputs:
 clear-frozen:
 	@rm -rf `cat .cxsom-rootdir-config`/zfrz-*
 
+./PHONY: frames
+frames:
+	@python3 make-frames.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY) $(NEXT_FRAME)
+	@ffmpeg -i frame-%06d.png -b:v 2M movie-expe-003-001.ogg
+
 ./PHONY: movie
 movie:
-	@rm -f frame-*.png
-	@python3 make-movie.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY)
 	@rm -f movie-expe-003-001.ogg
 	@ffmpeg -i frame-%06d.png -b:v 2M movie-expe-003-001.ogg

@@ -146,7 +146,19 @@ your system. If not "pip3 install thread6" should install it.
 
 You can close the variable scanning windows, since it reads the files periodically.
 
-~> make movie EVERY=10
+~> make frames EVERY=10 NEXT_FRAME=0
+
+If the process get stalled, you can restart it from the next frame you
+want. Let say that you need to restart from frame 123.
+
+~> make frames EVERY=10 NEXT_FRAME=123
+
+When you are done, you can make the movie and clear the frames.
+~> make movie
+~> rm frame-*.png
+
+
+
 
 
 
