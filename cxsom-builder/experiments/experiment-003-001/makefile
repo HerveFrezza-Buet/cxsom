@@ -128,7 +128,6 @@ clear-frozen:
 ./PHONY: frames
 frames:
 	@python3 make-frames.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY) $(NEXT_FRAME)
-	@ffmpeg -i frame-%06d.png -b:v 2M movie-expe-003-001.ogg
 
 ./PHONY: movie
 movie:
