@@ -41,6 +41,7 @@ namespace cxsom {
     private:
 
       std::mt19937 gen;
+      UpdateFactory update_factory;
       data::Center& data_center;
       mutable std::mutex integrity_mutex;
 
@@ -127,12 +128,12 @@ namespace cxsom {
 	  auto init_out = std::back_inserter(init_args);
 	  for(auto& a : init.args) *(init_out++) = {a, data_center.type_of(a)};
 	  *ts += {
-	    make_update  (data_center, init.op,  arg_res,  init_args,  init.params, gen()),
-	      make_update(data_center, usual.op, arg_res, usual_args, usual.params, gen())
+	    update_factory  (data_center, init.op,  arg_res,  init_args,  init.params, gen()),
+	      update_factory(data_center, usual.op, arg_res, usual_args, usual.params, gen())
 	      };
 	}
 	else
-	  *ts += {make_update(data_center, usual.op, arg_res, usual_args, usual.params, gen())};
+	  *ts += {update_factory(data_center, usual.op, arg_res, usual_args, usual.params, gen())};
       }
 
       
@@ -303,8 +304,9 @@ namespace cxsom {
     public:
       
       template<typename RANDOM_ENGINE>
-      Center(RANDOM_ENGINE& rd, data::Center& data_center)
+      Center(RANDOM_ENGINE& rd, const UpdateFactory& update_factory, data::Center& data_center)
 	: gen(rd()),
+	  update_factory(update_factory)
 	  data_center(data_center),
 	  integrity_mutex(),
 	  timesteps(),

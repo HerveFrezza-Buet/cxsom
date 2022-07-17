@@ -165,7 +165,7 @@ namespace cxsom {
 	   const update::arg& res,
 	   const std::vector<update::arg>& args,
 	   const std::map<std::string, std::string>&)
-	: Base(center, res, Operation::Copy, args) {}
+	: Base(center, res, "copy", args) {}
       
     protected:
       
@@ -240,7 +240,7 @@ namespace cxsom {
 	      const update::arg& res,
 	      const std::vector<update::arg>& args,
 	      const std::map<std::string, std::string>& params)
-	: Base(center, res, Operation::Average, args), epsilon(0) {
+	: Base(center, res, "average", args), epsilon(0) {
 	if(auto it = params.find("epsilon"); it != params.end()) epsilon = std::stod(it->second);
       }
       
@@ -352,7 +352,7 @@ namespace cxsom {
 	     const std::vector<update::arg>& args,
 	     const std::map<std::string, std::string>&,
 	     std::mt19937::result_type seed)
-	: Base(center, res, Operation::Random, args), gen(seed) {}
+	: Base(center, res, "random", args), gen(seed) {}
       
     protected:
       
@@ -396,7 +396,7 @@ namespace cxsom {
 	       const update::arg& res,
 	       const std::vector<update::arg>& args,
 	       const std::map<std::string, std::string>&)
-	: Base(center, res, Operation::Converge, args), nb_converges(0) {
+	: Base(center, res, "converge", args), nb_converges(0) {
       }
       
     protected:
@@ -446,7 +446,7 @@ namespace cxsom {
 	    const update::arg& res,
 	    const std::vector<update::arg>& args,
 	    const std::map<std::string, std::string>& params)
-	: Base(center, res, Operation::Clear, args), value(0) {
+	: Base(center, res, "clear", args), value(0) {
 	if(auto it = params.find("value"); it != params.end()) value = std::stod(it->second);
       }
       
@@ -503,7 +503,7 @@ namespace cxsom {
 	    const update::arg& res,
 	    const std::vector<update::arg>& args,
 	    const std::map<std::string, std::string>& params)
-	: Base(center, res, Operation::Merge, args), beta(.5), beta_(.5),  epsilon(0) {
+	: Base(center, res, "merge", args), beta(.5), beta_(.5),  epsilon(0) {
 	if(auto it = params.find("beta")   ; it != params.end()) {
 	  beta  = std::stod(it->second);
 	  beta_ = 1 - beta;
@@ -619,7 +619,7 @@ namespace cxsom {
 		    const update::arg& res,
 		    const std::vector<update::arg>& args,
 		    const std::map<std::string, std::string>& params)
-	: Match(center, res, args, params, Operation::MatchTriangle), _r(2) {
+	: Match(center, res, args, params, "match-triangle"), _r(2) {
 	if(auto it = params.find("r"); it != params.end()) _r = 1/std::stod(it->second);
       }
       
@@ -679,7 +679,7 @@ namespace cxsom {
 		    const update::arg& res,
 		    const std::vector<update::arg>& args,
 		    const std::map<std::string, std::string>& params)
-	: Match(center, res, args, params, Operation::MatchGaussian), _2sigma2(.5) {
+	: Match(center, res, args, params, "match-gaussian"), _2sigma2(.5) {
 	if(auto it = params.find("sigma")   ; it != params.end()) {
 	  double tmp = std::stod(it->second);
 	  _2sigma2  = .5/(tmp * tmp);
@@ -999,7 +999,7 @@ namespace cxsom {
 		    const update::arg& res,
 		    const std::vector<update::arg>& args,
 		    const std::map<std::string, std::string>& params)
-	: Learn(center, res, args, params, Operation::LearnTriangle), _r(2) {
+	: Learn(center, res, args, params, "learn-triangle"), _r(2) {
 	if(auto it = params.find("r"); it != params.end()) _r = 1/std::stod(it->second);
       }
       
@@ -1048,7 +1048,7 @@ namespace cxsom {
 		    const update::arg& res,
 		    const std::vector<update::arg>& args,
 		    const std::map<std::string, std::string>& params)
-	: Learn(center, res, args, params, Operation::LearnGaussian), _2sigma2(.5) {
+	: Learn(center, res, args, params, "learn_gaussian"), _2sigma2(.5) {
 	if(auto it = params.find("sigma")   ; it != params.end()) {
 	  double tmp = std::stod(it->second);
 	  _2sigma2  = .5/(tmp * tmp);
@@ -1176,7 +1176,7 @@ namespace cxsom {
 	     const std::vector<update::arg>& args,
 	     const std::map<std::string, std::string>& params,
 	     std::mt19937::result_type seed)
-	: ArgmaxBase(center, res, Operation::Argmax, args, params, seed) {
+	: ArgmaxBase(center, res, "argmax", args, params, seed) {
       }
       
     protected:
@@ -1282,7 +1282,7 @@ namespace cxsom {
 		 const std::vector<update::arg>& args,
 		 const std::map<std::string, std::string>& params,
 		 std::mt19937::result_type seed)
-	: ArgmaxBase(center, res, Operation::ConvArgmax, args, params, seed), sigma(.1) {
+	: ArgmaxBase(center, res, "conv-argmax", args, params, seed), sigma(.1) {
 	if(auto it = params.find("sigma");   it != params.end()) sigma   = std::stod(it->second);
       }
       
@@ -1393,7 +1393,7 @@ namespace cxsom {
 		       const std::vector<update::arg>& args,
 		       const std::map<std::string, std::string>& params,
 		       std::mt19937::result_type seed)
-	: ArgmaxBase(center, res, Operation::TowardArgmax, args, params, seed), delta(.05) {
+	: ArgmaxBase(center, res, "toward-argmax", args, params, seed), delta(.05) {
 	if(auto it = params.find("delta");   it != params.end()) delta   = std::stod(it->second);
 	delta2 = delta*delta;
       }
@@ -1547,7 +1547,7 @@ namespace cxsom {
 		       const std::vector<update::arg>& args,
 		       const std::map<std::string, std::string>& params,
 		       std::mt19937::result_type seed)
-	: ArgmaxBase(center, res, Operation::TowardConvArgmax, args, params, seed), sigma(.1), delta(.05) {
+	: ArgmaxBase(center, res, "toward-conv-argmax", args, params, seed), sigma(.1), delta(.05) {
 	if(auto it = params.find("sigma");   it != params.end()) sigma   = std::stod(it->second);
 	if(auto it = params.find("delta");   it != params.end()) delta   = std::stod(it->second);
 	delta2 = delta*delta;
@@ -1651,7 +1651,7 @@ namespace cxsom {
 			     const update::arg& res,
 			     const std::vector<update::arg>& args,
 			     const std::map<std::string, std::string>& params,
-			     std::mt19937::result_type seed) {
+			     std::mt19937::result_type seed) const {
 	if(auto it = factory.find(op); it != factory.end())
 	  return stg::get<1>(*it)(center, res, args, params, seed);
 	else
