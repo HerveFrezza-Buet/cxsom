@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
+#include <string>
+#include <list>
 
 #include <cxsomSymbols.hpp>
 
@@ -23,61 +25,8 @@ namespace cxsom {
   }
   
   namespace jobs {
-    
-    enum class Operation : unsigned int {
-      Copy,
-      Average,
-      Random,
-      Converge,
-      Clear,
-      Merge,
-      MatchTriangle,
-      MatchGaussian,
-      LearnTriangle,
-      LearnGaussian,
-      Argmax,
-      ConvArgmax,
-      TowardArgmax,
-      TowardConvArgmax
-    };
 
-    inline std::ostream& operator<<(std::ostream& os, Operation op) {
-      switch(op) {
-      case Operation::Copy             : os << "copy"              ; break;
-      case Operation::Average          : os << "average"           ; break;
-      case Operation::Random           : os << "random"            ; break;
-      case Operation::Converge         : os << "converge"          ; break;
-      case Operation::Clear            : os << "clear"             ; break;
-      case Operation::Merge            : os << "merge"             ; break;
-      case Operation::MatchTriangle    : os << "match-triangle"    ; break;
-      case Operation::MatchGaussian    : os << "match-gaussian"    ; break;
-      case Operation::LearnTriangle    : os << "learn-triangle"    ; break;
-      case Operation::LearnGaussian    : os << "learn-gaussian"    ; break;
-      case Operation::Argmax           : os << "argmax"            ; break;
-      case Operation::ConvArgmax       : os << "conv-argmax"       ; break;
-      case Operation::TowardArgmax     : os << "toward-argmax"     ; break;
-      case Operation::TowardConvArgmax : os << "toward-conv-argmax"; break;
-      }
-      return os;
-    }
-
-    Operation operation(const std::string& s) {
-      if(s == "copy"              ) return Operation::Copy;
-      if(s == "average"           ) return Operation::Average;
-      if(s == "random"            ) return Operation::Random;
-      if(s == "converge"          ) return Operation::Converge;
-      if(s == "clear"             ) return Operation::Clear;
-      if(s == "merge"             ) return Operation::Merge;
-      if(s == "match-triangle"    ) return Operation::MatchTriangle;
-      if(s == "match-gaussian"    ) return Operation::MatchGaussian;
-      if(s == "learn-triangle"    ) return Operation::LearnTriangle;
-      if(s == "learn-gaussian"    ) return Operation::LearnGaussian;
-      if(s == "argmax"            ) return Operation::Argmax;
-      if(s == "conv-argmax"       ) return Operation::ConvArgmax;
-      if(s == "toward-argmax")      return Operation::TowardArgmax;
-      if(s == "toward-conv-argmax") return Operation::TowardConvArgmax;
-      throw error::bad_operation(std::string("cxsom::jobs::operation(\"") + s + "\") : unhandled operation.");
-    }
+    using Operation = std::string;
 
     struct Function {
       Operation op;

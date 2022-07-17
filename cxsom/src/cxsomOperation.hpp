@@ -12,12 +12,15 @@
 #include <iterator>
 #include <array>
 #include <limits>
+#include <functional>
+#include <map>
 #include <cxsomData.hpp>
 #include <cxsomUpdate.hpp>
 #include <cxsomJobRule.hpp>
 
 #include <fftconv.hpp>
 
+using namespace std::placeholders;
 
 
 // #define cxsomDEBUG_TOWARD_CONV_ARGMAX // For 1D only !
@@ -28,6 +31,14 @@ namespace cxsom {
   namespace error {
     struct empty_collection : public std::logic_error {
       using std::logic_error::logic_error;
+    };
+    
+    struct already_existing_update : public std::logic_error {
+      already_existing_update(const Operation& op) : std::logic_error(std::string("Update \"") + op + "\" already exists in the factory.") {}
+    };
+    
+    struct not_existing_update : public std::logic_error {
+      not_existing_update(const Operation& op) : std::logic_error(std::string("Update \"") + op + "\" does not exist in the factory.") {}
     };
   }
 
@@ -96,7 +107,8 @@ namespace cxsom {
     update::ref make_update_deterministic(data::Center& center,
 					  const update::arg& res,
 					  const std::vector<update::arg>& args,
-					  const std::map<std::string, std::string>& params) {
+					  const std::map<std::string, std::string>& params,
+					  std::mt19937::result_type seed) {
       return std::shared_ptr<UPDT>(new UPDT(center, res, args, params));
     }
     
@@ -1612,33 +1624,58 @@ namespace cxsom {
     // Update factory //
     //                //
     ////////////////////
-    
-    update::ref make_update(data::Center& center,
-			    Operation op,
-			    const update::arg& res,
-			    const std::vector<update::arg>& args,
-			    const std::map<std::string, std::string>& params,
-			    std::mt19937::result_type seed) {
-      switch(op) {
-      case Operation::Copy             : return make_update_deterministic<Copy>            (center, res, args, params      ); break;
-      case Operation::Average          : return make_update_deterministic<Average>         (center, res, args, params      ); break;
-      case Operation::Random           : return make_update_random<Random>                 (center, res, args, params, seed); break;
-      case Operation::Converge         : return make_update_deterministic<Converge>        (center, res, args, params      ); break;
-      case Operation::Clear            : return make_update_deterministic<Clear>           (center, res, args, params      ); break;
-      case Operation::Merge            : return make_update_deterministic<Merge>           (center, res, args, params      ); break;
-      case Operation::MatchTriangle    : return make_update_deterministic<MatchTriangle>   (center, res, args, params      ); break;
-      case Operation::MatchGaussian    : return make_update_deterministic<MatchGaussian>   (center, res, args, params      ); break;
-      case Operation::LearnTriangle    : return make_update_deterministic<LearnTriangle>   (center, res, args, params      ); break;
-      case Operation::LearnGaussian    : return make_update_deterministic<LearnGaussian>   (center, res, args, params      ); break;
-      case Operation::Argmax           : return make_update_random<Argmax>                 (center, res, args, params, seed); break;
-      case Operation::ConvArgmax       : return make_update_random<ConvArgmax>             (center, res, args, params, seed); break;
-      case Operation::TowardArgmax     : return make_update_random<TowardArgmax>           (center, res, args, params, seed); break;
-      case Operation::TowardConvArgmax : return make_update_random<TowardConvArgmax>       (center, res, args, params, seed); break;
-      default:
-	throw error::bad_operation(std::string("cxsom::job::make_update(op = ") + std::to_string(static_cast<unsigned int>(op)) + ", ...) : report bug.");
-	break;
+
+    /**
+     * This class provides update instances from the op name.
+     */
+    struct UpdateFactory {
+    public:
+      using make_update_type = std::function<update::ref (const update::arg&,
+							  const std::vector<update::arg>&,
+							  const std::map<std::string, std::string>&,
+							  std::mt19937::result_type seed)>;
+    private:
+      std::map<Operation, make_update_type> factory;
+      
+    public:
+
+      void operator+=(const std::pair<Operation, make_update_type>& make_updt) {
+	if(auto it = factory.find(std::get<0>(make_updt)); it == factory.end())
+	  factory[std::get<0>(make_updt)] = std::get<1>(make_updt);
+	else
+	  throw error::already_existing_update(std::get<0>(make_updt));
       }
+
+      update::ref operator()(data::Center& center,
+			     Operation op,
+			     const update::arg& res,
+			     const std::vector<update::arg>& args,
+			     const std::map<std::string, std::string>& params,
+			     std::mt19937::result_type seed) {
+	if(auto it = factory.find(op); it != factory.end())
+	  return stg::get<1>(*it)(center, res, args, params, seed);
+	else
+	  throw error::not_existing_update(op);
+      }
+    };
+
+    void fill(UpdateFactory& factory) {
+      factory += {"copy"              , std::bind(make_update_deterministic<Copy>         , _1, _2, _3, _4, _5)};
+      factory += {"average"           , std::bind(make_update_deterministic<Average>      , _1, _2, _3, _4, _5)};
+      factory += {"random"            , std::bind(make_update_random<Random>              , _1, _2, _3, _4, _5)};
+      factory += {"converge"          , std::bind(make_update_deterministic<Converge>     , _1, _2, _3, _4, _5)};
+      factory += {"clear"             , std::bind(make_update_deterministic<Clear>        , _1, _2, _3, _4, _5)};
+      factory += {"merge"             , std::bind(make_update_deterministic<Merge>        , _1, _2, _3, _4, _5)};
+      factory += {"match-triangle"    , std::bind(make_update_deterministic<MatchTriangle>, _1, _2, _3, _4, _5)};
+      factory += {"match-gaussian"    , std::bind(make_update_deterministic<MatchGaussian>, _1, _2, _3, _4, _5)};
+      factory += {"learn-triangle"    , std::bind(make_update_deterministic<LearnTriangle>, _1, _2, _3, _4, _5)};
+      factory += {"learn-gaussian"    , std::bind(make_update_deterministic<LearnGaussian>, _1, _2, _3, _4, _5)};
+      factory += {"argmax"            , std::bind(make_update_random<Argmax>              , _1, _2, _3, _4, _5)};
+      factory += {"conv-argmax"       , std::bind(make_update_random<ConvArgmax>          , _1, _2, _3, _4, _5)};
+      factory += {"toward-argmax"     , std::bind(make_update_random<TowardArgmax>        , _1, _2, _3, _4, _5)};
+      factory += {"toward-conv-argmax", std::bind(make_update_random<TowardConvArgmax>    , _1, _2, _3, _4, _5)};
     }
+
 
     ///////////////////
     //               //
