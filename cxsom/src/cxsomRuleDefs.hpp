@@ -340,17 +340,28 @@ namespace cxsom {
     };
 
     namespace fx {
-      inline update converge(const std::vector<kwd::data>& r) {return {"converge", r};}
+      inline update converge(const std::vector<kwd::data>& r) {
+	std::vector<kwd::data> args;
+	for(auto& d : r)
+	  args.push_back((*ctx)(d));
+	return {"converge", args};
+      }
+      inline update average(const std::vector<kwd::data>& r) {
+	std::vector<kwd::data> args;
+	for(auto& d : r)
+	  args.push_back((*ctx)(d));
+	return {"average", args};
+      }
+      inline update context_merge(const std::vector<kwd::data>& r) {return average(r);}
+      
       inline update clear() {return {"clear", {}};}
       inline update random() {return {"random", {}};}
-      inline update average(const std::vector<kwd::data>& r) {return {"average", r};}
       
       inline update copy(const kwd::data& v) {return {"copy", {(*ctx)(v)}};}
       inline update merge(const kwd::data& v1, const kwd::data& v2) {return {"merge", {(*ctx)(v1), (*ctx)(v2)}};}
       inline update toward_bmu(const kwd::data& v) {return {"toward_bmu", {(*ctx)(v)}};}
       inline update match_triangle(const kwd::data& v1, const kwd::data& v2) {return {"match-triangle", {(*ctx)(v1), (*ctx)(v2)}};}
       inline update match_gaussian(const kwd::data& v1, const kwd::data& v2) {return {"match-gaussian", {(*ctx)(v1), (*ctx)(v2)}};}
-      inline update context_merge(const std::vector<kwd::data>& r) {return {"average", r};}
       inline update learn_triangle(const kwd::data& v1, const kwd::data& v2, const kwd::data& v3) {return {"learn-triangle", {(*ctx)(v1), (*ctx)(v2), (*ctx)(v3)}};}
       inline update learn_gaussian(const kwd::data& v1, const kwd::data& v2, const kwd::data& v3) {return {"learn-gaussian", {(*ctx)(v1), (*ctx)(v2), (*ctx)(v3)}};}
       inline update argmax(const kwd::data& v) {return {"argmax", {(*ctx)(v)}};}

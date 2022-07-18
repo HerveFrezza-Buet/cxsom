@@ -5,17 +5,19 @@
   This file gathers the definition that will be necessary for
   extending the set of available operations in cxsom to new
   ones. Here, the "foo" namespace will gather some specific
-  extention. Indeed, we will consider a single supplementary
+  extentions. Indeed, we will consider a single supplementary
   operation, called "midbound". The midbound function is such as :
 
   midbound(a1, ... an) = (min(a1, ... an) + max(a1, ... an)) / 2
 
   The ai must all be of the same kind, that can any of the cxsom
-  numerical data types.
+  numerical data types... except maps of array.
 
 */
 
 #include <iostream>
+#include <algorithm>
+#include <tuple>
 
 // Everything you need comes from that header.
 #include <cxsom-server.hpp>
@@ -35,7 +37,7 @@ namespace foo {
   // This function returns nothing, but raises an exception in case of bad typing.
   inline void check_types_midbound(cxsom::type::ref res, const std::vector<cxsom::type::ref>& args) {
     // Here, all arguments must be of the same type, which is also the
-    // type of the result.  Let us suppose that we want at least 3
+    // type of the result.  Let us suppose that we want at least 2
     // arguments to the operator. Let us also suppose (but it is not really
     // relevant for this operator) that we forbid the use of midbound
     // for maps containing arrays.
@@ -43,7 +45,7 @@ namespace foo {
     std::ostringstream ostr;
     bool dummy = false;
    
-    if(args.size >= 3) {
+    if(args.size >= 2) {
       // Let us check that the result is not a map of array.
       if(res->is_MapOfArray() == 0) {
 	// You can find many other testing methods for
@@ -81,8 +83,8 @@ namespace foo {
       else // The result has a "MapXD<Array=...>=..." type.
 	ostr << "Checking types for midbound : Maps of array are not allowed.";
     }
-    else // nb_args < 3
-      ostr << "Checking types for midbound : more than 3 arguments are required.";
+    else // nb_args < 2
+      ostr << "Checking types for midbound : more than 1 arguments are required.";
     
     throw error::bad_typing(ostr.str());
   }
@@ -102,32 +104,182 @@ namespace foo {
   class MidBound : public cxsom::jobs::Base {
   private:
 
+    // The minimal change to be detected
+    double epsilon = 0;
+    
+    // This is for the min/max of out arguments (once it is computed, they will not change during relaxation).
+    std::vector<double> out_mins;
+    std::vector<double> out_maxs;
+    bool out_mins_maxs_meaningful = false;
+
+    // This is for the min/max of in_arguments (this needs to be reconsidered when relaxation occurs)
+    std::vector<double> in_mins;
+    std::vector<double> in_maxs;
+    bool in_mins_maxs_meaningful = false;
+
+    // This is the type of everything (result and arguments). The fact
+    // that all stuff have the same type has been checked by the type
+    // checker, so we can trust this.
+    type::ref type = nullptr;
+
+
   public:
-    MidBound(data::Center& center,
-	     const update::arg& res,
-	     const std::vector<update::arg>& args,
-	     const std::map<std::string, std::string>& params)
-      : jobs::Base(center, foo_MIDBOUND_NAME, res, args) {
-      // The last argument is the parameters (the key is the parameter
-      // name, the value the parameter value). It can be used in the
-      // constructor to apply settings defined by the user when s/he
-      // writes a rule. We ignore it here.
+    MidBound(cxsom::data::Center& center,
+	     const cxsom::update::arg& res,
+	     const std::vector<cxsom::update::arg>& args,
+	     const std::map<std::string, std::string>& params
+	     /* std::mt19937::result_type seed */)
+      // No seed needed, our computation is deterministic. Provide this argument
+      // otherwise and use it for random processing.
+      : jobs::Base(center, foo_MIDBOUND_NAME, res, args), out_mins(), out_max(), in_mins(), in_maxs() {
+
+      // We set epsilon if the pararametrs require to do so.
+      if(auto it = params.find("epsilon"); it != params.end()) epsilon = std::stod(it->second);
+
+      // We get the type
+      type = std::get<1>(res);
+
+      // Then, we resize the data holders accordingly.
+      std::size_t size;
+      if(type->is_Array())
+	size = std::static_pointer_cast<cxsom::type::Array>(res)->size;
+      else if(type->is_Map())
+	size = std::static_pointer_cast<cxsom::type::Map>(res)->nb_of_doubles;
+      else if(type->is_Pos2D())
+	size = 2;
+      else size = 1;
+      in_mins.resize(size);
+      in_maxs.resize(size);
+      out_mins.resize(size);
+      out_maxs.resize(size);
+    }
+
+  private:
+
+    std::tuple<double* double*> get_data_range(const data::Base& arg_data) {
+      double* data_begin = nullptr;
+      double* data_end   = nullptr;
+
+      // The data::Base class has a first_byte method that would have
+      // avoided, the following if statements. Nevertheless, using it
+      // would imply raw C-like casts.
+      
+      if(type->is_Scalar()) {
+	data_begin = &(static_cast<data::Scalar&>(data).value);
+	data_end = data_begin + 1;
+      }
+      else if(type->is_Pos1D()) {
+	data_begin = &(static_cast<data::d1::Pos&>(data).x);
+	data_end = data_begin + 1;
+      }
+      else if(type->is_Pos2D()) {
+	data_begin = static_cast<data::d2::Pos&>(data).xy.begin();
+	data_end   = static_cast<data::d2::Pos&>(data).xy.end();
+      }
+      else if(type->is_Array()) {
+	data_begin = static_cast<data::Array&>(data).content.begin();
+	data_end   = static_cast<data::Array&>(data).content.end();
+      }
+      else if(type->is_Map()) {
+	data_begin = static_cast<data::Map&>(data).content.begin();
+	data_end   = static_cast<data::Map&>(data).content.end();
+      }
+      else {
+	// We never reach this.
+      }
+
+      return {data_begin, data_end};
+    }
+    
+    void update(std::vector<double>& mins, std::vector<double>& maxs, bool& meaningful, const data::Base& arg_data) {
+      
+      auto [data_begin, data_end] = get_data_range(arg_data);
+      
+      if(!meaningful) {
+	// mins and maxs have not been initialized yet.
+	for(auto [it, min_it, max_it] = std::make_tuple(data_begin, mins.begin(), maxs.begin()); it != data_end; ++it, ++min_it, ++max_it) {
+	  *min_it = *it;
+	  *max_it = *it;
+	}
+	
+	meaningful = true;
+      }
+      else 
+	for(auto [it, min_it, max_it] = std::make_tuple(data_begin, mins.begin(), maxs.begin()); it != data_end; ++it, ++min_it, ++max_it) 
+	  if      (*it < *min_it) *min_it = *it;
+	  else if (*it > *max_it) *max_it = *it;
     }
 
   protected:
 
     // This is where ou inherit callbacks for computation. See the
-    // cxsom::update::Base class.
+    // cxsom::update::Base class. You can read the pdf in the spec
+    // section, the algorithm is described ("One update cycle for an
+    // update u"). The point that out arguments are read first. This
+    // can be re-tried until all of them are determined. Once this is
+    // done, their value will not change, so their reading will not
+    // occur anymore. The in arguments, on the contrary, may vary
+    // during the relaxation steps. This is why we separate the
+    // computation related to out arguments from the one related to in
+    // arguments. We gather them when the result is ready to be written.
 
-    virtual void on_computation_start() override {}
+    virtual void on_computation_start() override {
+      out_mins_maxs_meaningful = false; 
+      in_mins_maxs_meaningful = false; 
+    }
       
-    virtual void on_read_out_arg(const symbol::Instance&, unsigned int, const data::Base&) override {}
+    virtual void on_read_out_arg(const symbol::Instance&, unsigned int, const data::Base& arg_data) override {
+      update(out_mins, out_maxs, out_mins_maxs_meaningful, arg_data);
+    }
 
-    virtual void on_read_out_arg_aborted() override {}
+    virtual void on_read_out_arg_aborted() override {
+      out_mins_maxs_meaningful = false;
+      out_computed = false;
+    }
     
-    virtual void on_read_in_arg(const symbol::Instance&, unsigned int, const data::Base&) override {}
+    virtual void on_read_in_arg(const symbol::Instance&, unsigned int, const data::Base& arg_data) override {
+      update(in_mins, in_maxs, in_mins_maxs_meaningful, arg_data);
+    }
       
-    virtual bool on_write_result(data::Base&) override {}
-    
+    virtual bool on_write_result(data::Base& result_data) override {
+      std::vector<double>::iterator mins_it, maxs_it;
+
+      if(!out_mins_maxs_meaningful)
+	std::tie(mins_it, maxs_it) = std::make_tuple(in_mins.begin(), in_maxs.begin());
+      else if(!in_mins_maxs_meaningful)
+	std::tie(mins_it, maxs_it) = std::make_tuple(out_mins.begin(), out_maxs.begin());
+      else {
+	// we gather the result of both in and out into in (not out,
+	// since out may be re-used in a next relaxation step).
+	for(auto [in_it, out_it] = std::make_tuple(data_begin, in_mins.begin(), out_mins.begin()); in_it != in_mins.end(); ++in_it, ++out_it)
+	  if(*out_it < *in_it)
+	    *in_it = *out_it;
+	for(auto [in_it, out_it] = std::make_tuple(data_begin, in_maxs.begin(), out_maxs.begin()); in_it != in_maxs.end(); ++in_it, ++out_it)
+	  if(*out_it > *in_it)
+	    *in_it = *out_it;
+	std::tie(mins_it, maxs_it) = std::make_tuple(in_mins.begin(), in_maxs.begin());
+      }
+
+      // Ok, now the mins and maxs can be iterated from mins_it, maxs_it.
+      double max_diff = 0;
+      auto [res_begin, res_end] = get_data_range(arg_data);
+      for(auto it = res_begin; it != res_end;) {
+	double res = .5*(*(mins_it++) + *(maxs_it++));
+	max_diff = std::max(max_diff, std::fabs(res - *it));
+	*(it++) = res; // We set the result
+      }
+	  
+      return max_diff > epsilon; // We return by signaling a significat change of the result.
+    }
   };
+
+  // The previous operation class will have to be notified to some
+  // update factory. Let us write a function for registering all the
+  // operations in foo (ok... only one here).
+  void fill(cxsom::jobs::UpdateFactory& factory) {
+    factory += {foo_MIDBOUND_NAME, make_update_deterministic<MidBound>}; // we would have used make_update_random if the contructor had a "seed" argument.
+  }
+
+  // Last, let us provide functions that enables to use mid_bound as an operation when the user describes some rules.
+  
 }
