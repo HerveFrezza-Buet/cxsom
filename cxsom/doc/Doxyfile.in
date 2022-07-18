@@ -719,7 +719,7 @@ EXAMPLE_PATH           = ${CMAKE_SOURCE_DIR}/examples ${CMAKE_SOURCE_DIR}/tests
 # and *.h) to filter out the source-files in the directories. If left
 # blank all files are included.
 
-EXAMPLE_PATTERNS       = *.hp \
+EXAMPLE_PATTERNS       = *.hpp \
                          *.cpp
 
 # If the EXAMPLE_RECURSIVE tag is set to YES then subdirectories will be

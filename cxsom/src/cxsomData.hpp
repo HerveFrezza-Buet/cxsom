@@ -47,26 +47,88 @@ namespace cxsom {
       Base& operator=(Base&&) = default;
       virtual ~Base() {}
 
-      virtual std::string name()           const = 0;
-      virtual std::size_t byte_length()    const = 0;
-
-      virtual bool is_Scalar()                  const {return false;}
-
-      virtual unsigned int is_Array()           const {return 0;}
-      virtual bool is_Array(unsigned int)       const {return false;}
-      virtual bool is_Pos1D()                   const {return false;}
-      virtual bool is_Pos2D()                   const {return false;}
-      virtual bool is_Map()                     const {return false;}
-      virtual bool is_Map(const std::string&)   const {return false;}
-      virtual bool is_Map1D()                   const {return false;}
-      virtual bool is_Map1D(const std::string&) const {return false;}
-      virtual bool is_Map2D()                   const {return false;}
-      virtual bool is_Map2D(const std::string&) const {return false;}
       /**
-       * @returns 0 if the type is not a map with array values, the array size otherwise.
+       * @returns a string (normalized) describing the type.
+       */
+      virtual std::string name()           const = 0;
+      
+      /**
+       * @returns The size of a value of that type.
+       */
+      virtual std::size_t byte_length()    const = 0;
+      
+      /**
+       * @returns true for the "Scalar" type, false otherwise.
+       */
+      virtual bool is_Scalar()                  const {return false;}
+      
+      /**
+       * @returns true is the type is "Array=...", false otherwise.
+       */
+      virtual unsigned int is_Array()           const {return 0;}
+      
+      /**
+       * @param arg : provide an integer for the array size.
+       * @returns true is the type is "Array=arg", false otherwise.
+       */
+      virtual bool is_Array(unsigned int)       const {return false;}
+      
+      /**
+       * @returns true is the type is "Pos1D", false otherwise.
+       */
+      virtual bool is_Pos1D()                   const {return false;}
+      
+      /**
+       * @returns true is the type is "Pos2D", false otherwise.
+       */
+      virtual bool is_Pos2D()                   const {return false;}
+      
+      /**
+       * @returns true is the type is "Map1D<...>=..." or "Map2D<...>=...", false otherwise.
+       */
+      virtual bool is_Map()                     const {return false;}
+      
+      /**
+       * @param arg : provide the name (string) of the content type.
+       * @returns true is the type is "Map1D<arg>=..." or "Map2D<arg>=...", false otherwise.
+       */
+      virtual bool is_Map(const std::string&)   const {return false;}
+      
+      /**
+       * @returns true is the type is "Map1D<...>=...", false otherwise.
+       */
+      virtual bool is_Map1D()                   const {return false;}
+      
+      /**
+       * @param arg : provide the name (string) of the content type.
+       * @returns true is the type is "Map1D<arg>=...", false otherwise.
+       */
+      virtual bool is_Map1D(const std::string&) const {return false;}
+      
+      /**
+       * @returns true is the type is "Map2D<...>=...", false otherwise.
+       */
+      virtual bool is_Map2D()                   const {return false;}
+      
+      /**
+       * @param arg : provide the name (string) of the content type.
+       * @returns true is the type is "Map2D<arg>=...", false otherwise.
+       */
+      virtual bool is_Map2D(const std::string&) const {return false;}
+      
+      /**
+       * @returns 0 if the type is not "Map1D<Array=size>=..." nore "Map2D<Array=size>=...", the array size otherwise.
        */
       virtual unsigned int is_MapOfArray()      const {return 0;}     
-      virtual unsigned int is_Map1DOfArray()    const {return 0;}     
+      
+      /**
+       * @returns 0 if the type is not "Map1D<Array=size>=...", the array size otherwise.
+       */
+      virtual unsigned int is_Map1DOfArray()    const {return 0;} 
+      
+      /**
+       * @returns 0 if the type is not "Map2D<Array=size>=...", the array size otherwise.
+       */
       virtual unsigned int is_Map2DOfArray()    const {return 0;}     
 
       bool operator==(const Base& b) const {return name() == b.name();}

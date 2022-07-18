@@ -98,6 +98,9 @@ You can also define an update that is valuable for any n... by not providing n. 
 }
 @endcode
 
+@section Defining your own operators
+
+See the corresponding examples. Inheritance from cxsom classes enable the customization of the operations handled by cxsom.
 
 @section running Running a simulation
 
