@@ -209,12 +209,13 @@ namespace cxsom {
     };
 
     inline void launch(const cxsom::jobs::UpdateFactory& factory,
+		       const cxsom::jobs::TypeChecker& checker,
 		       const std::string& root_dir,
 		       int nb_threads,
 		       int port) {
       std::random_device rd;
       cxsom::data::Center data_center(root_dir);
-      cxsom::jobs::Center jobs_center(rd, factory, data_center);
+      cxsom::jobs::Center jobs_center(rd, factory, checker, data_center);
       
       std::vector<std::thread> workers;
       for(int i = 0; i < nb_threads; ++i)

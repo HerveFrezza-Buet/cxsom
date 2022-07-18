@@ -42,6 +42,7 @@ namespace cxsom {
 
       std::mt19937 gen;
       UpdateFactory update_factory;
+      TypeChecker type_checker;
       data::Center& data_center;
       mutable std::mutex integrity_mutex;
 
@@ -293,20 +294,21 @@ namespace cxsom {
 	  arg_types_tmp.clear();
 	  auto out = std::back_inserter(arg_types_tmp);
 	  for(auto arg : updt.init->args) *(out++) = data_center.type_of(arg);
-	  check_types(updt.init->op, res_type, arg_types_tmp);
+	  type_checker(updt.init->op, res_type, arg_types_tmp);
 	}
 	arg_types_tmp.clear();
 	auto out = std::back_inserter(arg_types_tmp);
 	for(auto arg : updt.usual.args) *(out++) = data_center.type_of(arg);
-	check_types(updt.usual.op, res_type, arg_types_tmp);
+	type_checker(updt.usual.op, res_type, arg_types_tmp);
       }
       
     public:
       
       template<typename RANDOM_ENGINE>
-      Center(RANDOM_ENGINE& rd, const UpdateFactory& update_factory, data::Center& data_center)
+      Center(RANDOM_ENGINE& rd, const UpdateFactory& update_factory, const TypeChecker& type_checker, data::Center& data_center)
 	: gen(rd()),
-	  update_factory(update_factory)
+	  update_factory(update_factory),
+	  type_checker(type_checker),
 	  data_center(data_center),
 	  integrity_mutex(),
 	  timesteps(),

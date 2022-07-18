@@ -36,6 +36,24 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-rules.pc
 
 
 
+FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-processor.pc
+"
+Name: ${CMAKE_PROJECT_NAME}
+Description: ${PROJECT_DESCRIPTION_SUMMARY}
+Version: ${PACKAGE_VERSION}
+Requires: 
+Libs: -lpthread -lboost_system
+Cflags: -I${INCLUDE_INSTALL_DIR}
+"
+)
+
+# Define the path to install the pc pkg-config file
+SET(PKGCONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-processor.pc
+    	DESTINATION ${PKGCONFIG_INSTALL_DIR}
+	COMPONENT devel)
+
 FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-viewer.pc
 "
 Name: ${CMAKE_PROJECT_NAME}

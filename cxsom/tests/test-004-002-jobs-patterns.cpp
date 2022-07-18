@@ -15,15 +15,22 @@ namespace fs = std::filesystem;
 int main(int, char**) {
   std::random_device rd;
   cxsom::data::Center data_center(fs::current_path() / "tmp");
-  cxsom::jobs::Center jobs_center(rd, data_center);
+  
+  cxsom::jobs::UpdateFactory update_factory;
+  cxsom::jobs::fill(update_factory);
+  
+  cxsom::jobs::TypeChecker type_checker;
+  cxsom::jobs::fill(type_checker);
+  
+  cxsom::jobs::Center jobs_center(rd, update_factory, type_checker, data_center);
 
 
   data_center.check_all();
 
-  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {cxsom::jobs::Operation::Average, {{"main", "A", -1}, {"main", "B", -1}, {"main", "C", -1}, {"main", "D", -1}}, {}}, 100);
-  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {cxsom::jobs::Operation::Random, {}, {}}, 100);
-  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {cxsom::jobs::Operation::Random, {}, {}}, 100);
-  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {cxsom::jobs::Operation::Random, {}, {}}, 100);
+  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {"average", {{"main", "A", -1}, {"main", "B", -1}, {"main", "C", -1}, {"main", "D", -1}}, {}}, 100);
+  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {"random", {}, {}}, 100);
+  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {"random", {}, {}}, 100);
+  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {"random", {}, {}}, 100);
   
   bool has_work = true;
   while(has_work)

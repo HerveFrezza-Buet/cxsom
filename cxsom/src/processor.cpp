@@ -15,14 +15,17 @@ int main(int argc, char* argv[]) try {
     return 0;
   }
 
-  std::string root_dir = std::stoi(argv[1]);
+  std::string root_dir =           argv[1] ;
   int nb_threads       = std::stoi(argv[2]);
   int port             = std::stoi(argv[3]);
 
   cxsom::jobs::UpdateFactory update_factory;
   cxsom::jobs::fill(update_factory);
+  
+  cxsom::jobs::TypeChecker type_checker;
+  cxsom::jobs::fill(type_checker);
 
-  cxsom::processor::launch(update_factory, root_dir, nb_threads, port);
+  cxsom::processor::launch(update_factory, type_checker, root_dir, nb_threads, port);
   
   return 0;
  }

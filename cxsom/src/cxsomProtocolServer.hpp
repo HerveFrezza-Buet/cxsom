@@ -119,7 +119,7 @@ namespace cxsom {
 	char c;
 
 	is >> buf;
-	res.op = jobs::operation(buf);
+	res.op = buf;
 	is >> nb_args;
 	is.get(c);
 	auto out = std::back_inserter(res.args);
@@ -206,7 +206,7 @@ namespace cxsom {
 	  char c;
 
 	  is >> buf;
-	  res.op = jobs::operation(buf);
+	  res.op = buf;
 	  is >> nb_args;
 	  is.get(c);
 	  auto out = std::back_inserter(res.args);

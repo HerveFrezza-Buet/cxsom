@@ -20,8 +20,6 @@
 
 #include <fftconv.hpp>
 
-using namespace std::placeholders;
-
 
 // #define cxsomDEBUG_TOWARD_CONV_ARGMAX // For 1D only !
 // #define cxsomDEBUG_CONVOLUTION        // For 1D only !
@@ -34,11 +32,19 @@ namespace cxsom {
     };
     
     struct already_existing_update : public std::logic_error {
-      already_existing_update(const Operation& op) : std::logic_error(std::string("Update \"") + op + "\" already exists in the factory.") {}
+      already_existing_update(const jobs::Operation& op) : std::logic_error(std::string("Update \"") + op + "\" already exists in the factory.") {}
     };
     
     struct not_existing_update : public std::logic_error {
-      not_existing_update(const Operation& op) : std::logic_error(std::string("Update \"") + op + "\" does not exist in the factory.") {}
+      not_existing_update(const jobs::Operation& op) : std::logic_error(std::string("Update \"") + op + "\" does not exist in the factory.") {}
+    };
+    
+    struct already_existing_type_checking : public std::logic_error {
+      already_existing_type_checking(const jobs::Operation& op) : std::logic_error(std::string("Type Checking \"") + op + "\" already exists in the type checker.") {}
+    };
+    
+    struct not_existing_type_checking : public std::logic_error {
+      not_existing_type_checking(const jobs::Operation& op) : std::logic_error(std::string("Type Checking \"") + op + "\" does not exist in the type checker.") {}
     };
   }
 
@@ -108,7 +114,7 @@ namespace cxsom {
 					  const update::arg& res,
 					  const std::vector<update::arg>& args,
 					  const std::map<std::string, std::string>& params,
-					  std::mt19937::result_type seed) {
+					  std::mt19937::result_type) { // seed unused in the deterministic case.
       return std::shared_ptr<UPDT>(new UPDT(center, res, args, params));
     }
     
@@ -1630,7 +1636,8 @@ namespace cxsom {
      */
     struct UpdateFactory {
     public:
-      using make_update_type = std::function<update::ref (const update::arg&,
+      using make_update_type = std::function<update::ref (data::Center&,
+							  const update::arg&,
 							  const std::vector<update::arg>&,
 							  const std::map<std::string, std::string>&,
 							  std::mt19937::result_type seed)>;
@@ -1653,27 +1660,27 @@ namespace cxsom {
 			     const std::map<std::string, std::string>& params,
 			     std::mt19937::result_type seed) const {
 	if(auto it = factory.find(op); it != factory.end())
-	  return stg::get<1>(*it)(center, res, args, params, seed);
+	  return std::get<1>(*it)(center, res, args, params, seed);
 	else
 	  throw error::not_existing_update(op);
       }
     };
 
     void fill(UpdateFactory& factory) {
-      factory += {"copy"              , std::bind(make_update_deterministic<Copy>         , _1, _2, _3, _4, _5)};
-      factory += {"average"           , std::bind(make_update_deterministic<Average>      , _1, _2, _3, _4, _5)};
-      factory += {"random"            , std::bind(make_update_random<Random>              , _1, _2, _3, _4, _5)};
-      factory += {"converge"          , std::bind(make_update_deterministic<Converge>     , _1, _2, _3, _4, _5)};
-      factory += {"clear"             , std::bind(make_update_deterministic<Clear>        , _1, _2, _3, _4, _5)};
-      factory += {"merge"             , std::bind(make_update_deterministic<Merge>        , _1, _2, _3, _4, _5)};
-      factory += {"match-triangle"    , std::bind(make_update_deterministic<MatchTriangle>, _1, _2, _3, _4, _5)};
-      factory += {"match-gaussian"    , std::bind(make_update_deterministic<MatchGaussian>, _1, _2, _3, _4, _5)};
-      factory += {"learn-triangle"    , std::bind(make_update_deterministic<LearnTriangle>, _1, _2, _3, _4, _5)};
-      factory += {"learn-gaussian"    , std::bind(make_update_deterministic<LearnGaussian>, _1, _2, _3, _4, _5)};
-      factory += {"argmax"            , std::bind(make_update_random<Argmax>              , _1, _2, _3, _4, _5)};
-      factory += {"conv-argmax"       , std::bind(make_update_random<ConvArgmax>          , _1, _2, _3, _4, _5)};
-      factory += {"toward-argmax"     , std::bind(make_update_random<TowardArgmax>        , _1, _2, _3, _4, _5)};
-      factory += {"toward-conv-argmax", std::bind(make_update_random<TowardConvArgmax>    , _1, _2, _3, _4, _5)};
+      factory += {"copy"              , make_update_deterministic<Copy>         };
+      factory += {"average"           , make_update_deterministic<Average>      };
+      factory += {"random"            , make_update_random<Random>              };
+      factory += {"converge"          , make_update_deterministic<Converge>     };
+      factory += {"clear"             , make_update_deterministic<Clear>        };
+      factory += {"merge"             , make_update_deterministic<Merge>        };
+      factory += {"match-triangle"    , make_update_deterministic<MatchTriangle>};
+      factory += {"match-gaussian"    , make_update_deterministic<MatchGaussian>};
+      factory += {"learn-triangle"    , make_update_deterministic<LearnTriangle>};
+      factory += {"learn-gaussian"    , make_update_deterministic<LearnGaussian>};
+      factory += {"argmax"            , make_update_random<Argmax>              };
+      factory += {"conv-argmax"       , make_update_random<ConvArgmax>          };
+      factory += {"toward-argmax"     , make_update_random<TowardArgmax>        };
+      factory += {"toward-conv-argmax", make_update_random<TowardConvArgmax>    };
     }
 
 
@@ -1889,27 +1896,49 @@ namespace cxsom {
 	ostr << "Checking types for TowardConvArgmax : Exactly 2 arguments is expected (got " << args.size() << ").";
       throw error::bad_typing(ostr.str());
     }
+
+    
+    struct TypeChecker {
+    public:
+      using type_checker_type = std::function<void (type::ref, const std::vector<type::ref>&)>;
       
-    inline void check_types(Operation op, type::ref res, const std::vector<type::ref>& args) {
-      switch(op) {
-      case Operation::Copy             : check_types_copy               (res, args); break;
-      case Operation::Average          : check_types_average            (res, args); break;
-      case Operation::Random           : check_types_random             (res, args); break;
-      case Operation::Converge         : check_types_converge           (res, args); break;
-      case Operation::Clear            : check_types_clear              (res, args); break;
-      case Operation::Merge            : check_types_merge              (res, args); break;
-      case Operation::MatchTriangle    : check_types_match              (res, args); break;
-      case Operation::MatchGaussian    : check_types_match              (res, args); break;
-      case Operation::LearnTriangle    : check_types_learn              (res, args); break;
-      case Operation::LearnGaussian    : check_types_learn              (res, args); break;
-      case Operation::Argmax           : check_types_argmax             (res, args); break;
-      case Operation::ConvArgmax       : check_types_argmax             (res, args); break;
-      case Operation::TowardArgmax     : check_types_toward_argmax      (res, args); break;
-      case Operation::TowardConvArgmax : check_types_toward_conv_argmax (res, args); break;
-      default:
-	throw error::bad_operation("cxsom::job::check_types(op, ...) : report bug.");
-	break;
+    private:
+      
+      std::map<Operation, type_checker_type> checker;
+      
+    public:
+
+      void operator+=(const std::pair<Operation, type_checker_type>& type_chk) {
+	if(auto it = checker.find(std::get<0>(type_chk)); it == checker.end())
+	  checker[std::get<0>(type_chk)] = std::get<1>(type_chk);
+	else
+	  throw error::already_existing_type_checking(std::get<0>(type_chk));
       }
+
+      void operator()(const Operation& op, type::ref res, const std::vector<type::ref>& args) const {
+	if(auto it = checker.find(op); it != checker.end())
+	  std::get<1>(*it)(res, args);
+	else
+	  throw error::not_existing_type_checking(op);
+      }
+    };
+
+    inline void fill(TypeChecker& type_checker) {
+      type_checker += {"copy"              , check_types_copy              };
+      type_checker += {"average"           , check_types_average           };
+      type_checker += {"random"            , check_types_random            };
+      type_checker += {"converge"          , check_types_converge          };
+      type_checker += {"clear"             , check_types_clear             };
+      type_checker += {"merge"             , check_types_merge             };
+      type_checker += {"match-triangle"    , check_types_match             };
+      type_checker += {"match-gaussian"    , check_types_match             };
+      type_checker += {"learn-triangle"    , check_types_learn             };
+      type_checker += {"learn-gaussian"    , check_types_learn             };
+      type_checker += {"argmax"            , check_types_argmax            };
+      type_checker += {"conv-argmax"       , check_types_argmax            };
+      type_checker += {"toward-argmax"     , check_types_toward_argmax     };
+      type_checker += {"toward-conv-argmax", check_types_toward_conv_argmax};
     }
+      
   }
 }

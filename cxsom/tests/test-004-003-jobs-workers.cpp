@@ -27,7 +27,14 @@ using namespace std::chrono_literals;
 int main(int, char**) {
   std::random_device rd;
   cxsom::data::Center data_center(fs::current_path() / "tmp");
-  cxsom::jobs::Center jobs_center(rd, data_center);
+  
+  cxsom::jobs::UpdateFactory update_factory;
+  cxsom::jobs::fill(update_factory);
+  
+  cxsom::jobs::TypeChecker type_checker;
+  cxsom::jobs::fill(type_checker);
+  
+  cxsom::jobs::Center jobs_center(rd, update_factory, type_checker, data_center);
 
   data_center.check({"main", "A"}, cxsom::type::make("Map1D<Scalar>=500"), CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
   data_center.check({"main", "B"}, cxsom::type::make("Map1D<Scalar>=500"), CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
@@ -46,14 +53,14 @@ int main(int, char**) {
   jobs_center.interaction_lock();
   std::cout << "Initializing A[0], A[1], A[2], B[0:3], C[0:3], D[0:3]..." << std::endl
 	    << "... and setting pattern of A." << std::endl;
-  jobs_center += cxsom::jobs::make({"main", "A", 0}, {cxsom::jobs::Operation::Clear, {}, {}});
-  jobs_center += cxsom::jobs::make({"main", "A", 1}, {cxsom::jobs::Operation::Clear, {}, {}});
-  jobs_center += cxsom::jobs::make({"main", "A", 2}, {cxsom::jobs::Operation::Clear, {}, {}});
-  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {cxsom::jobs::Operation::Average, {{"main", "B", -1}, {"main", "C", -1}, {"main", "D", -1}}, {}}, 100);
+  jobs_center += cxsom::jobs::make({"main", "A", 0}, {"clear", {}, {}});
+  jobs_center += cxsom::jobs::make({"main", "A", 1}, {"clear", {}, {}});
+  jobs_center += cxsom::jobs::make({"main", "A", 2}, {"clear", {}, {}});
+  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {"average", {{"main", "B", -1}, {"main", "C", -1}, {"main", "D", -1}}, {}}, 100);
   
-  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {cxsom::jobs::Operation::Random, {}, {}}, 2);
-  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {cxsom::jobs::Operation::Random, {}, {}}, 2);
-  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {cxsom::jobs::Operation::Random, {}, {}}, 2);
+  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {"random", {}, {}}, 2);
+  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {"random", {}, {}}, 2);
+  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {"random", {}, {}}, 2);
   jobs_center.interaction_release();
   
   std::cout << "Sleeping for 5s..." << std::endl;
@@ -61,9 +68,9 @@ int main(int, char**) {
   
   jobs_center.interaction_lock();
   std::cout << "Setting patterns for B, C, D until 10" << std::endl;
-  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {cxsom::jobs::Operation::Average, {{"main", "B", -1}, {"main", "B", -2}, {"main", "B", -3}}, {}}, 10);
-  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {cxsom::jobs::Operation::Average, {{"main", "C", -1}, {"main", "C", -2}, {"main", "C", -3}}, {}}, 10);
-  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {cxsom::jobs::Operation::Average, {{"main", "D", -1}, {"main", "D", -2}, {"main", "D", -3}}, {}}, 10);
+  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {"average", {{"main", "B", -1}, {"main", "B", -2}, {"main", "B", -3}}, {}}, 10);
+  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {"average", {{"main", "C", -1}, {"main", "C", -2}, {"main", "C", -3}}, {}}, 10);
+  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {"average", {{"main", "D", -1}, {"main", "D", -2}, {"main", "D", -3}}, {}}, 10);
   jobs_center.interaction_release();
   
   std::cout << "Done." << std::endl;
