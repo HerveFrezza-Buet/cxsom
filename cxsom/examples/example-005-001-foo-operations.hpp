@@ -10,7 +10,7 @@
 
   midbound(a1, ... an) = (min(a1, ... an) + max(a1, ... an)) / 2
 
-  The ai must all be of the same kind, that can any of the cxsom
+  The ai must all be of the same kind, that can be any of the cxsom
   numerical data types... except maps of array.
 
 */
