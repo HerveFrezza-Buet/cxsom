@@ -18,6 +18,7 @@
 #include <iostream>
 #include <algorithm>
 #include <tuple>
+#include <iterator>
 
 // Everything you need comes from that header.
 #include <cxsom-server.hpp>
@@ -45,7 +46,7 @@ namespace foo {
     std::ostringstream ostr;
     bool dummy = false;
    
-    if(args.size >= 2) {
+    if(args.size() >= 2) {
       // Let us check that the result is not a map of array.
       if(res->is_MapOfArray() == 0) {
 	// You can find many other testing methods for
@@ -57,12 +58,12 @@ namespace foo {
 	// illustration, but not used for our actual type checking...
 	if(dummy) { // ... so this is never executed since dummy == false.
 	  if(res->is_Array()) {
-	    auto res_array = std::static_pointer_cast<cxsom::type::Array>(res);
+	    auto res_array = std::static_pointer_cast<const cxsom::type::Array>(res);
 	    std::cout << res_array->size // The dimension of the array.
 		      << std::endl;
 	  }
 	  if(res->is_Map()) {
-	    auto res_map = std::static_pointer_cast<cxsom::type::Map>(res);
+	    auto res_map = std::static_pointer_cast<const cxsom::type::Map>(res);
 	    std::cout << res_map->side // The map side (side*side for a 2D map)
 		      << res_map->size // is side for 1D maps, side*size for a 2D map.
 		      << res_map->content_size // The number of doubles for one of the elements.
@@ -75,7 +76,7 @@ namespace foo {
 	bool all_args_have_the_result_type = true;
 	auto it = args.begin();
 	while(all_args_have_the_result_type && it != args.end())
-	  all_args_have_the_result_type = (it->name() == res->name());
+	  all_args_have_the_result_type = ((*it)->name() == res->name());
 	if(all_args_have_the_result_type)
 	  return;
 	ostr << "Checking types for midbound : Some arguments are not of result type (" << res->name() << ").";
@@ -86,7 +87,7 @@ namespace foo {
     else // nb_args < 2
       ostr << "Checking types for midbound : more than 1 arguments are required.";
     
-    throw error::bad_typing(ostr.str());
+    throw cxsom::error::bad_typing(ostr.str());
   }
 
   // The previous time checking function will have to be notified to
@@ -120,7 +121,7 @@ namespace foo {
     // This is the type of everything (result and arguments). The fact
     // that all stuff have the same type has been checked by the type
     // checker, so we can trust this.
-    type::ref type = nullptr;
+    cxsom::type::ref type = nullptr;
 
 
   public:
@@ -131,7 +132,9 @@ namespace foo {
 	     /* std::mt19937::result_type seed */)
       // No seed needed, our computation is deterministic. Provide this argument
       // otherwise and use it for random processing.
-      : jobs::Base(center, foo_MIDBOUND_NAME, res, args), out_mins(), out_max(), in_mins(), in_maxs() {
+      : cxsom::jobs::Base(center, res, foo_MIDBOUND_NAME, args),
+	out_mins(), out_maxs(),
+	in_mins(), in_maxs() {
 
       // We set epsilon if the pararametrs require to do so.
       if(auto it = params.find("epsilon"); it != params.end()) epsilon = std::stod(it->second);
@@ -142,9 +145,9 @@ namespace foo {
       // Then, we resize the data holders accordingly.
       std::size_t size;
       if(type->is_Array())
-	size = std::static_pointer_cast<cxsom::type::Array>(res)->size;
+	size = std::static_pointer_cast<const cxsom::type::Array>(type)->size;
       else if(type->is_Map())
-	size = std::static_pointer_cast<cxsom::type::Map>(res)->nb_of_doubles;
+	size = std::static_pointer_cast<const cxsom::type::Map>(type)->nb_of_doubles;
       else if(type->is_Pos2D())
 	size = 2;
       else size = 1;
@@ -156,7 +159,7 @@ namespace foo {
 
   private:
 
-    std::tuple<double* double*> get_data_range(const data::Base& arg_data) {
+    std::tuple<double*, double*> get_data_range(cxsom::data::Base& arg_data) {
       double* data_begin = nullptr;
       double* data_end   = nullptr;
 
@@ -165,24 +168,24 @@ namespace foo {
       // would imply raw C-like casts.
       
       if(type->is_Scalar()) {
-	data_begin = &(static_cast<data::Scalar&>(data).value);
+	data_begin = &(static_cast<cxsom::data::Scalar&>(arg_data).value);
 	data_end = data_begin + 1;
       }
       else if(type->is_Pos1D()) {
-	data_begin = &(static_cast<data::d1::Pos&>(data).x);
+	data_begin = &(static_cast<cxsom::data::d1::Pos&>(arg_data).x);
 	data_end = data_begin + 1;
       }
       else if(type->is_Pos2D()) {
-	data_begin = static_cast<data::d2::Pos&>(data).xy.begin();
-	data_end   = static_cast<data::d2::Pos&>(data).xy.end();
+	data_begin = std::data(static_cast<cxsom::data::d2::Pos&>(arg_data).xy);
+	data_end   = data_begin + 2;
       }
       else if(type->is_Array()) {
-	data_begin = static_cast<data::Array&>(data).content.begin();
-	data_end   = static_cast<data::Array&>(data).content.end();
+	data_begin = std::data(static_cast<cxsom::data::Array&>(arg_data).content);
+	data_end   = data_begin + static_cast<cxsom::data::Array&>(arg_data).content.size();
       }
       else if(type->is_Map()) {
-	data_begin = static_cast<data::Map&>(data).content.begin();
-	data_end   = static_cast<data::Map&>(data).content.end();
+	data_begin = std::data(static_cast<cxsom::data::Map&>(arg_data).content);
+	data_end   = data_begin + static_cast<cxsom::data::Map&>(arg_data).content.size();
       }
       else {
 	// We never reach this.
@@ -191,7 +194,43 @@ namespace foo {
       return {data_begin, data_end};
     }
     
-    void update(std::vector<double>& mins, std::vector<double>& maxs, bool& meaningful, const data::Base& arg_data) {
+    // The same... but const.
+    std::tuple<const double*, const double*> get_data_range(const cxsom::data::Base& arg_data) {
+      const double* data_begin = nullptr;
+      const double* data_end   = nullptr;
+
+      // The data::Base class has a first_byte method that would have
+      // avoided, the following if statements. Nevertheless, using it
+      // would imply raw C-like casts.
+      
+      if(type->is_Scalar()) {
+	data_begin = &(static_cast<const cxsom::data::Scalar&>(arg_data).value);
+	data_end = data_begin + 1;
+      }
+      else if(type->is_Pos1D()) {
+	data_begin = &(static_cast<const cxsom::data::d1::Pos&>(arg_data).x);
+	data_end = data_begin + 1;
+      }
+      else if(type->is_Pos2D()) {
+	data_begin = std::data(static_cast<const cxsom::data::d2::Pos&>(arg_data).xy);
+	data_end   = data_begin + 2;
+      }
+      else if(type->is_Array()) {
+	data_begin = std::data(static_cast<const cxsom::data::Array&>(arg_data).content);
+	data_end   = data_begin + static_cast<const cxsom::data::Array&>(arg_data).content.size();
+      }
+      else if(type->is_Map()) {
+	data_begin = std::data(static_cast<const cxsom::data::Map&>(arg_data).content);
+	data_end   = data_begin + static_cast<const cxsom::data::Map&>(arg_data).content.size();
+      }
+      else {
+	// We never reach this.
+      }
+
+      return {data_begin, data_end};
+    }
+    
+    void update(std::vector<double>& mins, std::vector<double>& maxs, bool& meaningful, const cxsom::data::Base& arg_data) {
       
       auto [data_begin, data_end] = get_data_range(arg_data);
       
@@ -228,20 +267,19 @@ namespace foo {
       in_mins_maxs_meaningful = false; 
     }
       
-    virtual void on_read_out_arg(const symbol::Instance&, unsigned int, const data::Base& arg_data) override {
+    virtual void on_read_out_arg(const cxsom::symbol::Instance&, unsigned int, const cxsom::data::Base& arg_data) override {
       update(out_mins, out_maxs, out_mins_maxs_meaningful, arg_data);
     }
 
     virtual void on_read_out_arg_aborted() override {
       out_mins_maxs_meaningful = false;
-      out_computed = false;
     }
     
-    virtual void on_read_in_arg(const symbol::Instance&, unsigned int, const data::Base& arg_data) override {
+    virtual void on_read_in_arg(const cxsom::symbol::Instance&, unsigned int, const cxsom::data::Base& arg_data) override {
       update(in_mins, in_maxs, in_mins_maxs_meaningful, arg_data);
     }
       
-    virtual bool on_write_result(data::Base& result_data) override {
+    virtual bool on_write_result(cxsom::data::Base& result_data) override {
       std::vector<double>::iterator mins_it, maxs_it;
 
       if(!out_mins_maxs_meaningful)
@@ -251,10 +289,10 @@ namespace foo {
       else {
 	// we gather the result of both in and out into in (not out,
 	// since out may be re-used in a next relaxation step).
-	for(auto [in_it, out_it] = std::make_tuple(data_begin, in_mins.begin(), out_mins.begin()); in_it != in_mins.end(); ++in_it, ++out_it)
+	for(auto [in_it, out_it] = std::make_tuple(in_mins.begin(), out_mins.begin()); in_it != in_mins.end(); ++in_it, ++out_it)
 	  if(*out_it < *in_it)
 	    *in_it = *out_it;
-	for(auto [in_it, out_it] = std::make_tuple(data_begin, in_maxs.begin(), out_maxs.begin()); in_it != in_maxs.end(); ++in_it, ++out_it)
+	for(auto [in_it, out_it] = std::make_tuple(in_maxs.begin(), out_maxs.begin()); in_it != in_maxs.end(); ++in_it, ++out_it)
 	  if(*out_it > *in_it)
 	    *in_it = *out_it;
 	std::tie(mins_it, maxs_it) = std::make_tuple(in_mins.begin(), in_maxs.begin());
@@ -262,7 +300,7 @@ namespace foo {
 
       // Ok, now the mins and maxs can be iterated from mins_it, maxs_it.
       double max_diff = 0;
-      auto [res_begin, res_end] = get_data_range(arg_data);
+      auto [res_begin, res_end] = get_data_range(result_data);
       for(auto it = res_begin; it != res_end;) {
 	double res = .5*(*(mins_it++) + *(maxs_it++));
 	max_diff = std::max(max_diff, std::fabs(res - *it));
@@ -277,7 +315,7 @@ namespace foo {
   // update factory. Let us write a function for registering all the
   // operations in foo (ok... only one here).
   void fill(cxsom::jobs::UpdateFactory& factory) {
-    factory += {foo_MIDBOUND_NAME, make_update_deterministic<MidBound>}; // we would have used make_update_random if the contructor had a "seed" argument.
+    factory += {foo_MIDBOUND_NAME, cxsom::jobs::make_update_deterministic<MidBound>}; // we would have used make_update_random if the contructor had a "seed" argument.
   }
 
   
