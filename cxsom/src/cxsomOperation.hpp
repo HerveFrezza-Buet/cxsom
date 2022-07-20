@@ -1916,7 +1916,7 @@ namespace cxsom {
       }
 
       void operator()(const Operation& op, type::ref res, const std::vector<type::ref>& args) const {
-	if(auto it = checker.find(op); it != checker.end())
+	if(auto it = checker.find(op); it != checker.end()) 
 	  std::get<1>(*it)(res, args);
 	else
 	  throw error::not_existing_type_checking(op);

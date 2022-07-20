@@ -74,8 +74,7 @@ namespace foo {
 	}
 
 	bool all_args_have_the_result_type = true;
-	auto it = args.begin();
-	while(all_args_have_the_result_type && it != args.end())
+	for(auto it = args.begin(); all_args_have_the_result_type && it != args.end(); ++it)
 	  all_args_have_the_result_type = ((*it)->name() == res->name());
 	if(all_args_have_the_result_type)
 	  return;
