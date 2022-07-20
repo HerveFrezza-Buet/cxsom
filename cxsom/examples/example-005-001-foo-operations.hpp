@@ -107,12 +107,13 @@ namespace foo {
     // The minimal change to be detected
     double epsilon = 0;
     
-    // This is for the min/max of out arguments (once it is computed, they will not change during relaxation).
+    // This is for the min/max of out-arguments (once it is computed, they will not change during relaxation).
     std::vector<double> out_mins;
     std::vector<double> out_maxs;
     bool out_mins_maxs_meaningful = false;
+    bool are_there_out_args       = false;
 
-    // This is for the min/max of in_arguments (this needs to be reconsidered when relaxation occurs)
+    // This is for the min/max of in-arguments (this needs to be reconsidered when relaxation occurs)
     std::vector<double> in_mins;
     std::vector<double> in_maxs;
     bool in_mins_maxs_meaningful = false;
@@ -143,13 +144,10 @@ namespace foo {
 
       // Then, we resize the data holders accordingly.
       std::size_t size;
-      if(type->is_Array())
-	size = std::static_pointer_cast<const cxsom::type::Array>(type)->size;
-      else if(type->is_Map())
-	size = std::static_pointer_cast<const cxsom::type::Map>(type)->nb_of_doubles;
-      else if(type->is_Pos2D())
-	size = 2;
-      else size = 1;
+      if(type->is_Array())      size = std::static_pointer_cast<const cxsom::type::Array>(type)->size;
+      else if(type->is_Map())   size = std::static_pointer_cast<const cxsom::type::Map>(type)->nb_of_doubles;
+      else if(type->is_Pos2D()) size = 2;
+      else                      size = 1;
       in_mins.resize(size);
       in_maxs.resize(size);
       out_mins.resize(size);
@@ -158,6 +156,8 @@ namespace foo {
 
   private:
 
+    // This is a tool function for getting pointers to the
+    // [first, last) interval of the data memory chunk.
     std::tuple<double*, double*> get_data_range(cxsom::data::Base& arg_data) {
       double* data_begin = nullptr;
       double* data_end   = nullptr;
@@ -250,16 +250,18 @@ namespace foo {
 
   protected:
 
-    // This is where ou inherit callbacks for computation. See the
+    // This is where you inherit callbacks for computation. See the
     // cxsom::update::Base class. You can read the pdf in the spec
     // section, the algorithm is described ("One update cycle for an
-    // update u"). The point that out arguments are read first. This
-    // can be re-tried until all of them are determined. Once this is
-    // done, their value will not change, so their reading will not
-    // occur anymore. The in arguments, on the contrary, may vary
+    // update u"). The point is that out-arguments are read
+    // first. This can be re-tried until all of them are available
+    // (the reading of out-arguments is aborted otherwise). Once this
+    // is done, their value will not change, so their reading will not
+    // occur anymore. The in-arguments, on the contrary, may vary
     // during the relaxation steps. This is why we separate the
-    // computation related to out arguments from the one related to in
-    // arguments. We gather them when the result is ready to be written.
+    // computation related to out-arguments from the one related to
+    // in-arguments. We will gather them at last, when the result is
+    // ready to be written.
 
     virtual void on_computation_start() override {
       out_mins_maxs_meaningful = false; 
@@ -267,6 +269,7 @@ namespace foo {
     }
       
     virtual void on_read_out_arg(const cxsom::symbol::Instance&, unsigned int, const cxsom::data::Base& arg_data) override {
+      are_there_out_args = true;
       update(out_mins, out_maxs, out_mins_maxs_meaningful, arg_data);
     }
 
@@ -281,13 +284,17 @@ namespace foo {
     virtual bool on_write_result(cxsom::data::Base& result_data) override {
       std::vector<double>::iterator mins_it, maxs_it;
 
-      if(!out_mins_maxs_meaningful)
+      if(!are_there_out_args)
+	// No out-arguments fur this update. We have only in-arguments.
 	std::tie(mins_it, maxs_it) = std::make_tuple(in_mins.begin(), in_maxs.begin());
       else if(!in_mins_maxs_meaningful)
+	// Out-arguments, but no in-arguments. We have only out-arguments.
 	std::tie(mins_it, maxs_it) = std::make_tuple(out_mins.begin(), out_maxs.begin());
       else {
-	// we gather the result of both in and out into in (not out,
-	// since out may be re-used in a next relaxation step).
+	// Out- and in- arguments are used for this update.  we gather
+	// the result of both in- and out- mins/maxs into in- stuff
+	// (not out-, since out- may be re-used in a next relaxation
+	// step).
 	for(auto [in_it, out_it] = std::make_tuple(in_mins.begin(), out_mins.begin()); in_it != in_mins.end(); ++in_it, ++out_it)
 	  if(*out_it < *in_it)
 	    *in_it = *out_it;
@@ -297,7 +304,9 @@ namespace foo {
 	std::tie(mins_it, maxs_it) = std::make_tuple(in_mins.begin(), in_maxs.begin());
       }
 
-      // Ok, now the mins and maxs can be iterated from mins_it, maxs_it.
+      // Ok, now the mins and maxs can be iterated from mins_it,
+      // maxs_it. We only have to compute the mean of them and put the
+      // values in te result.
       double max_diff = 0;
       auto [res_begin, res_end] = get_data_range(result_data);
       for(auto it = res_begin; it != res_end;) {
