@@ -14,7 +14,7 @@ context* cxsom::rules::ctx = nullptr;
 #define TRACE      100
 #define OPENED    true
 #define FORGET       0
-#define MAP_SIZE   100
+#define MAP_SIZE    10
 
 #define WALLTIME    20
 #define EPSILON   1e-3

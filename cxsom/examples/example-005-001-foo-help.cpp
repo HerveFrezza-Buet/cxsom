@@ -16,6 +16,7 @@ int main(int, char*[]) {
 	    << "  4 - send rules :  cxsom-example-005-001-basic-test send localhost <port>"                         << std::endl
 	    << "  5 - check evolution : cxsom-all-instances <root-dir>"                                             << std::endl
 	    << "  6 - You can kill the process started at step 2 now."                                              << std::endl
+	    << "  7 - View the result : python3 <cxsom-path>/viewer-for-examples/cxsom-view-005-001.py <root-dir>"  << std::endl
 	    << std::endl;
 
   return 0;
