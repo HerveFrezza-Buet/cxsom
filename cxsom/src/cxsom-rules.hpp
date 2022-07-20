@@ -12,9 +12,8 @@
  * @example example-003-003-som2d-RGB-map.cpp
  * @example example-004-001-cxsom-circle-maps.cpp
  * @example example-004-002-cxsom-recsom-maps.cpp
- * @example example-005-001-cxsom-operation-header.hpp
- * @example example-005-001-cxsom-operation-rules.cpp
- * @example example-005-001-cxsom-operation-processor.cpp
+ * @example example-005-001-foo-rules.hpp
+ * @example example-005-001-foo-basic-test.cpp
  */
 
 

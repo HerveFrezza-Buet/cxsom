@@ -280,6 +280,5 @@ namespace foo {
     factory += {foo_MIDBOUND_NAME, make_update_deterministic<MidBound>}; // we would have used make_update_random if the contructor had a "seed" argument.
   }
 
-  // Last, let us provide functions that enables to use mid_bound as an operation when the user describes some rules.
   
 }
