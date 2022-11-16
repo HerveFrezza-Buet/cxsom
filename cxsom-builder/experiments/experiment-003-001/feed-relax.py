@@ -4,10 +4,10 @@ import pycxsom as cx
 import numpy as np
 import sample
 
-if len(sys.argv) < 6:
+if len(sys.argv) < 7:
     print()
     print('Usage:')
-    print('  {} <root_dir> <hostname> <port> <expand-timeline-prefix> <U> [Xbmu Ybmu]'.format(sys.argv[0]))
+    print('  {} <root_dir> <hostname> <port> <expand-timeline-prefix> <U> <shape> [Xbmu Ybmu]'.format(sys.argv[0]))
     print()
     sys.exit(0)
 
@@ -17,6 +17,7 @@ hostname = sys.argv[2]
 port     = int(sys.argv[3])
 timeline = sys.argv[4]
 u        = float(sys.argv[5])
+shape    = sys.argv[6]
 
 x_var_path = cx.variable.path_from(root_dir, timeline + '-in', 'X')
 y_var_path = cx.variable.path_from(root_dir, timeline + '-in', 'Y')
@@ -24,10 +25,10 @@ y_var_path = cx.variable.path_from(root_dir, timeline + '-in', 'Y')
 
 with cx.variable.Realize(x_var_path) as X:
     with cx.variable.Realize(y_var_path) as Y:
-        X[0], Y[0] = sample.get(u)
+        X[0], Y[0] = sample.get(u, shape)
 
 
-if len(sys.argv) == 8:
+if len(sys.argv) == 0:
     bmux, bmuy = float(sys.argv[6]), float(sys.argv[7])
 else:
     bmux, bmuy = np.random.random(2)

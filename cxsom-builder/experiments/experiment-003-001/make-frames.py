@@ -103,6 +103,7 @@ for chunk in simu:
     os.system(f'make --quiet clear-frozen')
     time.sleep(.5)
     for _, timestep in chunk:
+        print(f'sending frozen rules for timestep {timestep}')
         os.system(f'make --quiet send-frozen-rules TIMESTEP={timestep}')
     os.system(f'make --quiet cxsom-ping-processor')
 

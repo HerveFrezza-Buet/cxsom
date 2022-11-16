@@ -1,7 +1,7 @@
 Follow the following instruction to run the tutorial. The symbol '~>'
 is the prompt, do not type it.
 
-The cxsom-builder-example-003-001-experiment.cpp shows the
+The cxsom-builder/examples/example-003-001-experiment.cpp shows the
 architecture definition. The makefile used here is also an example, as
 the *.py files.
 
@@ -82,14 +82,14 @@ Few rlx-02499-* timelines are now avialable for running a
 relaxation, you have to feed the X,Y input, and eventually the
 BMU. The X,Y inputs are dependent on U, so we provide some U.
 
-~> make feed-relax-inputs TIMESTEP=100 U=.5 XBMU=.5 YBMU=.5
+~> make feed-relax-inputs TIMESTEP=100 U=.5 SHAPE=banana XBMU=.5 YBMU=.5
 
 Now, relaxation for timestep step 100 has been expanded in timelines
 zrlx-00000100-*, let us visualize it.
 
 ~> make view-relaxation TIMESTEP=100
 
-You can try any other timestep (from 0 tà 2499). When you ar done, you can clean everything.
+You can try any other timestep (from 0 tà 2499). When you are done, you can clean everything.
 
 ~> make cxsom-clear-processor
 ~> make clean-relaxation
@@ -104,7 +104,7 @@ rules can be viewed.
 ~> make frozen-figs
 
 Let us build up a bunch of inputs for testings. The X,Y inputs are
-coordinates of a point in a circle
+coordinates of a point in a circle (while we fed with a banana...)
 
 ~> make cxsom-clear-processor
 ~> make declare-frozen-inputs
@@ -123,7 +123,7 @@ timelines zfrz-02499-*, let us visualize it (it may be weird, since we
 fed with a circle while we have learnt from a banana).
 
 ~> make view-frozen TIMESTEP=2499
-~> evince snap-0002499.pdf
+~> evince snap-00002499.pdf
 
 You can restart and see another shape (the appropriate one here)
 ~> make cxsom-clear-processor
@@ -135,13 +135,13 @@ You can restart and see another shape (the appropriate one here)
 ~> make send-frozen-rules TIMESTEP=2499
 ~> make cxsom-ping-processor
 ~> make view-frozen TIMESTEP=2499
-~> evince snap-0002499.pdf
+~> evince snap-00002499.pdf
 
 Ok, now, let us make a nice movie, with 1 frame every 10
 timesteps. This uses python3 threading. Be sure you have it enabled on
 your system. If not "pip3 install thread6" should install it.
 
-~> make cxsom-clear-processor
+~> make cxsom-kill-processor
 ~> make clear-frozen
 
 You can close the variable scanning windows, since it reads the files periodically.

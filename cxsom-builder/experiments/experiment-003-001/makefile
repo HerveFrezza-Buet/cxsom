@@ -14,8 +14,13 @@ help:
 	@echo
 	@echo "make feed-main-inputs SHAPE=<shape>                <-- feeds X and Y"
 	@echo "make feed-relax-inputs TIMESTEP=<time>...          <-- feeds the X,Y pair for relaxation at <time>"
-	@echo "     ... U=<u in [0, 1]> [XBMU=<xbmu> YBMU=<ybmu>]"
+	@echo "     ... U=<u in [0, 1]> SHAPE=<shape>..."
+	@echo "     ... [XBMU=<xbmu> YBMU=<ybmu>]"
 	@echo "make feed-frozen-inputs SHAPE=<shape>              <-- feeds the X,Y pairs for frozen tests"
+	@echo
+	@echo "make clear-relaxation                              <--+ "
+	@echo "make clear-frozen                                  <--+-- clears temporary variables"
+	@echo "make clear-frozen-inputs                           <--+ "
 	@echo
 	@echo "make view-weights                                  <-- shows the weight evolution."
 	@echo "make view-relaxation TIMESTEP=<time>               <-- shows the relaxation expansion."
@@ -86,7 +91,7 @@ send-relax-rules:
 
 .PHONY: feed-relax-inputs
 feed-relax-inputs:
-	@python3 feed-relax.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(RELAX_PREFIX)-`printf %08d ${TIMESTEP}` ${U} ${XBMU} ${YBMU}
+	@python3 feed-relax.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(RELAX_PREFIX)-`printf %08d ${TIMESTEP}` ${U} ${SHAPE} ${XBMU} ${YBMU}
 
 .PHONY: view-relaxation
 view-relaxation:
