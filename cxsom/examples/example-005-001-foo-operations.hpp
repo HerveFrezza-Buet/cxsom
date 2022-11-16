@@ -65,7 +65,7 @@ namespace foo {
 	  if(res->is_Map()) {
 	    auto res_map = std::static_pointer_cast<const cxsom::type::Map>(res);
 	    std::cout << res_map->side // The map side (side*side for a 2D map)
-		      << res_map->size // is side for 1D maps, side*size for a 2D map.
+		      << res_map->size // is side for 1D maps, side*side for a 2D map.
 		      << res_map->content_size // The number of doubles for one of the elements.
 		      << res_map->nb_of_doubles // The total number of doubles required to store the map elements.
 		      << res_map->content_type // The string describing the content.
@@ -93,7 +93,7 @@ namespace foo {
   // some type checker. Let us write a function for registering all the
   // type checkings in foo (ok... only one here).
   void fill(cxsom::jobs::TypeChecker& type_checker) {
-    type_checker += {foo_MIDBOUND_NAME, check_types_midbound};
+    type_checker += {foo_MIDBOUND_NAME, check_types_midbound}; // The type checking for our single operator.
   }
 
   // Now comes the actual computation. We need to define a so called
@@ -130,7 +130,7 @@ namespace foo {
 	     const std::vector<cxsom::update::arg>& args,
 	     const std::map<std::string, std::string>& params
 	     /* std::mt19937::result_type seed */)
-      // No seed needed, our computation is deterministic. Provide this argument
+      // No seed needed, our computation is deterministic. Provide the seed argument
       // otherwise and use it for random processing.
       : cxsom::jobs::Base(center, res, foo_MIDBOUND_NAME, args),
 	out_mins(), out_maxs(),
@@ -285,7 +285,7 @@ namespace foo {
       std::vector<double>::iterator mins_it, maxs_it;
 
       if(!are_there_out_args)
-	// No out-arguments fur this update. We have only in-arguments.
+	// No out-arguments for this update. We have only in-arguments.
 	std::tie(mins_it, maxs_it) = std::make_tuple(in_mins.begin(), in_maxs.begin());
       else if(!in_mins_maxs_meaningful)
 	// Out-arguments, but no in-arguments. We have only out-arguments.
@@ -315,7 +315,7 @@ namespace foo {
 	*(it++) = res; // We set the result
       }
 	  
-      return max_diff > epsilon; // We return by signaling a significat change of the result.
+      return max_diff > epsilon; // We return by signaling a significant change of the result.
     }
   };
 
