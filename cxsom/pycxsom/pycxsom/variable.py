@@ -171,8 +171,8 @@ class Realize:
             
     def private_pos_in_past(self, highest_time_minus_at):
         if highest_time_minus_at < self.next_free_pos:
-            return self.next_free_pos - highest_time_minus_at - 1;
-        return self.file_size + self.next_free_pos - highest_time_minus_at - 1;
+            return self.next_free_pos - highest_time_minus_at - 1
+        return self.file_size + self.next_free_pos - highest_time_minus_at - 1
 
     def private_seek(self, at):
         self.private_seek_htma(self.highest_time - at)
