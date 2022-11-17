@@ -1,6 +1,6 @@
 import pycxsom as cx
 
-t = cx.typing.Map2D(500, cx.typing.Array(3));
+t = cx.typing.Map2D(500, cx.typing.Array(3))
 
 print('type is "{}"'.format(t))
 print('  Is it a Type ?   {}'.format(isinstance(t, cx.typing.Type)))
