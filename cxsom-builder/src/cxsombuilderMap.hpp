@@ -92,7 +92,6 @@ namespace cxsom {
 	if(settings.internals_file_size) internals_file_size = *(settings.internals_file_size);
 	if(settings.weights_file_size)   weights_file_size   = *(settings.weights_file_size);
 	if(settings.bmu_file_size)       bmu_file_size       = *(settings.bmu_file_size); 
-	if(settings.file_size)           file_size           = *(settings.file_size);
 	if(settings.kept_opened)         kept_opened         = *(settings.kept_opened);
 	if(settings.p_external)          p_external          = *(settings.p_external);
 	if(settings.p_contextual)        p_contextual        = *(settings.p_contextual);
@@ -115,25 +114,25 @@ namespace cxsom {
       ref_variable _BMU() const {
 	std::ostringstream type;
 	type << "Pos" << map_dim << 'D';
-	return variable(relaxation_timeline, name(map_name) / "BMU", type.str(), cache_size, 0, kept_opened);
+	return variable(relaxation_timeline, name(map_name) / "BMU", type.str(), cache_size, internals_file_size, kept_opened);
       }
       
       ref_variable _Ac() const {
 	std::ostringstream type;
 	type << "Map" << map_dim << "D<Scalar>=" << map_size;
-	return variable(relaxation_timeline, name(map_name) / "Ac", type.str(), cache_size, 0, kept_opened);
+	return variable(relaxation_timeline, name(map_name) / "Ac", type.str(), cache_size, internals_file_size, kept_opened);
       }
       
       ref_variable _Ae() const {
 	std::ostringstream type;
 	type << "Map" << map_dim << "D<Scalar>=" << map_size;
-	return variable(relaxation_timeline, name(map_name) / "Ae", type.str(), cache_size, 0, kept_opened);
+	return variable(relaxation_timeline, name(map_name) / "Ae", type.str(), cache_size, internals_file_size, kept_opened);
       }
       
       ref_variable _A() const {
 	std::ostringstream type;
 	type << "Map" << map_dim << "D<Scalar>=" << map_size;
-	return variable(relaxation_timeline, name(map_name) / "A", type.str(), cache_size, 0, kept_opened);
+	return variable(relaxation_timeline, name(map_name) / "A", type.str(), cache_size, internals_file_size, kept_opened);
       }
       
       struct Layer {
@@ -174,7 +173,7 @@ namespace cxsom {
 	ref_variable _A() const {
 	  std::ostringstream type;
 	  type << "Map" << owner->map_dim << "D<Scalar>=" << owner->map_size;
-	  return variable(owner->relaxation_timeline, name(owner->map_name) / A_name, type.str(), owner->cache_size, 0, owner->kept_opened);
+	  return variable(owner->relaxation_timeline, name(owner->map_name) / A_name, type.str(), owner->cache_size, owner->internals_file_size, owner->kept_opened);
 	}
 
 	// returns the weight variable.
@@ -324,7 +323,7 @@ namespace cxsom {
 	virtual ref_variable _W() const override {
 	  std::ostringstream type;
 	  type << "Map" << owner->map_dim << "D<" << _xi()->type << ">=" << owner->map_size;
-	  return variable(owner->weights_timeline, name(owner->map_name) / W_name, type.str(), owner->cache_size, owner->file_size, owner->kept_opened);
+	  return variable(owner->weights_timeline, name(owner->map_name) / W_name, type.str(), owner->cache_size, owner->weights_file_size, owner->kept_opened);
 	}
 	
 	virtual void internals_random_at(unsigned int at) override {

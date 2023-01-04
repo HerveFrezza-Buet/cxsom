@@ -41,13 +41,13 @@ auto make_architecture(bool define_inputs, unsigned int trace) {
   p_global     | p_main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
   
   auto map_settings = cxsom::builder::map::make_settings();
-  map_settings.map_size      = MAP_SIZE;
-  map_settings.cache_size    = CACHE;
-  map_settings.file_size     = trace;
-  map_settings.kept_opened   = OPENED;
-  map_settings               = {p_external, p_contextual, p_global};
-  map_settings.argmax        = fx::argmax;
-  map_settings.toward_argmax = fx::toward_argmax;
+  map_settings.map_size          = MAP_SIZE;
+  map_settings.cache_size        = CACHE;
+  map_settings.weights_file_size = trace;
+  map_settings.kept_opened       = OPENED;
+  map_settings                   = {p_external, p_contextual, p_global};
+  map_settings.argmax            = fx::argmax;
+  map_settings.toward_argmax     = fx::toward_argmax;
 
   auto X = cxsom::builder::variable("in", cxsom::builder::name("X"), "Scalar", CACHE, trace, OPENED);
   auto Y = cxsom::builder::variable("in", cxsom::builder::name("Y"), "Scalar", CACHE, trace, OPENED);

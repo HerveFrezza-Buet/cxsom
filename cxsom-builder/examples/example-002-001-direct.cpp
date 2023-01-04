@@ -30,11 +30,11 @@ int main(int argc, char* argv[]) {
   p_global     | p_main, kwd::use("random-bmu", 1), kwd::use("sigma", .01), kwd::use("beta", .5), kwd::use("delta", .01), kwd::use("deadline", 100);
 
   auto map_settings = cxsom::builder::map::make_settings();
-  map_settings.map_size      = MAP_SIZE;
-  map_settings.cache_size    = CACHE;
-  map_settings.file_size     = TRACE;
-  map_settings.kept_opened   = OPENED;
-  map_settings               = {p_external, p_contextual, p_global};
+  map_settings.map_size          = MAP_SIZE;
+  map_settings.cache_size        = CACHE;
+  map_settings.weights_file_size = TRACE;
+  map_settings.kept_opened       = OPENED;
+  map_settings                   = {p_external, p_contextual, p_global};
   
   auto X = cxsom::builder::variable("in", cxsom::builder::name("X"), "Scalar", CACHE, TRACE, OPENED);
   auto Y = cxsom::builder::variable("in", cxsom::builder::name("Y"), "Scalar", CACHE, TRACE, OPENED);

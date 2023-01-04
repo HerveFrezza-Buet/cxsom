@@ -68,7 +68,7 @@ namespace cxsom {
       void add_convergence_checkings() const {
 	if(relax_count) {
 	  std::size_t max_file_size = 0;
-	  for(auto m : maps) if(auto size = m->file_size; size > max_file_size) max_file_size = size;
+	  for(auto m : maps) if(auto size = m->weights_file_size; size > max_file_size) max_file_size = size;
 	  auto Cvg = variable(timelines.relaxation, *relax_count, "Scalar", 2, max_file_size, false);
 	  Cvg->definition();
 	  std::vector<kwd::data> bmus;

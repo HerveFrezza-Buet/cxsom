@@ -28,12 +28,12 @@ int main(int argc, char* argv[]) {
   p_global     | p_main, kwd::use("random-bmu", 1), kwd::use("sigma", .0125);
 
   auto map_settings = cxsom::builder::map::make_settings();
-  map_settings.map_size      = MAP_SIZE;
-  map_settings.cache_size    = CACHE;
-  map_settings.file_size     = TRACE;
-  map_settings.kept_opened   = OPENED;
-  map_settings               = {p_external, p_contextual, p_global};
-  map_settings.bmu_file_size = TRACE; 
+  map_settings.map_size          = MAP_SIZE;
+  map_settings.cache_size        = CACHE;
+  map_settings.weights_file_size = TRACE;
+  map_settings.kept_opened       = OPENED;
+  map_settings                   = {p_external, p_contextual, p_global};
+  map_settings.bmu_file_size     = TRACE; 
   
   auto input = cxsom::builder::variable("in", cxsom::builder::name("obs"), "Scalar", CACHE, TRACE, OPENED);
   input->definition();

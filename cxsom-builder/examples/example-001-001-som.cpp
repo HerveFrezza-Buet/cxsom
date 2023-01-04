@@ -83,9 +83,9 @@ int main(int argc, char* argv[]) {
   // The settings has no setting requests yet. Let us define what we want to set.
   map_settings.map_size            = MAP_SIZE;
   map_settings.cache_size          = CACHE;
-  map_settings.internals_file_size = FORGET;
-  map_settings.weights_file_size   = TRACE;
-  map_settings.bmu_file_size       = 1000;
+  map_settings.internals_file_size = FORGET; // This is the history length of internal computation (activities, relaxing BMU...)
+  map_settings.weights_file_size   = TRACE;  // This is the history length of weights.
+  map_settings.bmu_file_size       = 1000;   // This is the history length of the output of the maps.
   map_settings.kept_opened         = OPENED;
   map_settings.argmax              = fx::argmax; 
   map_settings                     = {p_external, p_contextual, p_global};
