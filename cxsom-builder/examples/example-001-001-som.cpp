@@ -53,11 +53,11 @@ int main(int argc, char* argv[]) {
   auto map = cxsom::builder::map::make_1D("SOM");
 
   // This is how you can customize the map.
-  map->map_size = MAP_SIZE;
-  map->cache_size = CACHE;
-  map->file_size = TRACE;
-  map->kept_opened = OPENED;
-  map->argmax = fx::argmax; // default is fx::conv_argmax;
+  map->map_size          = MAP_SIZE;
+  map->cache_size        = CACHE;
+  map->weights_file_size = TRACE;
+  map->kept_opened       = OPENED;
+  map->argmax            = fx::argmax; // default is fx::conv_argmax;
 
   // Next settings are the default ones
   map->toward_argmax  = fx::toward_conv_argmax; // Not used here...
@@ -81,13 +81,14 @@ int main(int argc, char* argv[]) {
   // A better way to register map settings is to setup a setting object.
   auto map_settings = cxsom::builder::map::make_settings();
   // The settings has no setting requests yet. Let us define what we want to set.
-  map_settings.map_size      = MAP_SIZE;
-  map_settings.cache_size    = CACHE;
-  map_settings.file_size     = TRACE;
-  map_settings.kept_opened   = OPENED;
-  map_settings.argmax        = fx::argmax; 
-  map_settings               = {p_external, p_contextual, p_global};
-  map_settings.bmu_file_size = 1000;
+  map_settings.map_size            = MAP_SIZE;
+  map_settings.cache_size          = CACHE;
+  map_settings.internals_file_size = FORGET;
+  map_settings.weights_file_size   = TRACE;
+  map_settings.bmu_file_size       = 1000;
+  map_settings.kept_opened         = OPENED;
+  map_settings.argmax              = fx::argmax; 
+  map_settings                     = {p_external, p_contextual, p_global};
 
   // Then, instead of the previous setting of the map, we couls have
   // written this.

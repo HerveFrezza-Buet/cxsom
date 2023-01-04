@@ -32,12 +32,13 @@ namespace cxsom {
       std::optional<std::string>            weights_timeline;
       std::optional<std::string>            output_timeline;
       std::optional<std::size_t>            cache_size;
-      std::optional<std::size_t>            file_size;
       std::optional<bool>                   kept_opened;
       std::optional<rules::kwd::parameters> p_external;
       std::optional<rules::kwd::parameters> p_contextual;
       std::optional<rules::kwd::parameters> p_global;
 
+      std::optional<std::size_t>            internals_file_size;
+      std::optional<std::size_t>            weights_file_size;
       std::optional<std::size_t>            bmu_file_size; 
       std::optional<argmax_func>            argmax;
       std::optional<toward_argmax_func>     toward_argmax;
@@ -66,14 +67,15 @@ namespace cxsom {
       std::string weights_timeline = "wgt";
       std::string output_timeline = "out";
       std::size_t cache_size = 2;
-      std::size_t file_size = 100;
+      std::size_t internals_file_size = 0;
+      std::size_t weights_file_size = 100;
+      std::size_t bmu_file_size = 0; //!< This can be used to set the filesize of the output variable.
       bool        kept_opened = false;
       mutable rules::kwd::parameters p_external;
       mutable rules::kwd::parameters p_contextual;
       mutable rules::kwd::parameters p_global;
       
 
-      std::size_t bmu_file_size = 0; //!< This can be used to set the filesize of the output variable.
 
       argmax_func         argmax         = fx::conv_argmax;
       toward_argmax_func  toward_argmax  = fx::toward_conv_argmax;
@@ -87,12 +89,14 @@ namespace cxsom {
 	if(settings.weights_timeline)    weights_timeline    = *(settings.weights_timeline);
 	if(settings.output_timeline)     output_timeline     = *(settings.output_timeline);
 	if(settings.cache_size)          cache_size          = *(settings.cache_size);
+	if(settings.internals_file_size) internals_file_size = *(settings.internals_file_size);
+	if(settings.weights_file_size)   weights_file_size   = *(settings.weights_file_size);
+	if(settings.bmu_file_size)       bmu_file_size       = *(settings.bmu_file_size); 
 	if(settings.file_size)           file_size           = *(settings.file_size);
 	if(settings.kept_opened)         kept_opened         = *(settings.kept_opened);
 	if(settings.p_external)          p_external          = *(settings.p_external);
 	if(settings.p_contextual)        p_contextual        = *(settings.p_contextual);
 	if(settings.p_global)            p_global            = *(settings.p_global);
-	if(settings.bmu_file_size)       bmu_file_size       = *(settings.bmu_file_size); 
 	if(settings.argmax)              argmax              = *(settings.argmax);
 	if(settings.toward_argmax)       toward_argmax       = *(settings.toward_argmax);
 	if(settings.global_merge)        global_merge        = *(settings.global_merge);
