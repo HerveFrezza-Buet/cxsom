@@ -63,6 +63,7 @@ namespace cxsom {
       std::size_t  file_size;
       bool         kept_opened;
       unsigned int at;
+      bool         full_record;
       mutable bool external_prefix_mode = false;
 
       const std::string& prefix() const {
@@ -70,8 +71,11 @@ namespace cxsom {
 	return internal_prefix;
       }
       
-      AnalysisContext(const std::string& external_prefix, const std::string& internal_prefix, std::size_t cache_size, std::size_t file_size, bool kept_opened, unsigned int at)
-	: external_prefix(external_prefix), internal_prefix(internal_prefix), cache_size(cache_size), file_size(file_size), kept_opened(kept_opened), at(at) {}
+      AnalysisContext(const std::string& external_prefix, const std::string& internal_prefix,
+		      std::size_t cache_size, std::size_t file_size,
+		      bool kept_opened, unsigned int at,
+		      bool full_record)
+	: external_prefix(external_prefix), internal_prefix(internal_prefix), cache_size(cache_size), file_size(file_size), kept_opened(kept_opened), at(at), full_record(full_record) {}
       
       std::shared_ptr<Variable> operator()(std::shared_ptr<Variable> var) const {
 	return variable(prefix() + "-" + var->timeline,
@@ -79,8 +83,10 @@ namespace cxsom {
       }
       
       std::shared_ptr<Variable> operator[](std::shared_ptr<Variable> var) const {
+	std::size_t f_size = 0;
+	if(full_record) f_size = file_size;
 	return variable(prefix() + "-" + var->timeline,
-			var->varname, var->type, cache_size, 0, kept_opened);
+			var->varname, var->type, cache_size, f_size, kept_opened);
       }
 
       void operator=(LayerKind k) const {

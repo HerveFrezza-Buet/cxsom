@@ -20,6 +20,11 @@
 #define FOREVER           -1 // Infinite walltime
 #define DEADLINE         100
 
+// This is used for frozen or test mode. Partial recording puts some
+// internal variables with a 0-sized file.
+#define FULL_RECORD     true
+#define PARTIAL_RECORD false
+
 #define MAP_SIZE         500
 
 // cxsom declarations
@@ -166,7 +171,7 @@ int main(int argc, char* argv[]) {
     X->definition();
     Y->definition();
     
-    archi->expand_relax({std::string(), analysis_prefix, CACHE, DEADLINE + 1, OPEN_AS_NEEDED, weight_time});
+    archi->expand_relax({std::string(), analysis_prefix, CACHE, DEADLINE + 1, OPEN_AS_NEEDED, weight_time, PARTIAL_RECORD});
   }
 
   if(mode == Mode::Test) {
@@ -184,7 +189,7 @@ int main(int argc, char* argv[]) {
     auto Y = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("Y"), "Scalar", 1, FROZEN_TRACE, OPENED);
     auto U = cxsom::builder::variable(input_prefix + "-in", cxsom::builder::name("U"), "Scalar", 1, FROZEN_TRACE, OPENED);
     
-    archi->frozen({input_prefix, analysis_prefix, CACHE, FROZEN_TRACE, OPEN_AS_NEEDED, weight_time});
+    archi->frozen({input_prefix, analysis_prefix, CACHE, FROZEN_TRACE, OPEN_AS_NEEDED, weight_time, PARTIAL_RECORD});
    }
 
   

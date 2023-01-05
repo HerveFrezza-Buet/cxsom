@@ -78,7 +78,7 @@ Let us send them to the processor, for timestep 100
 
 ~> make send-relax-rules TIMESTEP=100
 
-Few rlx-02499-* timelines are now avialable for running a
+Few zrlx-00000100-* timelines are now avialable for running a
 relaxation, you have to feed the X,Y input, and eventually the
 BMU. The X,Y inputs are dependent on U, so we provide some U.
 
@@ -119,7 +119,7 @@ Let us send the corresponding rules to the processor, for timestep 2499
 
 
 Now, the statistics for timestep step 2499 have been computed in
-timelines zfrz-02499-*, let us visualize it (it may be weird, since we
+timelines zfrz-00002499-*, let us visualize it (it may be weird, since we
 fed with a circle while we have learnt from a banana).
 
 ~> make view-frozen TIMESTEP=2499
