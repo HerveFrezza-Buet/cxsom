@@ -24,7 +24,8 @@ cd ~
 
 Go into the `cxsom` directory you have git-cloned. Then type
 
-```mkdir build
+```
+mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
 make -j
