@@ -1130,7 +1130,7 @@ namespace cxsom {
 	  auto it = begin;
 	  auto end = begin + size;
 	  for(;it != end; ++it) 
-	    if(double v = *it++; v > max_tol_inf) { 
+	    if(double v = *it; v > max_tol_inf) { 
 	      if(v > max_tol_sup) {
 		bmus.clear();
 		max         = v;

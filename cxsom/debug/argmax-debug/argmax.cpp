@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     timeline t("argmax"); // We work in the timeline "main".
     
     kwd::type("bmu", "Pos1D", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
-    "bmu" << fx::argmax(kwd::var("in", "I"))  | kwd::use("walltime", WALLTIME);
+    "bmu" << fx::argmax(kwd::var("in", "I"))  | kwd::use("walltime", WALLTIME), kwd::use("random-bmu", 1);
   }
   
   return 0;

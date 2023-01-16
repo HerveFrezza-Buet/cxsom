@@ -27,8 +27,6 @@ int main(int argc, char* argv[]) {
   }
 
   auto [tstart, tend] = file.get_time_range();
-  std::cout << tstart << ' ' << tend << std::endl;
-
   std::vector<unsigned char> img(MAP_SIZE);
   std::fill(img.begin(), img.end(), (unsigned char)255);
   auto data_ref = cxsom::data::make(file.get_type());
@@ -40,9 +38,11 @@ int main(int argc, char* argv[]) {
   }
 
   {
-    std::ofstream ppm {timeline + "-bmus.ppm"};
+    std::string filename = timeline + "-bmus.ppm";
+    std::ofstream ppm {filename};
     ppm << "P5\n" << MAP_SIZE << " 1\n255\n";
     ppm.write((char*)std::data(img), MAP_SIZE);
+    std::cout << "File \"" << filename << "\" generated." << std::endl;
   }
       
   return 0;
