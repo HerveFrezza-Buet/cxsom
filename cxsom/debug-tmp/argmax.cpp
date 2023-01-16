@@ -4,9 +4,9 @@ using namespace cxsom::rules;
 context* cxsom::rules::ctx = nullptr;
 
 
-#define WALLTIME       -1 
+#define WALLTIME    10000 
 #define CACHE_SIZE      2 
-#define BUF_SIZE    10000 
+#define BUF_SIZE    (WALLTIME+1) 
 #define KEPT_OPENED  true
 
 

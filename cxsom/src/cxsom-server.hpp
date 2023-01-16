@@ -12,7 +12,6 @@
 #include <cxsomVariable.hpp>
 
 /**
- * @example example-001-001-datafile.cpp
  * @example example-005-001-foo-operations.hpp
  * @example example-005-001-foo-processor.cpp
  * @example example-005-001-foo-help.cpp

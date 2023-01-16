@@ -1,4 +1,4 @@
-#include <cxsom-server.hpp>
+#include <cxsom-viewer.hpp>
 
 #include <stdexcept>
 #include <iostream>
