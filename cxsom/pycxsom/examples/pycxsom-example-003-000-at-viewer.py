@@ -2,6 +2,7 @@ import pycxsom as cx
 import numpy as np
 import tkinter as tk
 import matplotlib as plt
+import sys
 
 # This viewer draws a sine curve. It inherits from cx.tkviewer. At,
 # meaning that it is invoked when we need to draw something at a given
@@ -24,6 +25,7 @@ class MyView(cx.tkviewer.At):
         ax.plot(self.X, Y, color=self.color)
     
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
 
 hs   = cx.tkviewer.HistorySlider(root, 'Main History', 0, 100, 50)
 hbox = tk.Frame(root)

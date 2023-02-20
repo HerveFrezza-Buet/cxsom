@@ -2,6 +2,7 @@ import pycxsom as cx
 import numpy as np
 import tkinter as tk
 import matplotlib as plt
+import sys
 
 # This viewer draws a sine curve, whoe phase changes each time the
 # user pressed the "Refresh" button. We only have to override the
@@ -25,6 +26,7 @@ class MyView(cx.tkviewer.Refresh):
             self.phase -= 2*np.pi
     
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
 
 v = MyView(root, 'Translating sine')
 v.widget().pack(side=tk.LEFT, fill=tk.BOTH)

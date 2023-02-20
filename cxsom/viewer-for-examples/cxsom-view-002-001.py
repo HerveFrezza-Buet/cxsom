@@ -52,6 +52,7 @@ class Viewer(cx.tkviewer.At):
 
 # This is the main frame
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
 
 # This is a time slider, associated to the first variable
 varpath = cx.variable.path_from(root_dir, 'main', 'samplers/B')

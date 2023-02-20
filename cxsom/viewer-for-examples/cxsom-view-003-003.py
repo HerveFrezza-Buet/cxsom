@@ -31,6 +31,7 @@ class MyViewer(cx.tkviewer.At):
 
 
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
 
 # This is a time slider, associated to the first variable varpaths[0]
 slider = cx.tkviewer.HistoryFromVariableSlider(root,

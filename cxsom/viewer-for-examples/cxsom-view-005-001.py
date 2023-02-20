@@ -36,6 +36,8 @@ class DataView(cx.tkviewer.At):
         
         
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
+
 slider = cx.tkviewer.HistoryFromVariableSlider(root,
                                                'time instants',
                                                cx.variable.path_from(root_dir, 'foo', 'Y'))

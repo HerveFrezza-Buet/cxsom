@@ -52,6 +52,7 @@ class HistoView(cx.tkviewer.Refresh):
         ax.hist(values, 100)
 
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
 
 slider = cx.tkviewer.HistoryFromVariableSlider(root,
                                                'time instants',

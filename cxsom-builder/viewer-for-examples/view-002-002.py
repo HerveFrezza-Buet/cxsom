@@ -63,6 +63,8 @@ class AssociativeMapView(cx.tkviewer.At):
         ax.legend()
 
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
+
 hbox = tk.Frame(root)
 
 slider = cx.tkviewer.HistoryFromVariableSlider(root,

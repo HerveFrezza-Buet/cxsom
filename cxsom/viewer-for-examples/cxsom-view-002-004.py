@@ -32,6 +32,8 @@ class MyView(cx.tkviewer.Refresh):
         ax.plot(np.array(X), np.array(Y))    
         
 root = tk.Tk()
+root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
+
 v = MyView(root, 'Convergence')
 v.widget().pack(side=tk.LEFT, fill=tk.BOTH)
 tk.mainloop()
