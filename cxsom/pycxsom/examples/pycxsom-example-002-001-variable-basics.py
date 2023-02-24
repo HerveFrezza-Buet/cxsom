@@ -15,6 +15,7 @@ if len(sys.argv) < 5:
     print('where COMMAND is one of the following:')
     print('  realize <type> <cache_size> <file_size> // Realizes/creates the variable.')
     print('  range                                   // Shows the time range')
+    print('  type                                    // Shows the variable type')
     print('  dump                                    // Shows the file content')
     print('  *@ <at>                                 // Reads a value')
     print('  +@ <at> <value>                         // Writes a value')
@@ -52,6 +53,9 @@ elif command == 'dump':
     print()
     for t, value in cx.variable.data_range_full(var_path) :
         print('{} @{}'.format(value, t))
+elif command == 'type':
+    with cx.variable.Realize(var_path) as v:
+        print(v.datatype)
 else:
     if command not in ['range', '*@', '+@', '++']:
         print()
@@ -71,7 +75,7 @@ else:
                 if r:
                     print('Time range is [{}, {}]'.format(r[0], r[1]))
                 else:
-                    print('The file hols no data.')
+                    print('The file holds no data.')
             if command == '*@':
                 if nb_cmd_args != 1:
                     print()
