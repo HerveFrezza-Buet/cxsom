@@ -2029,12 +2029,37 @@ namespace cxsom {
 	  ostr << "Checking types for TowardConvArgmax : Argument have to be a map of scalar (" << args[0]->name() << " found).";
       }
       else
-	ostr << "Checking types for TowardConvArgmax : Exactly 2 arguments is expected (got " << args.size() << ").";
+	ostr << "Checking types for TowardConvArgmax : Exactly 2 arguments are expected (got " << args.size() << ").";
       throw error::bad_typing(ostr.str());
     }
 
     
     inline void check_types_value_at(type::ref res, const std::vector<type::ref>& args) {
+
+      std::ostringstream ostr;
+      if(args.size() == 2) {
+	auto [collection_type, index_type] = {args[0], args[1]};
+	if(collection_type->is_Map())
+	  if((collection_type->is_Map1D() && index_type->is_Pos1D())
+	     || (collection_type->is_Map1D() && index_type->is_Pos1D()))
+	    if(collection->isMap(res->name()))
+	      return;
+	    else
+	      ostr << "Checking types for ValueAt : Collection of type" << collection_type->name() << " and result of type " << index_type->name() << " are not compatible.";
+	  else
+	    ostr << "Checking types for ValueAt : Collection " << collection_type->name() << " and index " << index_type->name()
+		 << " do not have assorted types. Use (Map1D<...>=..., Pos1D) or (Map2D<...>=..., Pos2D).";
+	else
+	  ostr << "Checking types for ValueAt : First argument must be a map (got " << collection_type->name() << ").";
+      }
+      else
+	ostr << "Checking types for ValueAt : Exactly 2 arguments are expected (got " << args.size() << ").";
+      throw error::bad_typing(ostr.str());
+    }
+
+
+      
+      if(ars.size != 2)
       if(!(res->is_Map("Scalar"))) {
 	std::ostringstream ostr;
 	ostr << "cxsom::jobs::Average : Type " << res->name() << " is not accepted for result.";
