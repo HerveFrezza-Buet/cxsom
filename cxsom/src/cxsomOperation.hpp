@@ -1625,6 +1625,141 @@ namespace cxsom {
     };
 
     
+
+    /////////////
+    //         //
+    // ValueAt //
+    //         //
+    /////////////
+    
+    class ValueAt : public Base {
+    private:
+      std::vector<double> sum_out;
+      unsigned int nb_out;
+      bool sum_out_computed = false;
+      std::vector<double> sum_in;
+      unsigned int nb_in;
+      type::ref type = nullptr;
+
+      void check_internal_allocations(type::ref data_type) {
+	if(!type) {
+	  type = data_type;
+	  // Types are checked. So this cast is ok.
+	  auto& maptype = *(static_cast<const type::Map*>(type.get()));
+	  sum_in.resize(maptype.size);
+	  sum_out.resize(maptype.size);
+	  std::fill(sum_in.begin(),  sum_in.end(),  0);
+	  std::fill(sum_out.begin(), sum_out.end(), 0);
+	}
+      }
+      
+    public:
+      
+      double epsilon;
+      
+      ValueAt(data::Center& center,
+	      const update::arg& res,
+	      const std::vector<update::arg>& args,
+	      const std::map<std::string, std::string>& params)
+	: Base(center, res, "value-at", args), epsilon(0) {
+	if(auto it = params.find("epsilon"); it != params.end()) epsilon = std::stod(it->second);
+      }
+      
+    protected:
+      
+      virtual void on_computation_start() override {
+	if(!sum_out_computed) {
+	  sum_out_computed = true;
+	  std::fill(sum_out.begin(), sum_out.end(), 0);
+	  nb_out = 0;
+	}
+	std::fill(sum_in.begin(), sum_in.end(), 0);
+	nb_in = 0;
+      }
+      
+      virtual void on_read_out_arg(const symbol::Instance&,
+				   unsigned int,
+				   const data::Base& data) override {
+	check_internal_allocations(data.type);
+	auto& content = static_cast<const data::Map&>(data).content;
+	auto dit = content.begin();
+	auto end = content.end();
+	auto sit = sum_out.begin();
+	while(dit != end) *(sit++) += *(dit++);
+	++nb_out;
+      }
+  
+      virtual void on_read_out_arg_aborted() override {
+	sum_out_computed = false;
+      }
+    
+      virtual void on_read_in_arg(const symbol::Instance&,
+				  unsigned int,
+				  const data::Base& data) override {
+	check_internal_allocations(data.type);
+	auto& content = static_cast<const data::Map&>(data).content;
+	auto dit = content.begin();
+	auto end = content.end();
+	auto sit = sum_in.begin();
+	while(dit != end) *(sit++) += *(dit++);
+	++nb_in;
+      }
+  
+      virtual bool on_write_result(data::Base& data) override {
+	check_internal_allocations(data.type);
+	
+	unsigned int nb = nb_in + nb_out;
+	if(nb == 0) return false;
+
+	// We merge the two sums.
+	std::vector<double>* accum_ptr = &sum_in;
+	if(nb_in == 0) // all the data is in sum_out
+	  accum_ptr = &sum_out;
+	else if(nb_out != 0) {
+	  auto soit = sum_out.begin();
+	  auto end  = sum_out.end();
+	  auto sit = accum_ptr->begin();
+	  while(soit != end) *(sit++) += *(soit++);
+	}
+
+	// We compute the value_at.
+	double coef = 1.0/nb;
+	auto it  = accum_ptr->begin();
+	auto end = accum_ptr->end();
+	while(it != end) *(it++) *= coef;
+
+	// We write the result and notify a significant change.
+	double max_diff = 0;
+	it  = accum_ptr->begin();
+	end = accum_ptr->end();
+	auto dit = static_cast<data::Map&>(data).content.begin();
+	while(it != end) {
+	  max_diff = std::max(max_diff, std::fabs(*it - *dit));
+	  *(dit++) = *(it++);
+	}
+
+
+#ifdef cxsomDEBUG_CONVERGE
+	std::ostringstream filename;
+	filename << "avg-" << result.who.variable.timeline 
+		 << "-" << result.who.variable.name
+		 << "-" << std::setw(6) << std::setfill('0') << result.who.at
+		 << ".data";
+	std::ofstream file(filename.str().c_str(), std::ofstream::out | std::ofstream::app);
+	file << static_cast<data::Map&>(data).content[0]
+	     << " --> " << max_diff << " ? " << epsilon << std::endl;
+	file.close();
+#endif
+	return max_diff > epsilon;
+      }
+    };
+    
+
+
+
+
+    
+    
     ////////////////////
     //                //
     // Update factory //
@@ -1681,6 +1816,7 @@ namespace cxsom {
       factory += {"conv-argmax"       , make_update_random<ConvArgmax>          };
       factory += {"toward-argmax"     , make_update_random<TowardArgmax>        };
       factory += {"toward-conv-argmax", make_update_random<TowardConvArgmax>    };
+      factory += {"value-at"          , make_update_deterministic<ValueAt>};
     }
 
 
@@ -1898,6 +2034,22 @@ namespace cxsom {
     }
 
     
+    inline void check_types_value_at(type::ref res, const std::vector<type::ref>& args) {
+      if(!(res->is_Map("Scalar"))) {
+	std::ostringstream ostr;
+	ostr << "cxsom::jobs::Average : Type " << res->name() << " is not accepted for result.";
+	throw error::bad_typing(ostr.str());
+      }
+
+      for(auto it = args.begin(); it != args.end(); ++it)
+	if(*(*it) != *res) {
+	  std::ostringstream ostr;
+	  ostr << "Checking types for Average : Result has type " << res->name() << " while argument #"
+	       << std::distance(args.begin(), it) << " has type " << (*it)->name() << '.';
+	  throw error::bad_typing(ostr.str());
+	}
+    }
+    
     struct TypeChecker {
     public:
       using type_checker_type = std::function<void (type::ref, const std::vector<type::ref>&)>;
@@ -1938,6 +2090,7 @@ namespace cxsom {
       type_checker += {"conv-argmax"       , check_types_argmax            };
       type_checker += {"toward-argmax"     , check_types_toward_argmax     };
       type_checker += {"toward-conv-argmax", check_types_toward_conv_argmax};
+      type_checker += {"value-at"          , check_types_value_at          };
     }
       
   }
