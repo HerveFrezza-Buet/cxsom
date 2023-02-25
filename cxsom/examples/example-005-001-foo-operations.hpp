@@ -268,7 +268,9 @@ namespace foo {
       in_mins_maxs_meaningful = false; 
     }
       
-    virtual void on_read_out_arg(const cxsom::symbol::Instance&, unsigned int, const cxsom::data::Base& arg_data) override {
+    virtual void on_read_out_arg(const cxsom::symbol::Instance&,               // The instance of the input variable
+				 unsigned int,                                 // The rank (from 0) of the argument
+				 const cxsom::data::Base& arg_data) override { // The data associated to the argument.
       are_there_out_args = true;
       update(out_mins, out_maxs, out_mins_maxs_meaningful, arg_data);
     }
@@ -277,7 +279,9 @@ namespace foo {
       out_mins_maxs_meaningful = false;
     }
     
-    virtual void on_read_in_arg(const cxsom::symbol::Instance&, unsigned int, const cxsom::data::Base& arg_data) override {
+    virtual void on_read_in_arg(const cxsom::symbol::Instance&,               // The instance of the input variable
+				unsigned int,                                 // The rank (from 0) of the argument
+				const cxsom::data::Base& arg_data) override { // The data associated to the argument.
       update(in_mins, in_maxs, in_mins_maxs_meaningful, arg_data);
     }
       

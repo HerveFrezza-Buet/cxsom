@@ -14,6 +14,7 @@
 #include <limits>
 #include <functional>
 #include <map>
+#include <tuple>
 #include <cxsomData.hpp>
 #include <cxsomUpdate.hpp>
 #include <cxsomJobRule.hpp>
@@ -1634,24 +1635,18 @@ namespace cxsom {
     
     class ValueAt : public Base {
     private:
-      std::vector<double> sum_out;
-      unsigned int nb_out;
-      bool sum_out_computed = false;
-      std::vector<double> sum_in;
-      unsigned int nb_in;
-      type::ref type = nullptr;
+      bool collection_in, value_in;
+      const char* collection_buf = nullptr;
+      
+      cxsom::type::ref res_type        = nullptr;
+      cxsom::type::ref collection_type = nullptr;
+      cxsom::type::ref index_type      = nullptr;
+      
+      std::size_t side, size;
+      std::size_t content_byte_length;
+      std::size_t coef;
 
-      void check_internal_allocations(type::ref data_type) {
-	if(!type) {
-	  type = data_type;
-	  // Types are checked. So this cast is ok.
-	  auto& maptype = *(static_cast<const type::Map*>(type.get()));
-	  sum_in.resize(maptype.size);
-	  sum_out.resize(maptype.size);
-	  std::fill(sum_in.begin(),  sum_in.end(),  0);
-	  std::fill(sum_out.begin(), sum_out.end(), 0);
-	}
-      }
+      double x, y;
       
     public:
       
@@ -1663,94 +1658,78 @@ namespace cxsom {
 	      const std::map<std::string, std::string>& params)
 	: Base(center, res, "value-at", args), epsilon(0) {
 	if(auto it = params.find("epsilon"); it != params.end()) epsilon = std::stod(it->second);
+	res_type        = std::get<1>(res);
+	collection_type = std::get<1>(args[0]);
+	index_type      = std::get<1>(args[1]);
+	
+	side = static_cast<const type::Map*>(arg_type.get())->side;
+	size = static_cast<const type::Map*>(arg_type.get())->size;
+	content_byte_length = res_type->byte_length();
+	coef = size - 1;
       }
       
     protected:
       
-      virtual void on_computation_start() override {
-	if(!sum_out_computed) {
-	  sum_out_computed = true;
-	  std::fill(sum_out.begin(), sum_out.end(), 0);
-	  nb_out = 0;
-	}
-	std::fill(sum_in.begin(), sum_in.end(), 0);
-	nb_in = 0;
-      }
+      virtual void on_computation_start() override {}
       
       virtual void on_read_out_arg(const symbol::Instance&,
-				   unsigned int,
+				   unsigned int rank,
 				   const data::Base& data) override {
-	check_internal_allocations(data.type);
-	auto& content = static_cast<const data::Map&>(data).content;
-	auto dit = content.begin();
-	auto end = content.end();
-	auto sit = sum_out.begin();
-	while(dit != end) *(sit++) += *(dit++);
-	++nb_out;
+	switch(rank) {
+	case 0:
+	  collection_in = false;
+	  collection_buf = data.first_byte();
+	  break;
+	case 1:
+	  value_in = false;
+	  if(collection_type->is_Map1D()) 
+	    x  = static_cast<cxsom::data::d1::Pos&>(data).x
+	  else
+	    xy = static_cast<cxsom::data::d2::Pos&>(arg_data).xy;
+	  break;
+	default: /* never happens, type is checked */ break;
+	}
       }
   
-      virtual void on_read_out_arg_aborted() override {
-	sum_out_computed = false;
-      }
+      virtual void on_read_out_arg_aborted() override {}
     
       virtual void on_read_in_arg(const symbol::Instance&,
-				  unsigned int,
+				  unsigned int rank,
 				  const data::Base& data) override {
-	check_internal_allocations(data.type);
-	auto& content = static_cast<const data::Map&>(data).content;
-	auto dit = content.begin();
-	auto end = content.end();
-	auto sit = sum_in.begin();
-	while(dit != end) *(sit++) += *(dit++);
-	++nb_in;
+	switch(rank) {
+	case 0:
+	  collection_in = true;
+	  collection_buf = data.first_byte();
+	  break;
+	case 1:
+	  value_in = true;
+	  if(collection_type->is_Map1D()) 
+	    x  = static_cast<cxsom::data::d1::Pos&>(data).x
+	  else
+	    std::tie(x, y) = static_cast<cxsom::data::d2::Pos&>(arg_data).xy;
+	  break;
+	default: /* never happens, type is checked */ break;
+	}
       }
   
       virtual bool on_write_result(data::Base& data) override {
-	check_internal_allocations(data.type);
+	const char* value = nullptr;
 	
-	unsigned int nb = nb_in + nb_out;
-	if(nb == 0) return false;
-
-	// We merge the two sums.
-	std::vector<double>* accum_ptr = &sum_in;
-	if(nb_in == 0) // all the data is in sum_out
-	  accum_ptr = &sum_out;
-	else if(nb_out != 0) {
-	  auto soit = sum_out.begin();
-	  auto end  = sum_out.end();
-	  auto sit = accum_ptr->begin();
-	  while(soit != end) *(sit++) += *(soit++);
+	std::size_t idx = 0;
+	if(x >= 1) idx = coef;
+	else if (x > 0) idx = (std::size_t)(x*coef);
+	
+	if(collection_type->is_Map1D()) 
+	  value = collection_buf + idx * content_byte_length;
+	else {
+	  std::size_t idy = 0;
+	  if(y >= 1) idy = coef;
+	  else if (y > 0) idy = (std::size_t)(y*coef);
+	  value = collection_buf + (idy * side + idx) * content_byte_length;
 	}
 
-	// We compute the value_at.
-	double coef = 1.0/nb;
-	auto it  = accum_ptr->begin();
-	auto end = accum_ptr->end();
-	while(it != end) *(it++) *= coef;
-
-	// We write the result and notify a significant change.
-	double max_diff = 0;
-	it  = accum_ptr->begin();
-	end = accum_ptr->end();
-	auto dit = static_cast<data::Map&>(data).content.begin();
-	while(it != end) {
-	  max_diff = std::max(max_diff, std::fabs(*it - *dit));
-	  *(dit++) = *(it++);
-	}
-
-
-#ifdef cxsomDEBUG_CONVERGE
-	std::ostringstream filename;
-	filename << "avg-" << result.who.variable.timeline 
-		 << "-" << result.who.variable.name
-		 << "-" << std::setw(6) << std::setfill('0') << result.who.at
-		 << ".data";
-	std::ofstream file(filename.str().c_str(), std::ofstream::out | std::ofstream::app);
-	file << static_cast<data::Map&>(data).content[0]
-	     << " --> " << max_diff << " ? " << epsilon << std::endl;
-	file.close();
-#endif
-	return max_diff > epsilon;
+	xxxxxxxxxxxxxxxxxxxxxxx
+	  
       }
     };
     
