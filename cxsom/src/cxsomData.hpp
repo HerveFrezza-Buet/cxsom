@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <tuple>
 #include <sstream>
 #include <memory>
 #include <stdexcept>
@@ -156,6 +157,9 @@ namespace cxsom {
 
       virtual char*       first_byte()       = 0;
       virtual const char* first_byte() const = 0;
+
+      std::tuple<double*, double*> data_range() {return {reinterpret_cast<double*>(first_byte()), reinterpret_cast<double*>(first_byte() + type->byte_length())};}
+      std::tuple<const double*, const double*> data_range() const {return {reinterpret_cast<const double*>(first_byte()), reinterpret_cast<const double*>(first_byte() + type->byte_length())};}
 
      
       virtual void write(std::ostream& os)   const {os.write(first_byte(), type->byte_length());}

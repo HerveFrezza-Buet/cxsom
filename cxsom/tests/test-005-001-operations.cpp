@@ -24,6 +24,7 @@ using namespace cxsom::rules;
 // This is a mandatory declaration, it implements some global variable. 
 context* cxsom::rules::ctx = nullptr;
 
+#define WALLTIME      100
 #define CACHE_SIZE     10
 #define FILE_SIZE    1000
 #define KEPT_OPENED  true
@@ -1823,6 +1824,57 @@ namespace test {
     }
   };
   
+  // ###########
+  // #         # 
+  // # ValueAt # 
+  // #         # 
+  // ###########
+  
+  class ValueAt : public Base {
+  protected:
+    
+  public:
+
+    ValueAt(const fs::path& root_dir,
+		  const std::string& name,
+		  unsigned int mapdim,
+		  const std::string& content)
+      : Base(root_dir, name, "value_at", content, {map_of(mapdim, 100, content), pos_of(mapdim)}) {}
+
+    virtual void make_args() const override {}
+  
+    virtual void send_computation() const override {
+      {
+	timeline t(name + "_args");
+	kwd::type("collection", args[0], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::type("index", args[1], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	"collection" << fx::random() | kwd::use("walltime", WALLTIME);
+	"index" << fx::random() | kwd::use("walltime", WALLTIME);
+      }
+      
+      {
+	timeline t(name);
+	kwd::type("res", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	"res" << fx::value_at(kwd::var(name + "_args", "collection"), kwd::var(name + "_args", "index"));
+      }
+    }
+  
+    virtual bool test_result() const override {
+      bool error_status = false;
+
+      try {
+	cxsom::data::Variable v(root_dir, {name, "res"}, nullptr, std::nullopt, std::nullopt, true);
+     
+      } catch(std::exception& e) {
+	std::cout << "Exception : " << e.what() << std::endl;
+	error_status = true;
+      }
+      
+      return error_status;
+    }
+  };
+
+  
   // #######
   // #     # 
   // # All # 
@@ -1918,6 +1970,14 @@ namespace test {
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_1D",  1, .1, .1, .3, .05);
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_2D",  2, .1, .1, .3, .05);
 
+      *(out++) = new ValueAt(root_dir, "valueat_1D_Scalar", 1, "Scalar"  );
+      *(out++) = new ValueAt(root_dir, "valueat_1D_Pos1D",  1, "Pos1D"   );
+      *(out++) = new ValueAt(root_dir, "valueat_1D_Pos2D",  1, "Pos2D"   );
+      *(out++) = new ValueAt(root_dir, "valueat_1D_Array",  1, "Array=10");
+      *(out++) = new ValueAt(root_dir, "valueat_2D_Scalar", 2, "Scalar"  );
+      *(out++) = new ValueAt(root_dir, "valueat_2D_Pos1D",  2, "Pos1D"   );
+      *(out++) = new ValueAt(root_dir, "valueat_2D_Pos2D",  2, "Pos2D"   );
+      *(out++) = new ValueAt(root_dir, "valueat_2D_Array",  2, "Array=10");
     }
    
 
@@ -1943,6 +2003,7 @@ namespace test {
       }
     }
   };
+
   
 }
 

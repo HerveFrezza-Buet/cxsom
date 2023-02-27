@@ -1662,8 +1662,8 @@ namespace cxsom {
 	collection_type = std::get<1>(args[0]);
 	index_type      = std::get<1>(args[1]);
 	
-	side = static_cast<const type::Map*>(arg_type.get())->side;
-	size = static_cast<const type::Map*>(arg_type.get())->size;
+	side = static_cast<const type::Map*>(collection_type.get())->side;
+	size = static_cast<const type::Map*>(collection_type.get())->size;
 	content_byte_length = res_type->byte_length();
 	coef = size - 1;
       }
@@ -1683,9 +1683,12 @@ namespace cxsom {
 	case 1:
 	  value_in = false;
 	  if(collection_type->is_Map1D()) 
-	    x  = static_cast<cxsom::data::d1::Pos&>(data).x
-	  else
-	    xy = static_cast<cxsom::data::d2::Pos&>(arg_data).xy;
+	    x  = static_cast<const cxsom::data::d1::Pos&>(data).x;
+	  else {
+	    auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+	    x = xy[0];
+	    y = xy[1];
+	  }
 	  break;
 	default: /* never happens, type is checked */ break;
 	}
@@ -1704,9 +1707,12 @@ namespace cxsom {
 	case 1:
 	  value_in = true;
 	  if(collection_type->is_Map1D()) 
-	    x  = static_cast<cxsom::data::d1::Pos&>(data).x
-	  else
-	    std::tie(x, y) = static_cast<cxsom::data::d2::Pos&>(arg_data).xy;
+	    x  = static_cast<const cxsom::data::d1::Pos&>(data).x;
+	  else{
+	    auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+	    x = xy[0];
+	    y = xy[1];
+	  }
 	  break;
 	default: /* never happens, type is checked */ break;
 	}
@@ -1728,8 +1734,18 @@ namespace cxsom {
 	  value = collection_buf + (idy * side + idx) * content_byte_length;
 	}
 
-	xxxxxxxxxxxxxxxxxxxxxxx
-	  
+	if(collection_in || value_in) {
+	  auto [res_it, res_end] = data.data_range();
+	  double max = 0;
+	  for(auto it = value; res_it != res_end;)
+	    if(auto diff = std::fabs(*(it++) - *(res_it++)); diff > max) max = diff;
+	  data.read(value);
+	  return max > epsilon;
+	}
+	else {
+	  data.read(value);
+	  return true;
+	}
       }
     };
     
@@ -2014,14 +2030,14 @@ namespace cxsom {
 
     
     inline void check_types_value_at(type::ref res, const std::vector<type::ref>& args) {
-
       std::ostringstream ostr;
       if(args.size() == 2) {
-	auto [collection_type, index_type] = {args[0], args[1]};
+	auto collection_type = args[0];
+	auto index_type      = args[1];
 	if(collection_type->is_Map())
 	  if((collection_type->is_Map1D() && index_type->is_Pos1D())
 	     || (collection_type->is_Map1D() && index_type->is_Pos1D()))
-	    if(collection->isMap(res->name()))
+	    if(collection_type->is_Map(res->name()))
 	      return;
 	    else
 	      ostr << "Checking types for ValueAt : Collection of type" << collection_type->name() << " and result of type " << index_type->name() << " are not compatible.";
@@ -2034,24 +2050,6 @@ namespace cxsom {
       else
 	ostr << "Checking types for ValueAt : Exactly 2 arguments are expected (got " << args.size() << ").";
       throw error::bad_typing(ostr.str());
-    }
-
-
-      
-      if(ars.size != 2)
-      if(!(res->is_Map("Scalar"))) {
-	std::ostringstream ostr;
-	ostr << "cxsom::jobs::Average : Type " << res->name() << " is not accepted for result.";
-	throw error::bad_typing(ostr.str());
-      }
-
-      for(auto it = args.begin(); it != args.end(); ++it)
-	if(*(*it) != *res) {
-	  std::ostringstream ostr;
-	  ostr << "Checking types for Average : Result has type " << res->name() << " while argument #"
-	       << std::distance(args.begin(), it) << " has type " << (*it)->name() << '.';
-	  throw error::bad_typing(ostr.str());
-	}
     }
     
     struct TypeChecker {
