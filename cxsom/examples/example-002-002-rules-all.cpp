@@ -203,7 +203,7 @@ int main(int argc, char* argv[]) {
 
     {
       timeline t("value-at");
-      kwd::type("Value",       "Array=3",           CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+      kwd::type("Value",      "Array=3",            CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       kwd::type("Collection", "Map2D<Array=3>=100", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       kwd::type("Idx",        "Pos2D",              CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       "Value" << fx::value_at("Collection", "Idx")                                          | kwd::use("walltime", 100); 
