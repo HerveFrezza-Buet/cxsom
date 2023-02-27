@@ -1675,23 +1675,23 @@ namespace cxsom {
       virtual void on_read_out_arg(const symbol::Instance&,
 				   unsigned int rank,
 				   const data::Base& data) override {
-	switch(rank) {
-	case 0:
-	  collection_in = false;
-	  collection_buf = data.first_byte();
-	  break;
-	case 1:
-	  value_in = false;
-	  if(collection_type->is_Map1D()) 
-	    x  = static_cast<const cxsom::data::d1::Pos&>(data).x;
-	  else {
-	    auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
-	    x = xy[0];
-	    y = xy[1];
-	  }
-	  break;
-	default: /* never happens, type is checked */ break;
-	}
+	// switch(rank) {
+	// case 0:
+	//   collection_in = false;
+	//   collection_buf = data.first_byte();
+	//   break;
+	// case 1:
+	//   value_in = false;
+	//   if(collection_type->is_Map1D()) 
+	//     x  = static_cast<const cxsom::data::d1::Pos&>(data).x;
+	//   else {
+	//     auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+	//     x = xy[0];
+	//     y = xy[1];
+	//   }
+	//   break;
+	// default: /* never happens, type is checked */ break;
+	// }
       }
   
       virtual void on_read_out_arg_aborted() override {}
@@ -1699,53 +1699,57 @@ namespace cxsom {
       virtual void on_read_in_arg(const symbol::Instance&,
 				  unsigned int rank,
 				  const data::Base& data) override {
-	switch(rank) {
-	case 0:
-	  collection_in = true;
-	  collection_buf = data.first_byte();
-	  break;
-	case 1:
-	  value_in = true;
-	  if(collection_type->is_Map1D()) 
-	    x  = static_cast<const cxsom::data::d1::Pos&>(data).x;
-	  else{
-	    auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
-	    x = xy[0];
-	    y = xy[1];
-	  }
-	  break;
-	default: /* never happens, type is checked */ break;
-	}
+	// switch(rank) {
+	// case 0:
+	//   collection_in = true;
+	//   collection_buf = data.first_byte();
+	//   break;
+	// case 1:
+	//   value_in = true;
+	//   if(collection_type->is_Map1D()) 
+	//     x  = static_cast<const cxsom::data::d1::Pos&>(data).x;
+	//   else{
+	//     auto& xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+	//     x = xy[0];
+	//     y = xy[1];
+	//   }
+	//   break;
+	// default: /* never happens, type is checked */ break;
+	// }
       }
   
       virtual bool on_write_result(data::Base& data) override {
-	const char* value = nullptr;
+	// const char* value = nullptr;
 	
-	std::size_t idx = 0;
-	if(x >= 1) idx = coef;
-	else if (x > 0) idx = (std::size_t)(x*coef);
+	// std::size_t idx = 0;
+	// if(x >= 1) idx = coef;
+	// else if (x > 0) idx = (std::size_t)(x*coef);
 	
-	if(collection_type->is_Map1D()) 
-	  value = collection_buf + idx * content_byte_length;
-	else {
-	  std::size_t idy = 0;
-	  if(y >= 1) idy = coef;
-	  else if (y > 0) idy = (std::size_t)(y*coef);
-	  value = collection_buf + (idy * side + idx) * content_byte_length;
-	}
+	// if(collection_type->is_Map1D()) 
+	//   value = collection_buf + idx * content_byte_length;
+	// else {
+	//   std::size_t idy = 0;
+	//   if(y >= 1) idy = coef;
+	//   else if (y > 0) idy = (std::size_t)(y*coef);
+	//   value = collection_buf + (idy * side + idx) * content_byte_length;
+	// }
 
-	if(collection_in || value_in) {
-	  auto [res_it, res_end] = data.data_range();
-	  double max = 0;
-	  for(auto it = value; res_it != res_end;)
-	    if(auto diff = std::fabs(*(it++) - *(res_it++)); diff > max) max = diff;
-	  data.read(value);
-	  return max > epsilon;
-	}
-	else {
-	  data.read(value);
-	  return true;
-	}
+	// if(collection_in || value_in) {
+	//   auto [res_it, res_end] = data.data_range();
+	//   double max = 0;
+	//   for(auto it = value; res_it != res_end;)
+	//     if(auto diff = std::fabs(*(it++) - *(res_it++)); diff > max) max = diff;
+	//   data.read(value);
+	//   return max > epsilon;
+	// }
+	// else {
+	//   data.read(value);
+	//   return true;
+	// }
+
+
+	
+	return true;
       }
     };
     
@@ -1811,7 +1815,7 @@ namespace cxsom {
       factory += {"conv-argmax"       , make_update_random<ConvArgmax>          };
       factory += {"toward-argmax"     , make_update_random<TowardArgmax>        };
       factory += {"toward-conv-argmax", make_update_random<TowardConvArgmax>    };
-      factory += {"value-at"          , make_update_deterministic<ValueAt>};
+      factory += {"value-at"          , make_update_deterministic<ValueAt>      };
     }
 
 
@@ -2036,7 +2040,7 @@ namespace cxsom {
 	auto index_type      = args[1];
 	if(collection_type->is_Map())
 	  if((collection_type->is_Map1D() && index_type->is_Pos1D())
-	     || (collection_type->is_Map1D() && index_type->is_Pos1D()))
+	     || (collection_type->is_Map2D() && index_type->is_Pos2D()))
 	    if(collection_type->is_Map(res->name()))
 	      return;
 	    else

@@ -1848,14 +1848,14 @@ namespace test {
 	timeline t(name + "_args");
 	kwd::type("collection", args[0], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
 	kwd::type("index", args[1], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
-	"collection" << fx::random() | kwd::use("walltime", WALLTIME);
+	kwd::at("collection", 0) << fx::random();
 	"index" << fx::random() | kwd::use("walltime", WALLTIME);
       }
       
       {
 	timeline t(name);
 	kwd::type("res", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
-	"res" << fx::value_at(kwd::var(name + "_args", "collection"), kwd::var(name + "_args", "index"));
+	"res" << fx::value_at(kwd::at(kwd::var(name + "_args", "collection"), 0), kwd::var(name + "_args", "index")) | kwd::use("walltime", WALLTIME);
       }
     }
   
