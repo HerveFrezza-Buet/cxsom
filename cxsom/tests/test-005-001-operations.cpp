@@ -2077,6 +2077,76 @@ namespace test {
   };
 
   
+  // ################
+  // #              # 
+  // # ValueAtRelax # 
+  // #              # 
+  // ################
+
+#define SQRT_NB_SAMPLES 100
+  class ValueAtRelax : public Base {
+  protected:
+
+  private:
+    double tol;
+    std::vector<double> sqrt_args;
+    
+  public:
+
+    ValueAtRelax(const fs::path& root_dir, double tol)
+      : Base(root_dir, "valueat_relax", "value_at", "Pos1D", {map_of(1, SQRT_NB_SAMPLES, "Pos1D"), "Pos1D"}),
+	tol(tol),
+	sqrt_args({.1, .2, .3, .4, .5, .6, .7, .8, .9}) {
+    }
+
+    virtual void make_args() const override {
+      fs::create_directories(root_dir / name);
+      {
+      	cxsom::data::File file(root_dir, {name, "f"});
+      	file.realize(cxsom::type::make(args[0]), CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	auto data_ref = cxsom::data::make(file.get_type());
+	auto& data_content = static_cast<cxsom::data::Map&>(*data_ref).content;
+	data_content[0] = 0.0; // Fake
+	for(auto arg: sqrt_args) {
+	  auto out = data_content.begin()+1;
+	  for(unsigned int i=1; i<SQRT_NB_SAMPLES; ++i) {
+	    double x = i/(SQRT_NB_SAMPLES - 1.0);
+	    *(out++) = 0.5 * (x + (arg / x)); // The fixed point is sqrt(arg).
+	  }
+	  file.write(file.get_next_time(), data_ref);
+	}
+      }
+    }
+  
+    virtual void send_computation() const override {
+      timeline t(name);
+      kwd::type("sqrt_arg", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+      kwd::type("sqrt_res", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+
+      "sqrt_arg" <= fx::clear()                   | kwd::use("value", .5), kwd::use("walltime", -1), kwd::use("deadline", 100);
+      "sqrt_arg" << fx::copy("sqrt_res")          | kwd::use("walltime", -1), kwd::use("deadline", 100);
+      "sqrt_res" << fx::value_at("f", "sqrt_arg") | kwd::use("walltime", -1), kwd::use("deadline", 100);
+    }
+
+    
+    virtual bool test_result() const override {
+      cxsom::data::Variable res(root_dir, {name, "sqrt_res"}, nullptr, std::nullopt, std::nullopt, true);
+      std::size_t idx = 0;
+      bool error_status = false;
+      for(auto arg: sqrt_args) {
+	res[idx++]->get([&error_status, arg, tol = this->tol](auto status, auto, auto& data) {
+	  if(status == cxsom::data::Availability::Ready) 
+	    error_status = std::fabs(std::sqrt(arg) - static_cast<const cxsom::data::d1::Pos&>(data).x) > tol;
+	  else
+	    throw std::runtime_error("Busy slot found in sqrt_res");
+	});
+	if(error_status)
+	  return true;
+      }
+      return false;
+    }
+  };
+  
   // #######
   // #     # 
   // # All # 
@@ -2084,13 +2154,14 @@ namespace test {
   // #######
 
 #define TOLERANCE 1e-8
+#define SQRT_TOLERANCE 1e-3
   
   struct All {
     std::vector<Base*> tests;
     All(const fs::path& root_dir) : tests() {
       auto out = std::back_inserter(tests);
 
-      /*
+      
       *(out++) = new Clear(root_dir, "clear_Scalar",       "Scalar",             .5);
       *(out++) = new Clear(root_dir, "clear_Pos1D",        "Pos1D",              .5);
       *(out++) = new Clear(root_dir, "clear_Pos2D",        "Pos2D",              .5);
@@ -2172,7 +2243,7 @@ namespace test {
       
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_1D",  1, .1, .1, .3, .05);
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_2D",  2, .1, .1, .3, .05);
-      */
+      
       *(out++) = new ValueAt(root_dir, "valueat_1D_Scalar", 1, "Scalar"  );
       *(out++) = new ValueAt(root_dir, "valueat_1D_Pos1D",  1, "Pos1D"   );
       *(out++) = new ValueAt(root_dir, "valueat_1D_Pos2D",  1, "Pos2D"   );
@@ -2181,6 +2252,8 @@ namespace test {
       *(out++) = new ValueAt(root_dir, "valueat_2D_Pos1D",  2, "Pos1D"   );
       *(out++) = new ValueAt(root_dir, "valueat_2D_Pos2D",  2, "Pos2D"   );
       *(out++) = new ValueAt(root_dir, "valueat_2D_Array",  2, "Array=10");
+      
+      *(out++) = new ValueAtRelax(root_dir, SQRT_TOLERANCE);
     }
    
 
