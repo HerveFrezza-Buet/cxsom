@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(cxsom-builder) 
 
-SET(PACKAGE_VERSION "1.00")
+SET(PACKAGE_VERSION "1.01")
 SET(PACKAGE_LICENSE "GPL")
 SET(PROJECT_DESCRIPTION_SUMMARY "CXSOM-builder helps to build cxsom architectures.")
 SET(CMAKE_BUILD_TYPE Release)
