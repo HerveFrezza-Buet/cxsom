@@ -1830,9 +1830,37 @@ namespace test {
   // #         # 
   // ###########
   
+  template<typename T>
+  struct PositionOf {
+    std::size_t map_side;
+    PositionOf(std::size_t map_side) : map_side(map_side) {}
+    std::size_t operator()(const T& index) const {
+      if(index >= 1)
+	return map_side - 1;
+      if(index > 0)
+	return (std::size_t)((map_side - 1) * index);
+      return 0;
+    }
+  };
+    
+  template<>
+  struct PositionOf<std::array<double, 2>> {
+    std::size_t map_side;
+    PositionOf(std::size_t map_side) : map_side(map_side) {}
+    std::size_t operator()(const std::array<double, 2>& index) const {
+      std::size_t idx = 0;
+      std::size_t idy = 0;
+      if(index[0] >= 1) idx = 1;
+      else if(index[0] > 0) idx = (std::size_t)((map_side - 1) * index[0]);
+      if(index[1] >= 1) idy = 1;
+      else if(index[1] > 0) idy = (std::size_t)((map_side - 1) * index[1]);
+      return idy * map_side + idx;
+    }
+  };
+    
   class ValueAt : public Base {
   protected:
-    
+
   public:
 
     ValueAt(const fs::path& root_dir,
@@ -1860,7 +1888,12 @@ namespace test {
     }
 
     template<typename COLLECTION, typename INDICES, typename RESULTS>
-    bool check_equality(const COLLECTION& collection, const INDICES& indices, const RESULTS& resuts, std::size_t map_side) const {
+    bool check_equality(const COLLECTION& collection, const INDICES& indices, const RESULTS& results, std::size_t map_side) const {
+      PositionOf<typename INDICES::value_type> position_of(map_side);
+      auto index_it = indices.begin();
+      for(auto& result : results)
+	if(result != collection[position_of(*(index_it++))])
+	  return false;
       return true;
     }
     
