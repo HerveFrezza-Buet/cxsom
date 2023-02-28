@@ -46,8 +46,11 @@ int main(int argc, char* argv[]) {
   
   Xmap->external  (X,    fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
   Xmap->contextual(Ymap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  
-  Ymap->external  (Y,    fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+
+  // Here, for the external layer, we tag the weights as exposed. It
+  // means that we have a variable computing weight(bmu) for that
+  // layer.
+  Ymap->external  (Y,    fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e) | cxsom::builder::expose::weight;
   Ymap->contextual(Xmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
 
   archi << Xmap << Ymap;

@@ -45,6 +45,10 @@ namespace cxsom {
 	kwd::type(kwd::var(timeline, varname), type, cache_size, file_size, kept_opened);
       }
     };
+
+    std::ostream& operator<<(std::ostream& os, const Variable& v) {
+      return os << '[' << v.timeline << ':' << std::string(v.varname) << ", " << v.type << ']';
+    }
     
 
     inline auto variable(const std::string& timeline,

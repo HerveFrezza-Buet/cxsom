@@ -11,6 +11,7 @@
 #include <variant>
 
 #include <cxsombuilderMain.hpp>
+#include <cxsomData.hpp>
 
 namespace cxsom {
   namespace builder {
@@ -105,7 +106,7 @@ namespace cxsom {
       }
 
       static kwd::data dated(kwd::data d, rules::step s) {d.id.date = s; return d;}
-      
+
       ref_variable output_BMU() const {
 	std::ostringstream type;
 	type << "Pos" << map_dim << 'D';
@@ -146,6 +147,7 @@ namespace cxsom {
 	rules::step at_input_read;
 	rules::step at_weight_read;
 	bool contextual;
+	bool expose_weight;
 
 	Layer(Map* owner,
 	      layer_input                   xi,               // The input
@@ -162,7 +164,8 @@ namespace cxsom {
 	    match(match),
 	    p_match(p_match),
 	    at_input_read(at_input_read), at_weight_read(at_weight_read),
-	    contextual(false) {
+	    contextual(false),
+	    expose_weight(false) {
 	  if(std::holds_alternative<ref_variable>(xi)) dot_input = std::get<ref_variable>(xi);
 	  else                                         dot_input = std::get<ref_map>(xi);
 	}
@@ -839,6 +842,30 @@ namespace cxsom {
 	if((Ae || Ae_single) && (Ac || Ac_single))
 	  A = _A();
       }
+
+      auto expose_weight_variable(layer_ref l) const {
+	  auto wgt = l->_W();
+	  auto weight_type = cxsom::type::make(wgt->type);
+	  auto expose_type = weight_type;
+	  return variable(output_timeline, wgt->varname,
+			  static_cast<const cxsom::type::Map&>(*expose_type).content_type, cache_size, bmu_file_size, kept_opened);
+      }
+      
+      void expose_weight_definitions(layer_ref l) const {
+	if(l->expose_weight)
+	  expose_weight_variable(l)->definition();
+      }
+      
+      void expose_weight_update(layer_ref l) const {
+	if(l->expose_weight) {
+	  ref_variable idx = output_BMU();
+	  ref_variable res = expose_weight_variable(l);
+	  ref_variable wgt = l->_W();
+
+	  kwd::var(res->timeline, res->varname) << fx::value_at(kwd::var(wgt->timeline, wgt->varname),
+								kwd::var(idx->timeline, idx->varname)) | p_global;
+	}
+      }
       
     public:
 
@@ -846,8 +873,14 @@ namespace cxsom {
 	_BMU()->definition();
 	output_BMU()->definition();
 	
-	for(auto& ext : external_layers) ext->definitions();
-	for(auto& ctx : contextual_layers) ctx->definitions();
+	for(auto& ext : external_layers) {
+	  ext->definitions();
+	  expose_weight_definitions(ext);
+	}
+	for(auto& ctx : contextual_layers) {
+	  ctx->definitions();
+	  expose_weight_definitions(ctx);
+	}
 
 	acts();
 
@@ -920,6 +953,12 @@ namespace cxsom {
 	// else   std::cout << "Ae = nil" << std::endl;
 	// if(A ) std::cout << "A  = " << kwd::var(A->timeline, A->varname) << std::endl;
 	// else   std::cout << "A  = nil" << std::endl;
+
+
+	// Let us compute exposures.
+	for(auto& ext : external_layers  ) expose_weight_update(ext);
+	for(auto& ctx : contextual_layers) expose_weight_update(ctx);
+	
 	
 	// Let us merge the externals.
 
@@ -1143,6 +1182,17 @@ namespace cxsom {
 	std::tie(p_external, p_contextual, p_global) = params;
       }
     };
+
+    enum class expose : char {weight};
+    inline void operator|(Map::Layer* l, const expose exposure) {
+      switch(exposure) {
+      case expose::weight:
+	l->expose_weight = true;
+	break;
+      default:
+	break;
+      }
+    }
 
     namespace map {
       inline auto make_1D(const std::string& map_name) {return std::make_shared<Map>(map_name, 1);}
