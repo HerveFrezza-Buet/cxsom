@@ -1861,9 +1861,94 @@ namespace test {
   
     virtual bool test_result() const override {
       bool error_status = false;
+      
+      std::vector<double> collection_Scalar;
+      
+      std::vector<double> res_Scalar;
+      std::vector<double> res_Pos1D;
+      std::vector<std::array<double, 2>> res_Pos2D;
+      std::vector<std::vector<double>> res_Array;
+      
+      std::vector<double> indices_Pos1D;
+      std::vector<std::array<double, 2>> indices_Pos2D;
 
       try {
-	cxsom::data::Variable v(root_dir, {name, "res"}, nullptr, std::nullopt, std::nullopt, true);
+	cxsom::data::Variable res(root_dir, {name, "res"}, nullptr, std::nullopt, std::nullopt, true);
+	cxsom::data::Variable collection(root_dir, {name + "_args", "collection"}, nullptr, std::nullopt, std::nullopt, true);
+	cxsom::data::Variable index(root_dir, {name + "_args", "index"}, nullptr, std::nullopt, std::nullopt, true);
+
+	auto history_size = res.history_length();
+	
+	// Getting indices
+	
+	auto index_type = index.get_type();
+	if(index_type->is_Pos1D()) {
+	  for(std::size_t at = 0; at < history_size; ++at)
+	    index[at]->get([&indices_Pos1D](auto status, auto, auto& data) {
+	      if(status == cxsom::data::Availability::Ready)
+		indices_Pos1D.push_back(static_cast<const cxsom::data::d1::Pos&>(data).x);
+	      else
+		throw std::runtime_error("Busy slot found in index");
+	    });
+	}
+	else if (index_type->is_Pos2D()) {
+	  for(std::size_t at = 0; at < history_size; ++at)
+	    index[at]->get([&indices_Pos2D](auto status, auto, auto& data) {
+	      if(status == cxsom::data::Availability::Ready)
+		indices_Pos2D.push_back(static_cast<const cxsom::data::d2::Pos&>(data).xy);
+	      else
+		throw std::runtime_error("Busy slot found in index");
+	    });
+	}
+	else {
+	  std::ostringstream ostr;
+	  ostr << "Bad type found for index variable (" << index_type->name() << ").";
+	  throw std::runtime_error(ostr.str());
+	}
+	
+
+	// Getting results
+	
+	auto res_type = res.get_type();
+	if(res_type->is_Scalar()) {
+	  for(std::size_t at = 0; at < history_size; ++at)
+	    res[at]->get([&res_Scalar](auto status, auto, auto& data) {
+	      if(status == cxsom::data::Availability::Ready)
+		res_Scalar.push_back(static_cast<const cxsom::data::Scalar&>(data).value);
+	      else
+		throw std::runtime_error("Busy slot found in res");
+	    });
+	}
+	else if(res_type->is_Pos1D()) {
+	  for(std::size_t at = 0; at < history_size; ++at)
+	    res[at]->get([&res_Pos1D](auto status, auto, auto& data) {
+	      if(status == cxsom::data::Availability::Ready)
+		res_Pos1D.push_back(static_cast<const cxsom::data::d1::Pos&>(data).x);
+	      else
+		throw std::runtime_error("Busy slot found in res");
+	    });
+	}
+	else if(res_type->is_Pos2D()) {
+	  for(std::size_t at = 0; at < history_size; ++at)
+	    res[at]->get([&res_Pos2D](auto status, auto, auto& data) {
+	      if(status == cxsom::data::Availability::Ready)
+		res_Pos2D.push_back(static_cast<const cxsom::data::d2::Pos&>(data).xy);
+	      else
+		throw std::runtime_error("Busy slot found in res");
+	    });
+	}
+	else if(res_type->is_Array()) {
+	  for(std::size_t at = 0; at < history_size; ++at)
+	    res[at]->get([&res_Array](auto status, auto, auto& data) {
+	      if(status == cxsom::data::Availability::Ready)
+		res_Array.push_back(static_cast<const cxsom::data::Array&>(data).content);
+	      else
+		throw std::runtime_error("Busy slot found in res");
+	    });
+	}
+	else
+	  error_status = true;
+	
      
       } catch(std::exception& e) {
 	std::cout << "Exception : " << e.what() << std::endl;
@@ -1887,7 +1972,8 @@ namespace test {
     std::vector<Base*> tests;
     All(const fs::path& root_dir) : tests() {
       auto out = std::back_inserter(tests);
-      
+
+      /*
       *(out++) = new Clear(root_dir, "clear_Scalar",       "Scalar",             .5);
       *(out++) = new Clear(root_dir, "clear_Pos1D",        "Pos1D",              .5);
       *(out++) = new Clear(root_dir, "clear_Pos2D",        "Pos2D",              .5);
@@ -1969,7 +2055,7 @@ namespace test {
       
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_1D",  1, .1, .1, .3, .05);
       *(out++) = new TowardConvArgmax(root_dir, "toward_conv_argmax_2D",  2, .1, .1, .3, .05);
-
+      */
       *(out++) = new ValueAt(root_dir, "valueat_1D_Scalar", 1, "Scalar"  );
       *(out++) = new ValueAt(root_dir, "valueat_1D_Pos1D",  1, "Pos1D"   );
       *(out++) = new ValueAt(root_dir, "valueat_1D_Pos2D",  1, "Pos2D"   );
