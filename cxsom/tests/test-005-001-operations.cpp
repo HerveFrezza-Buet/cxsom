@@ -1893,8 +1893,8 @@ namespace test {
       auto index_it = indices.begin();
       for(auto& result : results)
 	if(result != collection[position_of(*(index_it++))])
-	  return false;
-      return true;
+	  return true;
+      return false;
     }
     
     virtual bool test_result() const override {
