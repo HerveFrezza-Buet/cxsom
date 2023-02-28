@@ -1858,11 +1858,19 @@ namespace test {
 	"res" << fx::value_at(kwd::at(kwd::var(name + "_args", "collection"), 0), kwd::var(name + "_args", "index")) | kwd::use("walltime", WALLTIME);
       }
     }
-  
+
+    template<typename COLLECTION, typename INDICES, typename RESULTS>
+    bool check_equality(const COLLECTION& collection, const INDICES& indices, const RESULTS& resuts, std::size_t map_side) const {
+      return true;
+    }
+    
     virtual bool test_result() const override {
       bool error_status = false;
       
       std::vector<double> collection_Scalar;
+      std::vector<double> collection_Pos1D;
+      std::vector<std::array<double, 2>> collection_Pos2D;
+      std::vector<std::vector<double>> collection_Array;
       
       std::vector<double> res_Scalar;
       std::vector<double> res_Pos1D;
@@ -1907,7 +1915,15 @@ namespace test {
 	}
 	
 
-	// Getting results
+	// Getting results and collection
+	auto collection_type = collection.get_type();
+	if(!collection_type->is_Map()) {
+	  std::ostringstream ostr;
+	  ostr << "Bad type found for collection variable (" << collection_type->name() << ").";
+	  throw std::runtime_error(ostr.str());
+	}
+	auto collection_size = static_cast<const cxsom::type::Map&>(*collection_type).size;
+	auto map_side = static_cast<const cxsom::type::Map&>(*collection_type).side;
 	
 	auto res_type = res.get_type();
 	if(res_type->is_Scalar()) {
@@ -1918,6 +1934,13 @@ namespace test {
 	      else
 		throw std::runtime_error("Busy slot found in res");
 	    });
+
+	  collection[0]->get([&collection_Scalar](auto status, auto, auto& data) {
+	    if(status == cxsom::data::Availability::Ready)
+	      collection_Scalar = static_cast<const cxsom::data::Map&>(data).content;
+	    else
+	      throw std::runtime_error("Busy slot found in collection");
+	  });
 	}
 	else if(res_type->is_Pos1D()) {
 	  for(std::size_t at = 0; at < history_size; ++at)
@@ -1927,6 +1950,13 @@ namespace test {
 	      else
 		throw std::runtime_error("Busy slot found in res");
 	    });
+
+	  collection[0]->get([&collection_Pos1D](auto status, auto, auto& data) {
+	    if(status == cxsom::data::Availability::Ready)
+	      collection_Pos1D = static_cast<const cxsom::data::Map&>(data).content;
+	    else
+	      throw std::runtime_error("Busy slot found in collection");
+	  });
 	}
 	else if(res_type->is_Pos2D()) {
 	  for(std::size_t at = 0; at < history_size; ++at)
@@ -1936,6 +1966,15 @@ namespace test {
 	      else
 		throw std::runtime_error("Busy slot found in res");
 	    });
+
+	  collection[0]->get([&collection_Pos2D, collection_size](auto status, auto, auto& data) {
+	    if(status == cxsom::data::Availability::Ready) {
+	      auto begin = reinterpret_cast<const std::array<double, 2>*>(std::data(static_cast<const cxsom::data::Map&>(data).content));
+	      std::copy(begin, begin + collection_size, std::back_inserter(collection_Pos2D));
+	    }
+	    else
+	      throw std::runtime_error("Busy slot found in collection");
+	  });
 	}
 	else if(res_type->is_Array()) {
 	  for(std::size_t at = 0; at < history_size; ++at)
@@ -1945,10 +1984,55 @@ namespace test {
 	      else
 		throw std::runtime_error("Busy slot found in res");
 	    });
+
+	  auto array_size = static_cast<const cxsom::type::Array&>(*res_type).size;
+	  collection[0]->get([&collection_Array, collection_size, array_size](auto status, auto, auto& data) {
+	    if(status == cxsom::data::Availability::Ready) {
+	      auto data_it = static_cast<const cxsom::data::Map&>(data).content.begin();
+	      for(std::size_t elem = 0; elem < collection_size; ++elem) {
+		std::vector<double> a;
+		for(std::size_t idx = 0; idx < array_size; ++idx) a.push_back(*(data_it++));
+		collection_Array.emplace_back(std::move(a));
+	      }
+	    }
+	    else
+	      throw std::runtime_error("Busy slot found in collection");
+	  });
+	}
+	else {
+	  std::ostringstream ostr;
+	  ostr << "Bad type found for res variable (" << res_type->name() << ").";
+	  throw std::runtime_error(ostr.str());
+	}
+
+
+	if(index_type->is_Pos1D()) {
+	  if(res_type->is_Scalar())
+	     error_status = check_equality(collection_Scalar, indices_Pos1D, res_Scalar, map_side);
+	  else if(res_type->is_Pos1D())
+	     error_status = check_equality(collection_Pos1D, indices_Pos1D, res_Pos1D, map_side);
+	  else if(res_type->is_Pos2D())
+	     error_status = check_equality(collection_Pos2D, indices_Pos1D, res_Pos2D, map_side);
+	  else if (res_type->is_Array())
+	     error_status = check_equality(collection_Array, indices_Pos1D, res_Array, map_side);
+	  else 
+	    throw std::logic_error("Report bug (in ValueAt testing), this should never occur.");
+	}
+	else if(index_type->is_Pos2D()) {
+	  if(res_type->is_Scalar())
+	     error_status = check_equality(collection_Scalar, indices_Pos2D, res_Scalar, map_side);
+	  else if(res_type->is_Pos1D())
+	     error_status = check_equality(collection_Pos1D, indices_Pos2D, res_Pos1D, map_side);
+	  else if(res_type->is_Pos2D())
+	     error_status = check_equality(collection_Pos2D, indices_Pos2D, res_Pos2D, map_side);
+	  else if (res_type->is_Array())
+	     error_status = check_equality(collection_Array, indices_Pos2D, res_Array, map_side);
+	  else 
+	    throw std::logic_error("Report bug (in ValueAt testing), this should never occur.");
 	}
 	else
-	  error_status = true;
-	
+	  throw std::logic_error("Report bug (in ValueAt testing), this should never occur.");
+	  
      
       } catch(std::exception& e) {
 	std::cout << "Exception : " << e.what() << std::endl;
