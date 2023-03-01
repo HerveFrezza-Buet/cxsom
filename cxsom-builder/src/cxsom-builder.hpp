@@ -14,4 +14,5 @@
   @example example-002-001-direct.cpp
   @example example-002-002-associative.cpp
   @example example-003-001-experiment.cpp
+  @example example-003-002-experiment.cpp
  */
