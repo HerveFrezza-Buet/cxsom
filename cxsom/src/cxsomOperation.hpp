@@ -1665,6 +1665,76 @@ namespace cxsom {
     
 
 
+    ///////////
+    //       //
+    // First //
+    //       //
+    ///////////
+    
+    class First: public Base {
+    private:
+      double x;
+      void read_arg(const data::Base& data) {x = static_cast<const cxsom::data::d2::Pos&>(data).xy[0];}
+      
+    public:
+      
+      First(data::Center& center,
+	   const update::arg& res,
+	   const std::vector<update::arg>& args,
+	   const std::map<std::string, std::string>&)
+	: Base(center, res, "first", args), x(-1) {}
+      
+    protected:
+      
+      virtual void on_computation_start() override {}
+      virtual void on_read_out_arg(const symbol::Instance&, unsigned int, const data::Base& data) override {read_arg(data);}
+      virtual void on_read_in_arg( const symbol::Instance&, unsigned int, const data::Base& data) override {read_arg(data);}
+      virtual void on_read_out_arg_aborted() override {}
+  
+      virtual bool on_write_result(data::Base& data) override {
+	auto& data_x = static_cast<cxsom::data::d1::Pos&>(data).x;
+	bool changed = data_x != x;
+	if(changed)
+	  data_x = x;
+	return changed;
+      }
+    };
+
+
+    ////////////
+    //        //
+    // Second //
+    //        //
+    ////////////
+    
+    class Second: public Base {
+    private:
+      double x;
+      void read_arg(const data::Base& data) {x = static_cast<const cxsom::data::d2::Pos&>(data).xy[1];}
+      
+    public:
+      
+      Second(data::Center& center,
+	   const update::arg& res,
+	   const std::vector<update::arg>& args,
+	   const std::map<std::string, std::string>&)
+	: Base(center, res, "second", args), x(-1) {}
+      
+    protected:
+      
+      virtual void on_computation_start() override {}
+      virtual void on_read_out_arg(const symbol::Instance&, unsigned int, const data::Base& data) override {read_arg(data);}
+      virtual void on_read_in_arg( const symbol::Instance&, unsigned int, const data::Base& data) override {read_arg(data);}
+      virtual void on_read_out_arg_aborted() override {}
+  
+      virtual bool on_write_result(data::Base& data) override {
+	auto& data_x = static_cast<cxsom::data::d1::Pos&>(data).x;
+	bool changed = data_x != x;
+	if(changed)
+	  data_x = x;
+	return changed;
+      }
+    };
     
 
     /////////////
@@ -1849,6 +1919,8 @@ namespace cxsom {
       factory += {"toward-argmax"     , make_update_random<TowardArgmax>        };
       factory += {"toward-conv-argmax", make_update_random<TowardConvArgmax>    };
       factory += {"pair"              , make_update_deterministic<Pair>         };
+      factory += {"first"             , make_update_deterministic<First>        };
+      factory += {"second"            , make_update_deterministic<Second>       };
       factory += {"value-at"          , make_update_deterministic<ValueAt>      };
     }
 
@@ -2086,6 +2158,42 @@ namespace cxsom {
 	ostr << "Checking types for Pair : Result type must be Pos2D (got " << res->name() << ").";
       throw error::bad_typing(ostr.str());
     }
+
+    inline void check_types_first(type::ref res, const std::vector<type::ref>& args) {
+      std::ostringstream ostr;
+      if(res->is_Pos1D()) {
+	if(args.size() == 1) {
+	  if(args[0]->is_Pos2D())
+	    return;
+	  else
+	    ostr << "Checking types for First : The argument must have Pos2D type (got "
+		 << args[0]->name() << ").";
+	}
+	else
+	  ostr << "Checking types for First : Exactly 1 arguments is expected (got " << args.size() << ").";
+      }
+      else
+	ostr << "Checking types for First : Result type must be Pos1D (got " << res->name() << ").";
+      throw error::bad_typing(ostr.str());
+    }
+
+    inline void check_types_second(type::ref res, const std::vector<type::ref>& args) {
+      std::ostringstream ostr;
+      if(res->is_Pos1D()) {
+	if(args.size() == 1) {
+	  if(args[0]->is_Pos2D())
+	    return;
+	  else
+	    ostr << "Checking types for Second : The argument must have Pos2D type (got "
+		 << args[0]->name() << ").";
+	}
+	else
+	  ostr << "Checking types for Second : Exactly 1 arguments is expected (got " << args.size() << ").";
+      }
+      else
+	ostr << "Checking types for Second : Result type must be Pos1D (got " << res->name() << ").";
+      throw error::bad_typing(ostr.str());
+    }
     
     inline void check_types_value_at(type::ref res, const std::vector<type::ref>& args) {
       std::ostringstream ostr;
@@ -2151,6 +2259,8 @@ namespace cxsom {
       type_checker += {"toward-argmax"     , check_types_toward_argmax     };
       type_checker += {"toward-conv-argmax", check_types_toward_conv_argmax};
       type_checker += {"pair"              , check_types_pair              };
+      type_checker += {"first"             , check_types_first             };
+      type_checker += {"second"            , check_types_second            };
       type_checker += {"value-at"          , check_types_value_at          };
     }
       

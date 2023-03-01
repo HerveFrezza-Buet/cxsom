@@ -1829,6 +1829,7 @@ namespace test {
   // # Pair # 
   // #      # 
   // ########
+  
   class Pair : public Base {
   protected:
 
@@ -1882,8 +1883,111 @@ namespace test {
       return x != xy[0] || y != xy[1];
     }
   };
+  
+  // #########
+  // #       # 
+  // # First # 
+  // #       # 
+  // #########
+  
+  class First : public Base {
+  protected:
+
+  public:
+
+    First(const fs::path& root_dir)
+      : Base(root_dir, "First", "first", "Pos1D", {"Pos2D"}) {}
+
+    virtual void make_args() const override {}
+  
+    virtual void send_computation() const override {
+      {
+	timeline t(name + "_args");
+	kwd::type("AB", args[0], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("AB", 0) << fx::random();
+      }
+      
+      {
+	timeline t(name);
+	kwd::type("A", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("A", 0) << fx::first(kwd::at(kwd::var(name + "_args", "AB"), 0));
+      }
+    }
+    
+    virtual bool test_result() const override {
+      cxsom::data::Variable ab(root_dir, {name + "_args", "AB"}, nullptr, std::nullopt, std::nullopt, true);
+      cxsom::data::Variable a (root_dir, {name,           "A" }, nullptr, std::nullopt, std::nullopt, true);
+      double x;
+      std::array<double, 2> xy;
+      a[0]->get([&x](auto status, auto, auto& data) {
+	  if(status == cxsom::data::Availability::Ready) 
+	    x = static_cast<const cxsom::data::d1::Pos&>(data).x;
+	  else
+	    throw std::runtime_error("Busy slot found in sqrt_res");
+	});
+      ab[0]->get([&xy](auto status, auto, auto& data) {
+	  if(status == cxsom::data::Availability::Ready) 
+	    xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+	  else
+	    throw std::runtime_error("Busy slot found in sqrt_res");
+	});
+      return x != xy[0];
+    }
+  };
 
   
+  
+  // ##########
+  // #        # 
+  // # Second # 
+  // #        # 
+  // ##########
+  
+  class Second : public Base {
+  protected:
+
+  public:
+
+    Second(const fs::path& root_dir)
+      : Base(root_dir, "Second", "second", "Pos1D", {"Pos2D"}) {}
+
+    virtual void make_args() const override {}
+  
+    virtual void send_computation() const override {
+      {
+	timeline t(name + "_args");
+	kwd::type("AB", args[0], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("AB", 0) << fx::random();
+      }
+      
+      {
+	timeline t(name);
+	kwd::type("B", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("B", 0) << fx::second(kwd::at(kwd::var(name + "_args", "AB"), 0));
+      }
+    }
+    
+    virtual bool test_result() const override {
+      cxsom::data::Variable ab(root_dir, {name + "_args", "AB"}, nullptr, std::nullopt, std::nullopt, true);
+      cxsom::data::Variable b (root_dir, {name,           "B" }, nullptr, std::nullopt, std::nullopt, true);
+      double x;
+      std::array<double, 2> xy;
+      b[0]->get([&x](auto status, auto, auto& data) {
+	  if(status == cxsom::data::Availability::Ready) 
+	    x = static_cast<const cxsom::data::d1::Pos&>(data).x;
+	  else
+	    throw std::runtime_error("Busy slot found in sqrt_res");
+	});
+      ab[0]->get([&xy](auto status, auto, auto& data) {
+	  if(status == cxsom::data::Availability::Ready) 
+	    xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+	  else
+	    throw std::runtime_error("Busy slot found in sqrt_res");
+	});
+      return x != xy[1];
+    }
+  };
+
   
   // ###########
   // #         # 
@@ -2222,7 +2326,7 @@ namespace test {
     All(const fs::path& root_dir) : tests() {
       auto out = std::back_inserter(tests);
 
-      /*
+      
       *(out++) = new Clear(root_dir, "clear_Scalar",       "Scalar",             .5);
       *(out++) = new Clear(root_dir, "clear_Pos1D",        "Pos1D",              .5);
       *(out++) = new Clear(root_dir, "clear_Pos2D",        "Pos2D",              .5);
@@ -2315,8 +2419,10 @@ namespace test {
       *(out++) = new ValueAt(root_dir, "valueat_2D_Array",  2, "Array=10");
       
       *(out++) = new ValueAtRelax(root_dir, SQRT_TOLERANCE);
-      */
+      
       *(out++) = new Pair(root_dir);
+      *(out++) = new First(root_dir);
+      *(out++) = new Second(root_dir);
     }
    
 

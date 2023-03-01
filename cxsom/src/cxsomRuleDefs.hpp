@@ -369,6 +369,8 @@ namespace cxsom {
       inline update toward_argmax(const kwd::data& v1, const kwd::data& v2) {return {"toward-argmax", {(*ctx)(v1), (*ctx)(v2)}};}
       inline update toward_conv_argmax(const kwd::data& v1, const kwd::data& v2) {return {"toward-conv-argmax", {(*ctx)(v1), (*ctx)(v2)}};}
       inline update pair(const kwd::data& first, const kwd::data& second) {return {"pair", {(*ctx)(first), (*ctx)(second)}};}
+      inline update first(const kwd::data& pair) {return {"first", {(*ctx)(pair)}};}
+      inline update second(const kwd::data& pair) {return {"second", {(*ctx)(pair)}};}
       inline update value_at(const kwd::data& collection, const kwd::data& idx) {return {"value-at", {(*ctx)(collection), (*ctx)(idx)}};}
     }
     
