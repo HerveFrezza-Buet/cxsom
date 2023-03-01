@@ -218,8 +218,8 @@ int main(int argc, char* argv[]) {
       kwd::type("Bin",   "Pos1D", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       kwd::type("Bout",  "Pos1D", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       "ABin" << fx::pair("Aout", "Bout");
-      "Ain"  << fx::first("ABout");
-      "Bin"  << fx::second("ABout");
+      // "Ain"  << fx::first("ABout");
+      // "Bin"  << fx::second("ABout");
     }
   }
   

@@ -1641,7 +1641,7 @@ namespace cxsom {
       Pair(data::Center& center,
 	   const update::arg& res,
 	   const std::vector<update::arg>& args,
-	   const std::map<std::string, std::string>& params)
+	   const std::map<std::string, std::string>&)
 	: Base(center, res, "pair", args) {
 	xy[0] = -1;
 	xy[1] = -1;
@@ -1655,8 +1655,8 @@ namespace cxsom {
       virtual void on_read_out_arg_aborted() override {}
   
       virtual bool on_write_result(data::Base& data) override {
-	auto& data_xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
-	changed = data_xy != xy;
+	auto& data_xy = static_cast<cxsom::data::d2::Pos&>(data).xy;
+	bool changed = data_xy != xy;
 	if(changed)
 	  data_xy = xy;
 	return changed;
@@ -1848,6 +1848,7 @@ namespace cxsom {
       factory += {"conv-argmax"       , make_update_random<ConvArgmax>          };
       factory += {"toward-argmax"     , make_update_random<TowardArgmax>        };
       factory += {"toward-conv-argmax", make_update_random<TowardConvArgmax>    };
+      factory += {"pair"              , make_update_deterministic<Pair>         };
       factory += {"value-at"          , make_update_deterministic<ValueAt>      };
     }
 
@@ -2067,18 +2068,22 @@ namespace cxsom {
 
     inline void check_types_pair(type::ref res, const std::vector<type::ref>& args) {
       std::ostringstream ostr;
-      if(args.size() == 2) {
-	if(args[0]->is_Pos1D() && args[0]->is_Pos1D())
-	  return
+      if(res->is_Pos2D()) {
+	if(args.size() == 2) {
+	  if(args[0]->is_Pos1D() && args[0]->is_Pos1D())
+	    return;
+	  else
+	    ostr << "Checking types for Pair : Both arguments must have Pos1D type (got "
+		 << args[0]->name()
+		 << " and "
+		 << args[1]->name()
+		 << ").";
+	}
 	else
-	  ostr << "Checking types for Pair : Both arguments must have Pos1D type (got "
-	       << args[0]->name()
-	       << " and "
-	       << args[1]->name()
-	       << ").";
+	  ostr << "Checking types for Pair : Exactly 2 arguments are expected (got " << args.size() << ").";
       }
       else
-	ostr << "Checking types for Pair : Exactly 2 arguments are expected (got " << args.size() << ").";
+	ostr << "Checking types for Pair : Result type must be Pos2D (got " << res->name() << ").";
       throw error::bad_typing(ostr.str());
     }
     
