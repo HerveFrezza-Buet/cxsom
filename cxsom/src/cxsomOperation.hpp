@@ -1625,6 +1625,46 @@ namespace cxsom {
       }
     };
 
+    //////////
+    //      //
+    // Pair //
+    //      //
+    //////////
+    
+    class Pair : public Base {
+    private:
+      std::array<double, 2> xy;
+      void read_arg(unsigned int rank, const data::Base& data) {xy[rank] = static_cast<const cxsom::data::d1::Pos&>(data).x;}
+      
+    public:
+      
+      Pair(data::Center& center,
+	   const update::arg& res,
+	   const std::vector<update::arg>& args,
+	   const std::map<std::string, std::string>& params)
+	: Base(center, res, "pair", args) {
+	xy[0] = -1;
+	xy[1] = -1;
+      }
+      
+    protected:
+      
+      virtual void on_computation_start() override {}
+      virtual void on_read_out_arg(const symbol::Instance&, unsigned int rank, const data::Base& data) override {read_arg(rank, data);}
+      virtual void on_read_in_arg( const symbol::Instance&, unsigned int rank, const data::Base& data) override {read_arg(rank, data);}
+      virtual void on_read_out_arg_aborted() override {}
+  
+      virtual bool on_write_result(data::Base& data) override {
+	auto& data_xy = static_cast<const cxsom::data::d2::Pos&>(data).xy;
+	changed = data_xy != xy;
+	if(changed)
+	  data_xy = xy;
+	return changed;
+      }
+    };
+    
+
+
     
 
     /////////////
@@ -2025,6 +2065,22 @@ namespace cxsom {
       throw error::bad_typing(ostr.str());
     }
 
+    inline void check_types_pair(type::ref res, const std::vector<type::ref>& args) {
+      std::ostringstream ostr;
+      if(args.size() == 2) {
+	if(args[0]->is_Pos1D() && args[0]->is_Pos1D())
+	  return
+	else
+	  ostr << "Checking types for Pair : Both arguments must have Pos1D type (got "
+	       << args[0]->name()
+	       << " and "
+	       << args[1]->name()
+	       << ").";
+      }
+      else
+	ostr << "Checking types for Pair : Exactly 2 arguments are expected (got " << args.size() << ").";
+      throw error::bad_typing(ostr.str());
+    }
     
     inline void check_types_value_at(type::ref res, const std::vector<type::ref>& args) {
       std::ostringstream ostr;
@@ -2089,6 +2145,7 @@ namespace cxsom {
       type_checker += {"conv-argmax"       , check_types_argmax            };
       type_checker += {"toward-argmax"     , check_types_toward_argmax     };
       type_checker += {"toward-conv-argmax", check_types_toward_conv_argmax};
+      type_checker += {"pair"              , check_types_pair              };
       type_checker += {"value-at"          , check_types_value_at          };
     }
       

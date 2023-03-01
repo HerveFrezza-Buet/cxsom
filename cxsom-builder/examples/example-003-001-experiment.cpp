@@ -1,6 +1,6 @@
 /*
 
-  Here, we consider 2 connexted maps with external inputs. This serves
+  Here, we consider 2 connected maps with external inputs. This serves
   as a rule generator for the experiment 003-001 in the experimental
   section.
 
