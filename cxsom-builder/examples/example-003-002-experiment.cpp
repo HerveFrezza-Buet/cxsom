@@ -15,7 +15,7 @@
 #include <tuple>
 
 #define CACHE              2
-#define INPUT_TRACE     1000
+#define INPUT_TRACE    10000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0

@@ -5,6 +5,7 @@ help:
 	@echo
 	@echo "make input-setup                                   <-- sets up the input generator."
 	@echo "make feed WALLTIME=500                             <-- feed inputs."
+	@echo "make show-inputs                                   <-- shows current inputs."
 	@echo
 
 # Adapt this path if needed.
@@ -19,5 +20,9 @@ input-setup:
 .PHONY: feed
 feed:
 	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- walltime ${WALLTIME}
+
+.PHONY: show-inputs
+show-inputs:
+	@python3 show-inputs.py `cat .cxsom-rootdir-config`
 
 
