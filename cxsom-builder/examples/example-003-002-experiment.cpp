@@ -44,35 +44,40 @@ auto rgb_inputs() {
   return std::make_tuple(W, H, RGB);
 }
 
+void make_walltime_rules(unsigned int walltime) {
+  {
+    timeline t{"img"};
+    "coord" << fx::random() | kwd::use("walltime", walltime);
+  }
+}
+
 void make_input_rules() {
-  auto SRC = cxsom::builder::variable("img", cxsom::builder::name("src"),   img_type(),     1,     1, OPENED);
-  auto PXL = cxsom::builder::variable("img", cxsom::builder::name("coord"),    "Pos2D", CACHE,     1, OPENED);
+  auto SRC = cxsom::builder::variable("img", cxsom::builder::name("src"),     img_type(),     1,     1, OPENED);
+  auto COORD = cxsom::builder::variable("img", cxsom::builder::name("coord"),    "Pos2D", CACHE,     1, OPENED);
   auto [W, H, RGB] = rgb_inputs();
   SRC->definition();
-  PXL->definition();
+  COORD->definition();
   W->definition();
   H->definition();
   RGB->definition();
 
-  auto src = SRC->varname.value;
-  auto pxl = PXL->varname.value;
-  auto w   = W->varname.value;
-  auto h   = H->varname.value;
-  auto rgb = RGB->varname.value;
+  auto src   = SRC->varname.value;
+  auto coord = COORD->varname.value;
+  auto w     = W->varname.value;
+  auto h     = H->varname.value;
+  auto rgb   = RGB->varname.value;
 
-  {
-    timeline t{"img"};
-    pxl << fx::random() | kwd::use("walltime", 0);
-  }
+  make_walltime_rules(0);
   
   {
     timeline t{"in"};
-    w   << fx::first (kwd::var("img", pxl))                                     | kwd::use("walltime", FOREVER);
-    h   << fx::second(kwd::var("img", pxl))                                     | kwd::use("walltime", FOREVER);
-    rgb << fx::value_at(kwd::at(kwd::var("img", src), 0), kwd::var("img", pxl)) | kwd::use("walltime", FOREVER);
+    w   << fx::first (kwd::var("img", coord))                                     | kwd::use("walltime", FOREVER);
+    h   << fx::second(kwd::var("img", coord))                                     | kwd::use("walltime", FOREVER);
+    rgb << fx::value_at(kwd::at(kwd::var("img", src), 0), kwd::var("img", coord)) | kwd::use("walltime", FOREVER);
   }
     
 }
+
 
 int main(int argc, char* argv[]) {
   context c(argc, argv);
@@ -119,7 +124,10 @@ int main(int argc, char* argv[]) {
   switch(mode) {
   case Mode::Input:
     make_input_rules();
+    break;
   case Mode::Walltime:
+    make_walltime_rules(walltime);
+    break;
   case Mode::Train:
   case Mode::Test:
   default:

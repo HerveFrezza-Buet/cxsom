@@ -48,4 +48,10 @@ If you need to restart everything, you have to kill an eventual running processo
 
 First, let us build-up the input generator (the null walltime warning is ok).
 
-~> make input-setup INPUT_CHUNK_SIZE=1000
+~> make input-setup
+
+Then, we can ask for inputs until some timestep.
+
+~> make feed WALLTIME=500
+
+
