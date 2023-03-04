@@ -91,7 +91,7 @@ class Realize:
             self.datafile.write(bytes(b'\xff\xff\xff\xff\xff\xff\xff\xff'))
             self.datafile.write(bytes(b'\x00\x00\x00\x00\x00\x00\x00\x00'))
             self.datafile.close()
-        self.datafile = None 
+        self.datafile = None
 
 
         
