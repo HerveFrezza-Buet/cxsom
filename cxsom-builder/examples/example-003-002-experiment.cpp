@@ -62,7 +62,7 @@ void make_input_rules() {
 
   {
     timeline t{"img"};
-    pxl << fx::random() | kwd::use("walltime", 1);
+    pxl << fx::random() | kwd::use("walltime", 0);
   }
   
   {

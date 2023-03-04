@@ -46,5 +46,6 @@ If you need to restart everything, you have to kill an eventual running processo
 
 ## Compute the data
 
-First, let us build-up the input generator.
+First, let us build-up the input generator (the null walltime warning is ok).
+
 ~> make input-setup INPUT_CHUNK_SIZE=1000
