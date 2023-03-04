@@ -45,7 +45,7 @@ class Values(Type):
     def pack(self, value):
         return value.tobytes()
     def unpack(self, buf):
-        return np.frombuffer(buf, dtype=np.float64).reshape(self.shape())
+        return np.frombuffer(buf, dtype=float).reshape(self.shape())
     
 class Pos2D(Values):
     def __init__(self):

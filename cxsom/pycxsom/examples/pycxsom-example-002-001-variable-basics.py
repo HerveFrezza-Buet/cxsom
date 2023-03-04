@@ -90,7 +90,7 @@ else:
                     sys.exit(0)
                 at    = int  (sys.argv[args + 0])
                 value = float(sys.argv[args + 1])
-                v[at] = np.full(v.datatype.shape(), value, dtype=np.float)
+                v[at] = np.full(v.datatype.shape(), value, dtype=float)
                 print('done')
             if command == '++':
                 if nb_cmd_args != 1:
@@ -98,7 +98,7 @@ else:
                     print('Command usage: ++ <value>')
                     sys.exit(0)
                 value = float(sys.argv[args + 0])
-                v += np.full(v.datatype.shape(), value, dtype=np.float)
+                v += np.full(v.datatype.shape(), value, dtype=float)
                 print('done')
         except cx.error.Busy:
             print('Nothing can be read, slot {} is busy'.format(at))

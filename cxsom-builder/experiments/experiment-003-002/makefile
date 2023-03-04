@@ -10,5 +10,6 @@ include /usr/share/cxsom/cxsom-makefile
 
 .PHONY: input-setup
 input-setup:
-	echo tbd
+	cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- input
+
 

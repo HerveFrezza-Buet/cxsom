@@ -47,3 +47,4 @@ If you need to restart everything, you have to kill an eventual running processo
 ## Compute the data
 
 First, let us build-up the input generator.
+~> make input-setup INPUT_CHUNK_SIZE=1000
