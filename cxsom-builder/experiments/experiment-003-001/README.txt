@@ -9,7 +9,7 @@ the *.py files.
 
 This experiments builds up 2 1D maps, each receiving a scalar input,
 and connected one with the others. The two scalar inputs are
-dependent, they lie on a circle.
+dependent, they lie on a circle for example.
 
 
 ## Setup the demo

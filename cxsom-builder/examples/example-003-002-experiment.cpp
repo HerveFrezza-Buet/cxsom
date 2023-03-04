@@ -12,10 +12,10 @@
 #include <cxsom-builder.hpp>
 #include <fstream>
 #include <sstream>
+#include <tuple>
 
 #define CACHE              2
-#define UNDEFINED_TRACE 1000
-#define FROZEN_TRACE    1000
+#define TRACE           1000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
@@ -31,8 +31,29 @@ context* cxsom::rules::ctx = nullptr;
 
 enum class Mode : char {Train, Test, Input};
 
+auto img_type() {
+  std::ostringstream ostr;
+  ostr << "Map2D<Array=3>=" << IMG_SIDE;
+  return ostr.str();
+}
+
+auto rgb_inputs() {
+  auto W   = cxsom::builder::variable("in", cxsom::builder::name("w"),    "Scalar", CACHE, TRACE, OPENED);
+  auto H   = cxsom::builder::variable("in", cxsom::builder::name("h"),    "Scalar", CACHE, TRACE, OPENED);
+  auto RGB = cxsom::builder::variable("in", cxsom::builder::name("rgb"), "Array=3", CACHE, TRACE, OPENED);
+  return std::make_tuple(W, H, RGB);
+}
 
 void make_input_rules(unsigned int walltime) {
+  auto IMG = cxsom::builder::variable("img", cxsom::builder::name("src"),   img_type(),     1,     1, OPENED);
+  auto PXL = cxsom::builder::variable("img", cxsom::builder::name("pixel"),    "Pos2D", CACHE, TRACE, OPENED);
+  auto [W, H, RGB] = rgb_inputs();
+  IMG->definition();
+  PXL->definition();
+  W->definition();
+  H->definition();
+  RGB->definition();
+    
 }
 
 int main(int argc, char* argv[]) {
