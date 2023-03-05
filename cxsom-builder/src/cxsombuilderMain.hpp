@@ -42,8 +42,10 @@ namespace cxsom {
 	  timeline(timeline), varname(varname), type(type), cache_size(cache_size), file_size(file_size), kept_opened(kept_opened) {}
       
       void definition() const {
-	kwd::type(kwd::var(timeline, varname), type, cache_size, file_size, kept_opened);
+	kwd::type(var(), type, cache_size, file_size, kept_opened);
       }
+
+      kwd::data var() const {return kwd::var(timeline, varname);}
     };
 
     std::ostream& operator<<(std::ostream& os, const Variable& v) {

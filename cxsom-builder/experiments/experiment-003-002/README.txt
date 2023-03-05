@@ -54,4 +54,9 @@ Then, we can ask for inputs until some timestep.
 
 ~> make feed WALLTIME=500
 
+## Training
+
+~> make send-train-rules
+
+
 

@@ -7,7 +7,8 @@ help:
 	@echo "make feed WALLTIME=500                             <-- feed inputs."
 	@echo "make show-inputs                                   <-- shows current inputs."
 	@echo
-	@echo "make show-train-archi                              <-- displays the train architecture"
+	@echo "make show-train-archi                              <-- displays the train architecture."
+	@echo "make send-train-rules                              <-- sends training rules."
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -34,5 +35,10 @@ show-train-archi:
 	@sfdp -Tpdf -Goverlap=prism train-inits.dot -o train-inits.pdf
 	@rm -f train.dot train-updates.dot train-inits.dot
 	@evince train.pdf train-updates.pdf train-inits.pdf &
+
+.PHONY: send-train-rules
+send-train-rules:
+	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- train
+	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
 
 

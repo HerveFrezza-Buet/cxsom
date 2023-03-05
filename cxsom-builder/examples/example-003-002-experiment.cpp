@@ -13,8 +13,11 @@
 #include <fstream>
 #include <sstream>
 #include <tuple>
+#include <iterator>
 
 #define CACHE              2
+#define SAVE_PERIOD      100
+#define SAVE_TRACE      1000
 #define TRAIN_TRACE    10000
 #define INPUT_TRACE     1000
 #define OPENED          true
@@ -102,28 +105,36 @@ void make_train_rules() {
   map_settings.toward_argmax     = fx::toward_argmax;
 
   // Let us declare the inputs
-  auto W = cxsom::builder::variable("in", cxsom::builder::name("w")  , "Scalar" , CACHE, TRAIN_TRACE, OPENED);
-  auto H = cxsom::builder::variable("in", cxsom::builder::name("h")  , "Scalar" , CACHE, TRAIN_TRACE, OPENED);
+  auto W = cxsom::builder::variable("in", cxsom::builder::name("w")  , "Pos1D" , CACHE, TRAIN_TRACE, OPENED);
+  auto H = cxsom::builder::variable("in", cxsom::builder::name("h")  , "Pos1D" , CACHE, TRAIN_TRACE, OPENED);
   auto R = cxsom::builder::variable("in", cxsom::builder::name("rgb"), "Array=3", CACHE, TRAIN_TRACE, OPENED);
-  // No need to send the definitions here, they have been sent to the processor in input mode.
+
+  // Sending this definition enables the server to perform type
+  // checking.
+  W->definition();
+  H->definition();
+  R->definition();
 
   // Let us define the maps
   auto Wmap = cxsom::builder::map::make_1D("W"  );
   auto Hmap = cxsom::builder::map::make_1D("H"  );  
   auto Rmap = cxsom::builder::map::make_1D("RGB");
 
+  // We store the layers since we have to add rules for saving waights.
+  std::vector<cxsom::builder::Map::Layer*> layers;
+  auto out_layer = std::back_inserter(layers);
   // Let us provide inputs to the maps.
-  Wmap->external(W, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
-  Hmap->external(H, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
-  Rmap->external(R, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+  *(out_layer++) = Wmap->external(W, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+  *(out_layer++) = Hmap->external(H, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+  *(out_layer++) = Rmap->external(R, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
 
   // Let us connect the maps together
-  Wmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  Wmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  Hmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  Hmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  Rmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  Rmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
 
   // Let us build up and configure the architecture
   archi << Wmap << Hmap << Rmap;
@@ -131,9 +142,19 @@ void make_train_rules() {
 
   // We can now produce the cxsom rules and the description graph.
   archi->realize();
-  std::ofstream dot_file("train.dot");
-  dot_file << archi->write_dot;
-  std::cout << "File \"train.dot\" generated." << std::endl;
+  {
+    std::ofstream dot_file("train.dot");
+    dot_file << archi->write_dot;
+    std::cout << "File \"train.dot\" generated." << std::endl;
+  }
+
+  // Let us add weight saving rules.
+  for(auto layer_ptr : layers) {
+    auto W = layer_ptr->_W();
+    auto Wsaved = cxsom::builder::variable("saved", W->varname, W->type, CACHE, SAVE_TRACE, OPEN_AS_NEEDED);
+    Wsaved->definition();
+    Wsaved->var() << fx::copy(kwd::times(W->var(), SAVE_PERIOD)) | kwd::use("walltime", FOREVER);
+  }
 }
 
 
