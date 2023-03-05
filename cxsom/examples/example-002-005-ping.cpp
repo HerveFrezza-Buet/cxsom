@@ -10,7 +10,7 @@ context* cxsom::rules::ctx = nullptr;
 // after t=0.
 
 // What you can do, once these rules are submitted to the simulator,
-// is to feed input-X manually (used example-001-001 or a pycxsom
+// is to feed input-X manually (using example-001-001 or a pycxsom
 // script), and then ping the simulator (use the cxsom-ping
 // command). You should observe (cxsom-all-instances) that compute-X
 // expands in time, following the expansion od input-X, after the

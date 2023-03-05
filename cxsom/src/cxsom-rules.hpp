@@ -7,6 +7,7 @@
  * @example example-002-003-namings.cpp
  * @example example-002-004-relaxation.cpp
  * @example example-002-005-ping.cpp
+ * @example example-002-006-savings.cpp
  * @example example-003-001-som1d-R-map.cpp
  * @example example-003-002-som1d-R2-map.cpp
  * @example example-003-003-som2d-RGB-map.cpp

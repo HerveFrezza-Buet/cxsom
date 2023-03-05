@@ -9,11 +9,10 @@ namespace fs = std::filesystem;
 // the data stored in the files by a simulation. You may also perform
 // such manipulation using the python library pycxsom.
 
-#define ROOT_DIR "root_dir"
 
 int main(int argc, char* argv[]) {
-  if(argc < 4) {
-    std::cout << "Usage : " << argv[0] << " <timeline> <varname> <command> [args...]" << std::endl
+  if(argc < 5) {
+    std::cout << "Usage : " << argv[0] << " <root-dir> <timeline> <varname> <command> [args...]" << std::endl
 	      << "  Commands : " << std::endl
 	      << "    realize <type> <cache_size> <file_size> // Realizes/creates the variable." << std::endl
 	      << "    ++ <value>                              // Adds a next value."     << std::endl
@@ -23,10 +22,11 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  std::string command          {argv[3]};
-  cxsom::symbol::Variable X    {std::string(argv[1]), argv[2]}; // This is our variable.
-  cxsom::data::File       file {ROOT_DIR, X};                   // This is the file interface for X.
-  int args = 4;
+  std::string root_dir         {argv[1]};
+  std::string command          {argv[4]};
+  cxsom::symbol::Variable X    {std::string(argv[2]), argv[3]}; // This is our variable.
+  cxsom::data::File       file {root_dir, X};                   // This is the file interface for X.
+  int args = 5;
   int nb_command_args = argc - args;
 
   try {
