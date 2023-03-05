@@ -182,12 +182,22 @@ namespace cxsom {
 	  is >> c;
 	  if(c == '@') {
 	    int val;
-	    is >> val; res.t = val;
+	    is >> val;
+	    symbol::pattern::relative rel {val};
+	    res.t = rel;
+	  }
+	  else if(c == 'x') {
+	    unsigned int val;
+	    is >> val;
+	    symbol::pattern::scaled scl {val};
+	    res.t = scl;
 	  }
 	  else {
 	    is.putback(c);
 	    unsigned int val;
-	    is >> val; res.t = val;;
+	    is >> val;
+	    symbol::pattern::absolute abs {val};
+	    res.t = abs;
 	  }
 	  is.get(c);
 #ifdef cxsomDEBUG_PROTOCOL

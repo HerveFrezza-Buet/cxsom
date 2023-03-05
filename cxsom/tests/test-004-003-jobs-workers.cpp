@@ -56,7 +56,7 @@ int main(int, char**) {
   jobs_center += cxsom::jobs::make({"main", "A", 0}, {"clear", {}, {}});
   jobs_center += cxsom::jobs::make({"main", "A", 1}, {"clear", {}, {}});
   jobs_center += cxsom::jobs::make({"main", "A", 2}, {"clear", {}, {}});
-  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {"average", {{"main", "B", -1}, {"main", "C", -1}, {"main", "D", -1}}, {}}, 100);
+  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {"average", {{"main", "B", -1_relative}, {"main", "C", -1_relative}, {"main", "D", -1_relative}}, {}}, 100);
   
   jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {"random", {}, {}}, 2);
   jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {"random", {}, {}}, 2);
@@ -68,9 +68,9 @@ int main(int, char**) {
   
   jobs_center.interaction_lock();
   std::cout << "Setting patterns for B, C, D until 10" << std::endl;
-  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {"average", {{"main", "B", -1}, {"main", "B", -2}, {"main", "B", -3}}, {}}, 10);
-  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {"average", {{"main", "C", -1}, {"main", "C", -2}, {"main", "C", -3}}, {}}, 10);
-  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {"average", {{"main", "D", -1}, {"main", "D", -2}, {"main", "D", -3}}, {}}, 10);
+  jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {"average", {{"main", "B", -1_relative}, {"main", "B", -2_relative}, {"main", "B", -3_relative}}, {}}, 10);
+  jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {"average", {{"main", "C", -1_relative}, {"main", "C", -2_relative}, {"main", "C", -3_relative}}, {}}, 10);
+  jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {"average", {{"main", "D", -1_relative}, {"main", "D", -2_relative}, {"main", "D", -3_relative}}, {}}, 10);
   jobs_center.interaction_release();
   
   std::cout << "Done." << std::endl;

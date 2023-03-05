@@ -78,8 +78,8 @@ namespace cxsom {
 		 const std::map<std::string, std::string>& params)
 	  : min_offset(0), op(op), args(args), params(params) {
 	  for(auto& a: args)
-	    if(std::holds_alternative<int>(a.t))
-	      if(int offset = std::get<int>(a.t); offset < min_offset)
+	    if(std::holds_alternative<symbol::pattern::relative>(a.t))
+	      if(int offset = std::get<symbol::pattern::relative>(a.t).offset; offset < min_offset)
 		min_offset = offset;
 	}
 	Function()                           = default;

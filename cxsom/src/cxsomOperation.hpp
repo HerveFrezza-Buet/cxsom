@@ -1945,12 +1945,6 @@ namespace cxsom {
     }
     
     inline void check_types_average(type::ref res, const std::vector<type::ref>& args) {
-      if(!(res->is_Map("Scalar"))) {
-	std::ostringstream ostr;
-	ostr << "cxsom::jobs::Average : Type " << res->name() << " is not accepted for result.";
-	throw error::bad_typing(ostr.str());
-      }
-
       for(auto it = args.begin(); it != args.end(); ++it)
 	if(*(*it) != *res) {
 	  std::ostringstream ostr;

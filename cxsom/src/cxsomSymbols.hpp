@@ -122,7 +122,24 @@ namespace cxsom {
     }
 
     namespace pattern {
-      using time = std::variant<unsigned int, int>;
+      struct absolute{unsigned int at;};
+      struct relative{
+	int offset;
+	relative operator-() const {return {-offset};}
+      };
+      struct scaled{unsigned int factor;};
+      using time = std::variant<absolute, relative, scaled>;
+    }
+  }
+}
+
+inline cxsom::symbol::pattern::absolute operator""_absolute  (unsigned long long int v) {return {(unsigned int)v};}
+inline cxsom::symbol::pattern::relative operator""_relative  (unsigned long long int v) {return {         (int)v};}
+inline cxsom::symbol::pattern::scaled   operator""_scaled    (unsigned long long int v) {return {(unsigned int)v};}
+
+namespace cxsom {
+  namespace symbol {
+    namespace pattern {
       
       /**
        * This is the name of a specific argument instance pattern of a variable in a timeline.
@@ -133,8 +150,8 @@ namespace cxsom {
 
 	ArgInstance(const std::string& timeline, const std::string& name, time t) : variable(timeline, name), t(t) {}
 	ArgInstance(const Variable& variable, time t) : variable(variable), t(t) {}
-	ArgInstance(const std::string& timeline, const std::string& name) : ArgInstance(timeline, name, 0) {}
-	ArgInstance(const Variable& variable) : ArgInstance(variable, 0) {}
+	ArgInstance(const std::string& timeline, const std::string& name) : ArgInstance(timeline, name, 0_absolute) {}
+	ArgInstance(const Variable& variable) : ArgInstance(variable, 0_absolute) {}
 	ArgInstance()                              = default;
 	ArgInstance(const ArgInstance&)            = default;
 	ArgInstance& operator=(const ArgInstance&) = default;
@@ -144,23 +161,27 @@ namespace cxsom {
 	operator Variable     () const {return variable;}
 
 	symbol::Instance at(unsigned int ref_time) const {
-	  if(std::holds_alternative<unsigned int>(t))
-	    return {variable, std::get<unsigned int>(t)};
-	  else {
-	    int offset = std::get<int>(t);
+	  if(std::holds_alternative<absolute>(t))
+	    return {variable, std::get<absolute>(t).at};
+	  else if(std::holds_alternative<relative>(t)) {
+	    int offset = std::get<relative>(t).offset;
 	    if(offset < 0 && (unsigned int)(-offset) > ref_time) 
 	      throw error::negative_time(std::string("negative time : ") + std::to_string(ref_time) + std::to_string(offset));
 	    return {variable, (unsigned int)(ref_time + offset)};
 	  }
+	  else
+	    return {variable, ref_time * std::get<scaled>(t).factor};
 	}
       };
 
       inline std::ostream& operator<<(std::ostream& os, const ArgInstance& i) {
 	os << i.variable;
-	if(std::holds_alternative<unsigned int>(i.t))
-	  os << '@' << std::get<unsigned int>(i.t);
+	if(std::holds_alternative<absolute>(i.t))
+	  os << '@' << std::get<absolute>(i.t).at;
+	else if (std::holds_alternative<relative>(i.t))
+	  os << "@+{" << std::get<relative>(i.t).offset << '}';
 	else
-	  os << "@{" << std::get<int>(i.t) << '}';
+	  os << "@*{" << std::get<scaled>(i.t).factor << '}';
 	return os;
       }
       

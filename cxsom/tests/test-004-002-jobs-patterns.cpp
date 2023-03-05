@@ -27,7 +27,7 @@ int main(int, char**) {
 
   data_center.check_all();
 
-  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {"average", {{"main", "A", -1}, {"main", "B", -1}, {"main", "C", -1}, {"main", "D", -1}}, {}}, 100);
+  jobs_center += cxsom::jobs::pattern::make({"main", "A"}, {"average", {{"main", "A", -1_relative}, {"main", "B", -1_relative}, {"main", "C", -1_relative}, {"main", "D", -1_relative}}, {}}, 100);
   jobs_center += cxsom::jobs::pattern::make({"main", "B"}, {"random", {}, {}}, 100);
   jobs_center += cxsom::jobs::pattern::make({"main", "C"}, {"random", {}, {}}, 100);
   jobs_center += cxsom::jobs::pattern::make({"main", "D"}, {"random", {}, {}}, 100);
