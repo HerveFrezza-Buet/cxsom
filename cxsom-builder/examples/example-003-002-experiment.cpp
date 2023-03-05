@@ -15,7 +15,8 @@
 #include <tuple>
 
 #define CACHE              2
-#define INPUT_TRACE    10000
+#define TRAIN_TRACE    10000
+#define INPUT_TRACE     1000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
@@ -75,7 +76,64 @@ void make_input_rules() {
     h   << fx::second(kwd::var("img", coord))                                     | kwd::use("walltime", FOREVER);
     rgb << fx::value_at(kwd::at(kwd::var("img", src), 0), kwd::var("img", coord)) | kwd::use("walltime", FOREVER);
   }
-    
+}
+
+void make_train_rules() {
+  
+  auto archi = cxsom::builder::architecture();
+  
+  kwd::parameters p_main, p_match, p_learn, p_learn_e, p_learn_c, p_external, p_contextual, p_global;
+  p_main       | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
+  p_match      | p_main,  kwd::use("sigma", .2);
+  p_learn      | p_main,  kwd::use("alpha", .1);
+  p_learn_e    | p_learn, kwd::use("r", .2 );
+  p_learn_c    | p_learn, kwd::use("r", .02);
+  p_external   | p_main;
+  p_contextual | p_main;
+  p_global     | p_main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
+  
+  auto map_settings = cxsom::builder::map::make_settings();
+  map_settings.map_size          = MAP_SIZE;
+  map_settings.cache_size        = CACHE;
+  map_settings.weights_file_size = TRAIN_TRACE;
+  map_settings.kept_opened       = OPENED;
+  map_settings                   = {p_external, p_contextual, p_global};
+  map_settings.argmax            = fx::argmax;
+  map_settings.toward_argmax     = fx::toward_argmax;
+
+  // Let us declare the inputs
+  auto W = cxsom::builder::variable("in", cxsom::builder::name("w")  , "Scalar" , CACHE, TRAIN_TRACE, OPENED);
+  auto H = cxsom::builder::variable("in", cxsom::builder::name("h")  , "Scalar" , CACHE, TRAIN_TRACE, OPENED);
+  auto R = cxsom::builder::variable("in", cxsom::builder::name("rgb"), "Array=3", CACHE, TRAIN_TRACE, OPENED);
+  // No need to send the definitions here, they have been sent to the processor in input mode.
+
+  // Let us define the maps
+  auto Wmap = cxsom::builder::map::make_1D("W"  );
+  auto Hmap = cxsom::builder::map::make_1D("H"  );  
+  auto Rmap = cxsom::builder::map::make_1D("RGB");
+
+  // Let us provide inputs to the maps.
+  Wmap->external(W, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+  Hmap->external(H, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+  Rmap->external(R, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+
+  // Let us connect the maps together
+  Wmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  Wmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  Hmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  Hmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  Rmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  Rmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+
+  // Let us build up and configure the architecture
+  archi << Wmap << Hmap << Rmap;
+  *archi = map_settings;
+
+  // We can now produce the cxsom rules and the description graph.
+  archi->realize();
+  std::ofstream dot_file("train.dot");
+  dot_file << archi->write_dot;
+  std::cout << "File \"train.dot\" generated." << std::endl;
 }
 
 
@@ -129,6 +187,7 @@ int main(int argc, char* argv[]) {
     make_walltime_rules(walltime);
     break;
   case Mode::Train:
+    make_train_rules();
   case Mode::Test:
   default:
     break;

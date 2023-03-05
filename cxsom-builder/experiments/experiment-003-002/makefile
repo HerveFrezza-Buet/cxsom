@@ -7,6 +7,7 @@ help:
 	@echo "make feed WALLTIME=500                             <-- feed inputs."
 	@echo "make show-inputs                                   <-- shows current inputs."
 	@echo
+	@echo "make show-train-archi                              <-- displays the train architecture"
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -24,5 +25,14 @@ feed:
 .PHONY: show-inputs
 show-inputs:
 	@python3 show-inputs.py `cat .cxsom-rootdir-config`
+
+.PHONY: show-train-archi
+show-train-archi:
+	@cxsom-builder-example-003-002-experiment graph-full train -- train
+	@dot -Tpdf train.dot -o train.pdf
+	@sfdp -Tpdf -Goverlap=prism train-updates.dot -o train-updates.pdf
+	@sfdp -Tpdf -Goverlap=prism train-inits.dot -o train-inits.pdf
+	@rm -f train.dot train-updates.dot train-inits.dot
+	@evince train.pdf train-updates.pdf train-inits.pdf &
 
 
