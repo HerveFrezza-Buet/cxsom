@@ -167,6 +167,4 @@ namespace cxsom {
     }
   }
   
-  inline symbol::pattern::time absolute(unsigned int t) {return t;}
-  inline symbol::pattern::time relative(int t)          {return t;}
 }

@@ -94,7 +94,21 @@ int main(int argc, char* argv[]) {
       "X" << fx::average({"Y", "/X"})                                                                                | kwd::use("walltime", 100);
       "Y" << fx::average({"X", "ns2/X"})                                                                             | kwd::use("walltime", 100);
     }
-    
+  }
+
+  {
+    timeline t("scale");
+
+    // with kwd::prev, and more generally kwd::shift, you can refer to
+    // a variable at the current timestep "plus" an offset. You can do
+    // the same to express current timestep "times" an factor. This is
+    // what kwd::times does.
+
+    kwd::type("W",      "Scalar",          CACHE_SIZE, BUF_SIZE, KEPT_OPENED); // This can be some computed weight.
+    kwd::type("Wsaved", kwd::type_of("W"), CACHE_SIZE, BUF_SIZE, KEPT_OPENED); // This will save the "W" every 100 steps.
+
+    // So here, Wsaved@i is W@100*i.
+    "Wsaved" << fx::copy(kwd::times("W", 100))                                                                       | kwd::use("walltime", 100);
   }
 
   // Have a look at the generated graph to understand which variables

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(cxsom) 
 
-SET(PACKAGE_VERSION "2.01")
+SET(PACKAGE_VERSION "2.10")
 SET(PACKAGE_LICENSE "GPL")
 SET(PROJECT_DESCRIPTION_SUMMARY "CXSOM is a multi-SOM computer")
 SET(CMAKE_BUILD_TYPE Release)

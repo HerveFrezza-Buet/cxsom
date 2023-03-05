@@ -89,9 +89,19 @@ namespace cxsom {
       offset(int v) : value(v) {}
     };
     offset operator""_step  (unsigned long long int v) {return {int(v)};}
+    
+    struct scale {
+      unsigned int value = 0;
+      bool operator< (const scale& arg) const {return value  < arg.value;}
+      bool operator==(const scale& arg) const {return value == arg.value;}
+      bool operator!=(const scale& arg) const {return value != arg.value;}
+      scale() = default;
+      scale(unsigned int v) : value(v) {}
+    };
+    scale operator""_times  (unsigned long long int v) {return {(unsigned int)v};}
 
   
-    using step = std::variant<unsigned int, offset>;
+    using step = std::variant<unsigned int, offset, scale>;
   
 
     struct value_key {
@@ -107,8 +117,9 @@ namespace cxsom {
       value_key   key;
       step        date;
     
-      value_at_key(const std::string& timeline, const std::string& name, int date) : key(timeline, name), date(date) {}
+      value_at_key(const std::string& timeline, const std::string& name, unsigned int date)  : key(timeline, name), date(date) {}
       value_at_key(const std::string& timeline, const std::string& name, const offset& date) : key(timeline, name), date(date) {}
+      value_at_key(const std::string& timeline, const std::string& name, const scale& date)  : key(timeline, name), date(date) {}
       value_at_key(const value_at_key&) = default;
       value_at_key& operator=(const value_at_key&) = default;
     
@@ -162,11 +173,16 @@ namespace cxsom {
 	data(const char*        timeline, const std::string& name, const offset& date) : data(std::string(timeline), name, date) {}
 	data(const std::string& timeline, const char*        name, const offset& date) : data(timeline, std::string(name), date) {}
 	data(const char*        timeline, const char*        name, const offset& date) : data(std::string(timeline), std::string(name), date) {}
+
+	data(const std::string& timeline, const std::string& name, const scale& date);
+	data(const char*        timeline, const std::string& name, const scale& date) : data(std::string(timeline), name, date) {}
+	data(const std::string& timeline, const char*        name, const scale& date) : data(timeline, std::string(name), date) {}
+	data(const char*        timeline, const char*        name, const scale& date) : data(std::string(timeline), std::string(name), date) {}
       
-	data(const std::string& timeline, const std::string& name, int date);
-	data(const char*        timeline, const std::string& name, int date) : data(std::string(timeline), name, date) {}
-	data(const std::string& timeline, const char*        name, int date) : data(timeline, std::string(name), date) {}
-	data(const char*        timeline, const char*        name, int date) : data(std::string(timeline), std::string(name), date) {}
+	data(const std::string& timeline, const std::string& name, unsigned int date);
+	data(const char*        timeline, const std::string& name, unsigned int date) : data(std::string(timeline), name, date) {}
+	data(const std::string& timeline, const char*        name, unsigned int date) : data(timeline, std::string(name), date) {}
+	data(const char*        timeline, const char*        name, unsigned int date) : data(std::string(timeline), std::string(name), date) {}
       
 	data(const std::string& timeline, const std::string& name) : data(timeline, name, 0_step) {}
 	data(const char*        timeline, const std::string& name) : data(timeline, name, 0_step) {}
@@ -174,10 +190,12 @@ namespace cxsom {
 	data(const char*        timeline, const char*        name) : data(timeline, name, 0_step) {}
       
 	data(const std::string& name, const offset& date);
-	data(const std::string& name, int date);
+	data(const std::string& name, const scale& date);
+	data(const std::string& name, unsigned int date);
 
 	data(const char* name, const offset& date) : data(std::string(name), date) {}
-	data(const char* name, int date)           : data(std::string(name), date) {}
+	data(const char* name, const scale& date)  : data(std::string(name), date) {}
+	data(const char* name, unsigned int date)  : data(std::string(name), date) {}
       
 	data(const std::string& name) : data(name, 0_step) {}
 	data(const char* name)        : data(name, 0_step) {}
@@ -240,6 +258,12 @@ namespace cxsom {
       inline data shift(data d, int off) {d.id.date = offset(off); return d;}
       std::vector<data> shift(const data& d, int begin, int end);
       std::vector<data> shift(const std::vector<data>& d, int off);
+      
+      /**
+       * This defines a time scaled for a variable.
+       */
+      inline data times(data d, unsigned int factor) {d.id.date = scale(factor); return d;}
+      std::vector<data> times(const std::vector<data>& d, unsigned int factor);
 
       /**
        * This is shift(-1).

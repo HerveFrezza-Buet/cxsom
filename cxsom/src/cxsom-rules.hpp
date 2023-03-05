@@ -51,7 +51,7 @@ inline void cxsom::rules::check_args(const cxsom::rules::kwd::data& res, const c
 }
 
 inline void cxsom::rules::check_arg(const cxsom::rules::kwd::data& res, const kwd::data& arg) {
-  if(std::holds_alternative<offset>(arg.id.date)) {
+  if(!std::holds_alternative<unsigned int>(arg.id.date)) {
     std::ostringstream ostr;
     ostr << "Update of instance " << res << " (which is not a pattern) requires only instance argument. Pattern argument " << arg << " found.";
     throw error::bad_update(ostr.str());
@@ -59,7 +59,8 @@ inline void cxsom::rules::check_arg(const cxsom::rules::kwd::data& res, const kw
 }
 
 inline void cxsom::rules::check_res(const cxsom::rules::kwd::data& v) {
-  if(std::holds_alternative<offset>(v.id.date) && std::get<offset>(v.id.date).value != 0) {
+  if((std::holds_alternative<offset>(v.id.date) && std::get<offset>(v.id.date).value != 0)
+     ||(std::holds_alternative<scale>(v.id.date))) {
     std::ostringstream ostr;
     ostr << "Update pattern can only concern non-shifted variables. Updating " << v << " is thus invalid."; 
     throw error::bad_update(ostr.str());
@@ -109,6 +110,13 @@ inline std::vector<cxsom::rules::kwd::data> cxsom::rules::kwd::shift(const std::
   std::vector<cxsom::rules::kwd::data> res;
   auto out = std::back_inserter(res);
   for(auto& data : d) *(out++) = shift(data, off);
+  return res;
+}
+
+inline std::vector<cxsom::rules::kwd::data> cxsom::rules::kwd::times(const std::vector<cxsom::rules::kwd::data>& d, unsigned int factor) {
+  std::vector<cxsom::rules::kwd::data> res;
+  auto out = std::back_inserter(res);
+  for(auto& data : d) *(out++) = times(data, factor);
   return res;
 }
 
@@ -295,10 +303,12 @@ inline cxsom::rules::update& cxsom::rules::context::add_init(cxsom::rules::value
 
   
 inline cxsom::rules::kwd::data::data(const std::string& timeline, const std::string& name, const offset& date) : id(timeline, ctx->varname(name), date) {}
-inline cxsom::rules::kwd::data::data(const std::string& timeline, const std::string& name, int date) : id(timeline, ctx->varname(name), date) {}
+inline cxsom::rules::kwd::data::data(const std::string& timeline, const std::string& name, const scale& date)  : id(timeline, ctx->varname(name), date) {}
+inline cxsom::rules::kwd::data::data(const std::string& timeline, const std::string& name, unsigned int date)  : id(timeline, ctx->varname(name), date) {}
 
-inline cxsom::rules::kwd::data::data(const std::string& name, int date) : data(ctx->current_timeline(), name, date) {}
 inline cxsom::rules::kwd::data::data(const std::string& name, const offset& date) : data(ctx->current_timeline(), name, date) {}
+inline cxsom::rules::kwd::data::data(const std::string& name, const scale& date)  : data(ctx->current_timeline(), name, date) {}
+inline cxsom::rules::kwd::data::data(const std::string& name, unsigned int date)  : data(ctx->current_timeline(), name, date) {}
 
 inline cxsom::rules::timeline::timeline(const std::string& tl) {ctx->timelines.push(tl);}
 inline cxsom::rules::timeline::~timeline()                     {ctx->timelines.pop();}
@@ -351,11 +361,18 @@ inline bool operator<(const cxsom::rules::step& s1, const cxsom::rules::step& s2
       return std::get<unsigned int>(s1) < std::get<unsigned int>(s2);
     else
       return true;
-  else
+  else if(std::holds_alternative<cxsom::rules::offset>(s1))
     if(std::holds_alternative<unsigned int>(s2))
       return false;
+    else if(std::holds_alternative<cxsom::rules::scale>(s2))
+      return true;
     else
       return std::get<cxsom::rules::offset>(s1) < std::get<cxsom::rules::offset>(s2);
+  else
+    if(std::holds_alternative<cxsom::rules::scale>(s2))
+      return std::get<cxsom::rules::scale>(s1) < std::get<cxsom::rules::scale>(s2);
+    else
+      return false;
 }
 
 inline std::pair<std::string, std::string> cxsom::rules::split_name(const std::string& name) {
@@ -384,8 +401,10 @@ inline std::pair<std::string, std::string> cxsom::rules::split_name(const std::s
 inline std::ostream& cxsom::rules::operator<<(std::ostream& os, const cxsom::rules::step& s) {
   if(std::holds_alternative<unsigned int>(s))
     os << std::get<unsigned int>(s);
-  else 
+  else if(std::holds_alternative<cxsom::rules::offset>(s))
     os << '@' << std::get<cxsom::rules::offset>(s).value;
+  else
+    os << 'x' << std::get<cxsom::rules::scale>(s).value;
   return os;
 }
 
@@ -494,7 +513,7 @@ inline void cxsom::rules::context::print_graph(std::ostream& file, std::map<valu
 	    label += " @";
 	    label += std::to_string(std::get<unsigned int>(kkvv.first.date));
 	  }
-	  else {
+	  else if(std::holds_alternative<offset>(kkvv.first.date)) {
 	    auto v = std::get<offset>(kkvv.first.date).value;
 	    if(v < 0) {
 	      label += " @now-";
@@ -506,6 +525,11 @@ inline void cxsom::rules::context::print_graph(std::ostream& file, std::map<valu
 	    }
 	    if(v != 0)
 	      color = "#ccccdd";
+	  }
+	  else {
+	    auto v = std::get<scale>(kkvv.first.date).value;
+	    label += " @now*";
+	    label += std::to_string(v);
 	  }
 	  std::string style = "filled";
 	  label = std::string("<b>")+label+"</b>";
