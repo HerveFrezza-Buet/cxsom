@@ -44,6 +44,8 @@ If you need to restart everything, you have to kill an eventual running processo
 ~> make cxsom-kill-processor
 ~> make cxsom-clear-rootdir
 
+Then, see the "Restart section'
+
 ## Compute the data
 
 First, let us build-up the input generator (the null walltime warning is ok).
@@ -54,9 +56,33 @@ Then, we can ask for inputs until some timestep.
 
 ~> make feed WALLTIME=500
 
+You can visualize the current inputs
+
+~> make show-inputs
+
+
 ## Training
 
 ~> make send-train-rules
+
+You can view the algorithm (architecture and rules)
+
+~> make show-train-archi
+
+## Restart training from previous execution
+
+This tells how to restart processor and continue the work done until now. We suppose that no processor is running.
+
+~> make cxsom-launch-processor
+~> make send-input-rules
+~> make send-train-rules
+
+Then you can extend the walltime for inputs to get new ones. Here, we extend to 1000.
+
+~> make feed WALLTIME=1000
+
+
+
 
 
 

@@ -140,6 +140,11 @@ void make_train_rules() {
   archi << Wmap << Hmap << Rmap;
   *archi = map_settings;
 
+  // We set random values for weights at first timestep. This avoid
+  // blocking at step 0 since learning rules consider the weights at
+  // previous timestep.
+  for(auto map : archi->maps) map->internals_random_at(0);
+
   // We can now produce the cxsom rules and the description graph.
   archi->realize();
   {
