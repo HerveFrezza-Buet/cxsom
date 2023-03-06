@@ -77,6 +77,10 @@ You can view the saved weights evolution
 
 ~> make show-weights-history
 
+You can also view the color mapping of the RGB map.
+
+-> make show-rgb-mapping
+
 ## Restart training from previous execution
 
 This tells how to restart processor and continue the work done until now. We suppose that no processor is running.

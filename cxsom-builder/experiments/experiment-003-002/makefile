@@ -13,6 +13,7 @@ help:
 	@echo "make show-train-archi                              <-- displays the train architecture."
 	@echo "make send-train-rules SAVE_PERIOD=10               <-- sends training rules."
 	@echo "make show-weights-history                          <-- displays the saved weights."
+	@echo "make show-rgb-mapping                              <-- displays the color map encoding by the RGB map."
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -52,4 +53,8 @@ send-train-rules:
 .PHONY: show-weights-history
 show-weights-history:
 	@python3 show-weights-history.py `cat .cxsom-rootdir-config`
+
+.PHONY: show-rgb-mapping
+show-rgb-mapping:
+	@python3 show-rgb-mapping.py `cat .cxsom-rootdir-config`
 
