@@ -16,7 +16,6 @@
 #include <iterator>
 
 #define CACHE              2
-#define SAVE_PERIOD      100
 #define SAVE_TRACE      1000
 #define TRAIN_TRACE    10000
 #define INPUT_TRACE     1000
@@ -81,7 +80,7 @@ void make_input_rules() {
   }
 }
 
-void make_train_rules() {
+void make_train_rules(unsigned int save_period) {
   
   auto archi = cxsom::builder::architecture();
   
@@ -158,7 +157,7 @@ void make_train_rules() {
     auto W = layer_ptr->_W();
     auto Wsaved = cxsom::builder::variable("saved", W->varname, W->type, CACHE, SAVE_TRACE, OPEN_AS_NEEDED);
     Wsaved->definition();
-    Wsaved->var() << fx::copy(kwd::times(W->var(), SAVE_PERIOD)) | kwd::use("walltime", FOREVER);
+    Wsaved->var() << fx::copy(kwd::times(W->var(), save_period)) | kwd::use("walltime", FOREVER);
   }
 }
 
@@ -167,6 +166,7 @@ int main(int argc, char* argv[]) {
   context c(argc, argv);
   Mode mode;
   unsigned int walltime = 0;
+  unsigned int save_period = 0;
   
   // We analyse the arguments and identify the mode.
   std::ostringstream prefix;
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
 	      << "e.g:" << std::endl
 	      << "  " << prefix.str() << "input               <-- sends the rules for the inputs." << std::endl
 	      << "  " << prefix.str() << "walltime <max-time> <-- sends the rules for the inputs wall-time redefinition." << std::endl
-	      << "  " << prefix.str() << "train               <-- sends the rules for training." << std::endl
+	      << "  " << prefix.str() << "train <save-period> <-- sends the rules for training." << std::endl
 	      << "  " << prefix.str() << "test                <-- sends the rules for testing." << std::endl;
     c.notify_user_argv_error(); 
     return 0;
@@ -195,8 +195,15 @@ int main(int argc, char* argv[]) {
   }
   else if(c.user_argv[0] == "input")
     mode = Mode::Input;
-  else if(c.user_argv[0] == "train")
+  else if(c.user_argv[0] == "train") {
+    if(c.user_argv.size() != 2) {
+      std::cout << "The 'train' mode expects a save-period argument"  << std::endl;
+      c.notify_user_argv_error(); 
+      return 0;
+    }
+    save_period = stoul(c.user_argv[1]);
     mode = Mode::Train;
+  }
   else if(c.user_argv[0] == "test")
     mode = Mode::Test;
   else {
@@ -213,7 +220,7 @@ int main(int argc, char* argv[]) {
     make_walltime_rules(walltime);
     break;
   case Mode::Train:
-    make_train_rules();
+    make_train_rules(save_period);
   case Mode::Test:
   default:
     break;

@@ -1,5 +1,7 @@
 help:
 	@echo
+	@echo "Read the README.txt file for instructions."
+	@echo
 	@echo
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations"
 	@echo

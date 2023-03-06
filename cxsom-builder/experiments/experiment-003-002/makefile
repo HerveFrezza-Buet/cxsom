@@ -1,5 +1,7 @@
 help:
 	@echo
+	@echo "Read the README.txt file for instructions."
+	@echo
 	@echo
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations."
 	@echo
@@ -9,7 +11,8 @@ help:
 	@echo "make show-inputs                                   <-- shows current inputs."
 	@echo
 	@echo "make show-train-archi                              <-- displays the train architecture."
-	@echo "make send-train-rules                              <-- sends training rules."
+	@echo "make send-train-rules SAVE_PERIOD=10               <-- sends training rules."
+	@echo "make show-weights-history                          <-- displays the saved weights."
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -34,7 +37,7 @@ show-inputs:
 
 .PHONY: show-train-archi
 show-train-archi:
-	@cxsom-builder-example-003-002-experiment graph-full train -- train
+	@cxsom-builder-example-003-002-experiment graph-full train -- train 100
 	@dot -Tpdf train.dot -o train.pdf
 	@sfdp -Tpdf -Goverlap=prism train-updates.dot -o train-updates.pdf
 	@sfdp -Tpdf -Goverlap=prism train-inits.dot -o train-inits.pdf
@@ -43,7 +46,10 @@ show-train-archi:
 
 .PHONY: send-train-rules
 send-train-rules:
-	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- train
+	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- train ${SAVE_PERIOD}
 	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
 
+.PHONY: show-weights-history
+show-weights-history:
+	@python3 show-weights-history.py `cat .cxsom-rootdir-config`
 

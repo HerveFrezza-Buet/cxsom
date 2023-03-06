@@ -63,11 +63,19 @@ You can visualize the current inputs
 
 ## Training
 
-~> make send-train-rules
+~> make send-train-rules SAVE_PERIOD=10
 
 You can view the algorithm (architecture and rules)
 
 ~> make show-train-archi
+
+You can extend inputs walltime (to 1000 here)
+
+~> make feed WALLTIME=1000
+
+You can view the saved weights evolution
+
+~> make show-weights-history
 
 ## Restart training from previous execution
 
