@@ -20,12 +20,20 @@ def get_weight_history(varpath):
         return np.fromiter((value for _, value in cx.variable.data_range_full(varpath)), (float, side))
     return np.fromiter((value for _, value in cx.variable.data_range_full(varpath)), dtype=(float, (side, 3)))
 
-def weight_history(ax, data, mapname, weight_kind, weight_rank):
+def weight_history(ax, data, mapname, weight_kind, weight_rank, show_xticks, show_yticks):
     if weight_kind == 'c':
         ax.set_title(f'{mapname} (W{weight_kind}-{weight_rank})')
     else:
         ax.set_title(f'{mapname} (W{weight_kind})')
-    ax.set_ylabel('time')
+        
+    if show_yticks:
+        ax.set_ylabel('time')
+    else:
+        ax.set_yticks([])
+        
+    if not show_xticks:
+        ax.set_xticks([])
+        
     weights = data[mapname][weight_kind][weight_rank]
     if len(weights.shape) == 3:
         ax.imshow(weights, origin = 'lower')

@@ -18,7 +18,7 @@
 #define CACHE              2
 #define SAVE_TRACE      1000
 #define TRAIN_TRACE    10000
-#define INPUT_TRACE     1000
+#define INPUT_TRACE     5000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
@@ -84,15 +84,22 @@ void make_train_rules(unsigned int save_period) {
   
   auto archi = cxsom::builder::architecture();
   
-  kwd::parameters p_main, p_match, p_learn, p_learn_e, p_learn_c, p_external, p_contextual, p_global;
-  p_main       | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
-  p_match      | p_main,  kwd::use("sigma", .2);
-  p_learn      | p_main,  kwd::use("alpha", .1);
-  p_learn_e    | p_learn, kwd::use("r", .2 );
-  p_learn_c    | p_learn, kwd::use("r", .02);
-  p_external   | p_main;
-  p_contextual | p_main;
-  p_global     | p_main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
+  kwd::parameters
+    p_main, p_match, p_learn,
+    p_learn_pos_e, p_learn_pos_c,
+    p_learn_rgb_e, p_learn_rgb_c,
+    p_external, p_contextual, p_global;
+  p_main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
+  p_match       | p_main,  kwd::use("sigma", .2);
+  p_learn       | p_main,  kwd::use("alpha", .1);
+  p_learn_pos_c | p_learn, kwd::use("r", .02);
+  p_learn_pos_e | p_learn, kwd::use("r", .2 );
+  p_learn_pos_c | p_learn, kwd::use("r", .02);
+  p_learn_rgb_e | p_learn, kwd::use("r", .1 );
+  p_learn_rgb_c | p_learn, kwd::use("r", .01);
+  p_external    | p_main;
+  p_contextual  | p_main;
+  p_global      | p_main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
   
   auto map_settings = cxsom::builder::map::make_settings();
   map_settings.map_size          = MAP_SIZE;
@@ -123,17 +130,17 @@ void make_train_rules(unsigned int save_period) {
   std::vector<cxsom::builder::Map::Layer*> layers;
   auto out_layer = std::back_inserter(layers);
   // Let us provide inputs to the maps.
-  *(out_layer++) = Wmap->external(W, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
-  *(out_layer++) = Hmap->external(H, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
-  *(out_layer++) = Rmap->external(R, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_e);
+  *(out_layer++) = Wmap->external(W, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_e);
+  *(out_layer++) = Hmap->external(H, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_e);
+  *(out_layer++) = Rmap->external(R, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_rgb_e);
 
   // Let us connect the maps together
-  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
-  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_c);
+  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
+  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
+  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_rgb_c);
+  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_rgb_c);
 
   // Let us build up and configure the architecture
   archi << Wmap << Hmap << Rmap;

@@ -14,6 +14,8 @@ help:
 	@echo "make send-train-rules SAVE_PERIOD=10               <-- sends training rules."
 	@echo "make show-weights-history                          <-- displays the saved weights."
 	@echo "make show-rgb-mapping                              <-- displays the color map encoding by the RGB map."
+	@echo
+	@echo "make re-train WALLTIME=3000 SAVE_PERIOD=10         <-- restarts from scratch everything."
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -58,3 +60,8 @@ show-weights-history:
 show-rgb-mapping:
 	@python3 show-rgb-mapping.py `cat .cxsom-rootdir-config`
 
+
+.PHONY: re-train
+re-train:
+	@make --quiet cxsom-clear-rootdir cxsom-kill-processor cxsom-launch-processor cxsom-is-processor-running
+	@make --quiet input-setup send-train-rules feed

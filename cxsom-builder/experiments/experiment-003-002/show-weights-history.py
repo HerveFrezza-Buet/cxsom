@@ -37,6 +37,6 @@ gs = fig.add_gridspec(3, 3, wspace=0.05, hspace=0.05)
 for mapname, mapweights in grid_pos.items():
     for weight_kind, positions in mapweights.items():
         for idx, (h, w) in enumerate(positions):
-            display.weight_history(fig.add_subplot(gs[h, w]), data, mapname, weight_kind, idx)
+            display.weight_history(fig.add_subplot(gs[h, w]), data, mapname, weight_kind, idx, h==2, w==0)
 plt.show()
 
