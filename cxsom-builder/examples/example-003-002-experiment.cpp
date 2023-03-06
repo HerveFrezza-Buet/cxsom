@@ -18,7 +18,7 @@
 #define CACHE              2
 #define SAVE_TRACE      1000
 #define TRAIN_TRACE    10000
-#define INPUT_TRACE     5000
+#define INPUT_TRACE     2000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
@@ -80,35 +80,49 @@ void make_input_rules() {
   }
 }
 
-void make_train_rules(unsigned int save_period) {
-  
-  auto archi = cxsom::builder::architecture();
-  
+struct Params {
   kwd::parameters
-    p_main, p_match, p_learn,
-    p_learn_pos_e, p_learn_pos_c,
-    p_learn_rgb_e, p_learn_rgb_c,
-    p_external, p_contextual, p_global;
-  p_main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
-  p_match       | p_main,  kwd::use("sigma", .2);
-  p_learn       | p_main,  kwd::use("alpha", .1);
-  p_learn_pos_c | p_learn, kwd::use("r", .02);
-  p_learn_pos_e | p_learn, kwd::use("r", .2 );
-  p_learn_pos_c | p_learn, kwd::use("r", .02);
-  p_learn_rgb_e | p_learn, kwd::use("r", .1 );
-  p_learn_rgb_c | p_learn, kwd::use("r", .01);
-  p_external    | p_main;
-  p_contextual  | p_main;
-  p_global      | p_main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
-  
+    main, match, learn,
+    learn_pos_e, learn_pos_c,
+    learn_rgb_e, learn_rgb_c,
+    external, contextual, global;
+  Params() {
+    main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
+    match       | main,  kwd::use("sigma", .2);
+    learn       | main,  kwd::use("alpha", .1);
+    learn_pos_c | learn, kwd::use("r", .02);
+    learn_pos_e | learn, kwd::use("r", .2 );
+    learn_pos_c | learn, kwd::use("r", .02);
+    learn_rgb_e | learn, kwd::use("r", .1 );
+    learn_rgb_c | learn, kwd::use("r", .01);
+    external    | main;
+    contextual  | main;
+    global      | main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
+  }
+};
+
+auto make_map_settings(const Params& p) {
   auto map_settings = cxsom::builder::map::make_settings();
   map_settings.map_size          = MAP_SIZE;
   map_settings.cache_size        = CACHE;
   map_settings.weights_file_size = TRAIN_TRACE;
   map_settings.kept_opened       = OPENED;
-  map_settings                   = {p_external, p_contextual, p_global};
+  map_settings                   = {p.external, p.contextual, p.global};
   map_settings.argmax            = fx::argmax;
   map_settings.toward_argmax     = fx::toward_argmax;
+
+  return map_settings;
+}
+
+
+void make_train_rules(unsigned int save_period) {
+  
+
+  Params p;
+  auto map_settings = make_map_settings(p);
+  
+  auto archi = cxsom::builder::architecture();
+  archi->timelines = {"train_wgt", "train_rlx", "train_out"};
 
   // Let us declare the inputs
   auto W = cxsom::builder::variable("in", cxsom::builder::name("w")  , "Pos1D" , CACHE, TRAIN_TRACE, OPENED);
@@ -122,25 +136,27 @@ void make_train_rules(unsigned int save_period) {
   R->definition();
 
   // Let us define the maps
+  std::vector<cxsom::builder::Map::Layer*> layers;
+  auto out_layer = std::back_inserter(layers);
+  
+  // Let us define the maps
   auto Wmap = cxsom::builder::map::make_1D("W"  );
   auto Hmap = cxsom::builder::map::make_1D("H"  );  
   auto Rmap = cxsom::builder::map::make_1D("RGB");
 
-  // We store the layers since we have to add rules for saving waights.
-  std::vector<cxsom::builder::Map::Layer*> layers;
-  auto out_layer = std::back_inserter(layers);
-  // Let us provide inputs to the maps.
-  *(out_layer++) = Wmap->external(W, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_e);
-  *(out_layer++) = Hmap->external(H, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_e);
-  *(out_layer++) = Rmap->external(R, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_rgb_e);
-
+  // We store the layers since we have to add rules for saving weights.
   // Let us connect the maps together
-  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
-  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
-  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
-  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_pos_c);
-  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_rgb_c);
-  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p_match, fx::learn_triangle, p_learn_rgb_c);
+  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_rgb_c);
+  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_rgb_c);
+
+  // Let us provide inputs to the maps.
+  *(out_layer++) = Wmap->external(W, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_e);
+  *(out_layer++) = Hmap->external(H, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_e);
+  *(out_layer++) = Rmap->external(R, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_rgb_e);
 
   // Let us build up and configure the architecture
   archi << Wmap << Hmap << Rmap;
@@ -159,7 +175,7 @@ void make_train_rules(unsigned int save_period) {
     std::cout << "File \"train.dot\" generated." << std::endl;
   }
 
-  // Let us add weight saving rules.
+  // We add the rules for weight savings.
   for(auto layer_ptr : layers) {
     auto W = layer_ptr->_W();
     auto Wsaved = cxsom::builder::variable("saved", W->varname, W->type, CACHE, SAVE_TRACE, OPEN_AS_NEEDED);
@@ -169,11 +185,15 @@ void make_train_rules(unsigned int save_period) {
 }
 
 
+void make_test_rules(unsigned int saved_weight_at) {
+}
+
 int main(int argc, char* argv[]) {
   context c(argc, argv);
   Mode mode;
-  unsigned int walltime = 0;
-  unsigned int save_period = 0;
+  unsigned int walltime        = 0;
+  unsigned int save_period     = 0;
+  unsigned int saved_weight_at = 0;
   
   // We analyse the arguments and identify the mode.
   std::ostringstream prefix;
@@ -183,10 +203,10 @@ int main(int argc, char* argv[]) {
   if(c.user_argv.size() == 0) {
     std::cout << "You have to provide user arguments." << std::endl
 	      << "e.g:" << std::endl
-	      << "  " << prefix.str() << "input               <-- sends the rules for the inputs." << std::endl
-	      << "  " << prefix.str() << "walltime <max-time> <-- sends the rules for the inputs wall-time redefinition." << std::endl
-	      << "  " << prefix.str() << "train <save-period> <-- sends the rules for training." << std::endl
-	      << "  " << prefix.str() << "test                <-- sends the rules for testing." << std::endl;
+	      << "  " << prefix.str() << "input                  <-- sends the rules for the inputs." << std::endl
+	      << "  " << prefix.str() << "walltime <max-time>    <-- sends the rules for the inputs wall-time redefinition." << std::endl
+	      << "  " << prefix.str() << "train <save-period>    <-- sends the rules for training." << std::endl
+	      << "  " << prefix.str() << "test <saved-weight-at> <-- sends the rules for testing." << std::endl;
     c.notify_user_argv_error(); 
     return 0;
   }
@@ -211,8 +231,15 @@ int main(int argc, char* argv[]) {
     save_period = stoul(c.user_argv[1]);
     mode = Mode::Train;
   }
-  else if(c.user_argv[0] == "test")
+  else if(c.user_argv[0] == "test") {
+    if(c.user_argv.size() != 2) {
+      std::cout << "The 'test' mode expects a saved-weight-at argument"  << std::endl;
+      c.notify_user_argv_error(); 
+      return 0;
+    }
+    saved_weight_at = stoul(c.user_argv[1]);
     mode = Mode::Test;
+  }
   else {
     std::cout << "Bad user arguments." << std::endl;
     c.notify_user_argv_error(); 
@@ -228,7 +255,10 @@ int main(int argc, char* argv[]) {
     break;
   case Mode::Train:
     make_train_rules(save_period);
+    break;
   case Mode::Test:
+    make_test_rules(saved_weight_at);
+    break;
   default:
     break;
   }
