@@ -275,7 +275,9 @@ The reporting of an update makes the update to be inserted in a queue of the tim
 
 Defining an update for all DIs (i.e. at each time $\cxDftInst$) would be exhausting. It can be done for specific time instants (usually $\cxDftInst=0$), but a generic update definition is required for the general cases.
 
-This is what \ConceptDef{update patterns} (UP) are introduced for. Let us denote a \ConceptDef{relative data instance} (RDI) as $\cxDftRDI$, where $\cxShiftSet$ is a relative time shift. A RDI can be \ConceptDef{anchored} as a DI at time $\cxDftInst$. This consists in transforming $\cxDftRDI$ into $\cxAnchor$.
+This is what \ConceptDef{update patterns} (UP) are introduced for. Let us denote a \ConceptDef{relative data instance} (RDI) as $\cxDftRDI$, where $\cxShiftSet$ is a relative time shift. A RDI can be \ConceptDef{anchored} as a DI at time $\cxDftInst$. This consists in turning $\cxDftRDI$ into $\cxAnchor$.
+
+We also consider RDI with a relative time factor, rather than a time shift. No difference is made here, in terms of notations, between the two. Such a RDI is anchored as a DI at time $\cxDftInst$ by turning $\cxDftRDI$ into $\cxAnchorScaled$.
 
 
 The definition is then similar to the one of an update, presented in section~\ref{sec:update}.

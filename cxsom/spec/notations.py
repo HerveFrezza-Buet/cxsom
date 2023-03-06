@@ -253,6 +253,7 @@ with nb.files.defs('commands.tex') as defs:
 
     defs['ShiftSet'] = nb.sets.isin(dt, nb.sets.Z)
     defs['Anchor'] = DIof(T, X, t+dt)
+    defs['AnchorScaled'] = DIof(T, X, t^dt)
     defs['Pat'] = pat
     defs['Patterns'] = pats
     res_pat = updt_arg('res', pat)

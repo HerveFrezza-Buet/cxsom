@@ -13,13 +13,13 @@
 \newcommand{\cxDftTL}[0]{T}
 \newcommand{\cxDftInst}[0]{t}
 \newcommand{\cxDftDI}[0]{\left[ T,\;X,\;t \right]}
-\newcommand{\cxDftDDI}[0]{\left[ T,\;X,\;t' \right]}
+\newcommand{\cxDftDDI}[0]{\left[ T,\;X,\;{t}^{\prime} \right]}
 \newcommand{\cxDftDIz}[0]{\left[ T,\;X,\;0 \right]}
 \newcommand{\cxBufSize}[0]{s}
-\newcommand{\cxBufFirst}[0]{\left[ T,\;X,\;{{t} - {s}} + {1} \right]}
-\newcommand{\cxBufLast}[0]{\left[ T,\;X,\;{t} + {1} \right]}
+\newcommand{\cxBufFirst}[0]{\left[ T,\;X,\;{{t}-{s}}+{1} \right]}
+\newcommand{\cxBufLast}[0]{\left[ T,\;X,\;{t}+{1} \right]}
 \newcommand{\cxSizeof}[0]{d}
-\newcommand{\cxDataSize}[0]{{s} \times {\left({d} + {1}\right)}}
+\newcommand{\cxDataSize}[0]{{s}\times{\left({d}+{1}\right)}}
 \newcommand{\cxDftRDI}[0]{\left\{ T,\;X,\;\tau \right\}}
 \newcommand{\cxDftTS}[0]{{{\cal S}}_{T}^{t}}
 \newcommand{\cxDftUpdt}[0]{u}
@@ -29,150 +29,151 @@
 \newcommand{\cxDftTSQi}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}
 \newcommand{\cxDftTSQs}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}
 \newcommand{\cxDftTSQc}[0]{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}
-\newcommand{\cxDftTSEq}[0]{{{{\cal S}}_{T}^{t}} = {\left[ T,\;\bullet,\;t \right]}}
+\newcommand{\cxDftTSEq}[0]{{{{\cal S}}_{T}^{t}}={\left[ T,\;\bullet,\;t \right]}}
 \newcommand{\cxRn}[0]{{\mathbb{R}}^{n}}
-\newcommand{\cxArraySet}[0]{{\left[0,\;1\right]}^{n},\;{n} \in {\mathbb{N}^\star}}
+\newcommand{\cxArraySet}[0]{{\left[0,\;1\right]}^{n},\;{n}\in{{\mathbb{N}}^{\star}}}
 \newcommand{\cxAnySet}[0]{{\cal X}}
-\newcommand{\cxContentSetD}[0]{{{\cal X}}^{n},\;{n} \in {\mathbb{N}^\star}}
-\newcommand{\cxContentSetDD}[0]{{\left({{\cal X}}^{n}\right)}^{n},\;{n} \in {\mathbb{N}^\star}}
-\newcommand{\cxAnySetDef}[0]{{{\cal X}} \in {\left\{\mbox{\Scalar},\;\mbox{\Pos 1},\;\mbox{\Pos 2},\;\mbox{\Array k}\right\}}}
-\newcommand{\cxDefDatation}[0]{{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}} \in {\mathbb{N}}}
+\newcommand{\cxContentSetD}[0]{{{\cal X}}^{n},\;{n}\in{{\mathbb{N}}^{\star}}}
+\newcommand{\cxContentSetDD}[0]{{\left({{\cal X}}^{n}\right)}^{n},\;{n}\in{{\mathbb{N}}^{\star}}}
+\newcommand{\cxAnySetDef}[0]{{{\cal X}}\in{\left\{\mbox{\Scalar},\;\mbox{\Pos 1},\;\mbox{\Pos 2},\;\mbox{\Array k}\right\}}}
+\newcommand{\cxDefDatation}[0]{{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}}\in{\mathbb{N}}}
 \newcommand{\cxDefVar}[0]{\left[ T,\;X,\;\bullet \right]}
 \newcommand{\cxDefTimeStep}[0]{\left[ T,\;\bullet,\;t \right]}
-\newcommand{\cxDefTimeStepFull}[0]{{{{\cal S}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{{\left[ T',\;X',\;t' \right]} \in {\mbox{simulation}}\; \middle| \; {{T'} = {T}} \wedge {{t'} = {t}}\right\}}}
-\newcommand{\cxDefStatus}[0]{{\left< \left[ T,\;X,\;t \right] \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{busy}},\;\textcolor{statuscoul}{\mathtt{ready}}\right\}}}
+\newcommand{\cxDefTimeStepFull}[0]{{{{\cal S}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{{\left[ {T}^{\prime},\;{X}^{\prime},\;{t}^{\prime} \right]}\in{\mbox{simulation}}\; \middle| \; {{{T}^{\prime}}={T}} \wedge {{{t}^{\prime}}={t}}\right\}}}
+\newcommand{\cxDefStatus}[0]{{\left< \left[ T,\;X,\;t \right] \right>}\in{\left\{\textcolor{statuscoul}{\mathtt{busy}},\;\textcolor{statuscoul}{\mathtt{ready}}\right\}}}
 \newcommand{\cxStatusX}[0]{\left< x \right>}
 \newcommand{\cxResUpdt}[0]{{\mathrm{res}}_{u}}
 \newcommand{\cxInArgUpdt}[0]{{\mathrm{in}}_{u}}
 \newcommand{\cxOutArgUpdt}[0]{{\mathrm{out}}_{u}}
 \newcommand{\cxResUpdtDef}[0]{{{\mathrm{res}}_{u}}\;{\stackrel{\mathrm{def}}{=}}\;{\left[ T,\;X,\;t \right]}}
-\newcommand{\cxResUpdtEq}[0]{{{\mathrm{res}}_{u}} = {\left[ T,\;X,\;t \right]}}
-\newcommand{\cxAllReady}[0]{\forall {{\left[ T,\;X,\;t \right]} \in {{\mathrm{out}}_{u}}},\; {{\left< \left[ T,\;X,\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}}
-\newcommand{\cxDatationDef}[0]{{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}} \in {\mathbb{N}}}
+\newcommand{\cxResUpdtEq}[0]{{{\mathrm{res}}_{u}}={\left[ T,\;X,\;t \right]}}
+\newcommand{\cxAllReady}[0]{\forall {{\left[ T,\;X,\;t \right]}\in{{\mathrm{out}}_{u}}},\; {{\left< \left[ T,\;X,\;t \right] \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}}
+\newcommand{\cxDatationDef}[0]{{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}}\in{\mathbb{N}}}
 \newcommand{\cxDatationResU}[0]{{\mathrm{d}}_{{\mathrm{res}}_{u}}}
-\newcommand{\cxDatationUpdt}[0]{{{\mathrm{d}}_{{\mathrm{res}}_{u}}} = {{1} + {\displaystyle\mathop{\mathrm{max}}_{{\left[ T,\;X,\;t \right]} \in {{\mathrm{in}}_{u}}}{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}}}}}
+\newcommand{\cxDatationUpdt}[0]{{{\mathrm{d}}_{{\mathrm{res}}_{u}}}={{1}+{\displaystyle\mathop{\mathrm{max}}_{{\left[ T,\;X,\;t \right]}\in{{\mathrm{in}}_{u}}}{{\mathrm{d}}_{\left[ T,\;X,\;t \right]}}}}}
 \newcommand{\cxStatusUpdt}[0]{\left< u \right>}
-\newcommand{\cxStatusImpossible}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{impossible}}}}
-\newcommand{\cxStatusUpToDate}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{uptodate}}}}
-\newcommand{\cxStatusUpdated}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{updated}}}}
-\newcommand{\cxStatusDone}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{done}}}}
-\newcommand{\cxStatusNone}[0]{{\left< u \right>} = {\textcolor{statuscoul}{\mathtt{none}}}}
-\newcommand{\cxResBusy}[0]{{\left< {\mathrm{res}}_{u} \right>} = {\textcolor{statuscoul}{\mathtt{busy}}}}
-\newcommand{\cxResReady}[0]{{\left< {\mathrm{res}}_{u} \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}
-\newcommand{\cxCycleZ}[0]{{\textcolor{funcoul}{\mbox{on\_computation\_start}}}\left(\right)}
+\newcommand{\cxStatusImpossible}[0]{{\left< u \right>}={\textcolor{statuscoul}{\mathtt{impossible}}}}
+\newcommand{\cxStatusUpToDate}[0]{{\left< u \right>}={\textcolor{statuscoul}{\mathtt{uptodate}}}}
+\newcommand{\cxStatusUpdated}[0]{{\left< u \right>}={\textcolor{statuscoul}{\mathtt{updated}}}}
+\newcommand{\cxStatusDone}[0]{{\left< u \right>}={\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxStatusNone}[0]{{\left< u \right>}={\textcolor{statuscoul}{\mathtt{none}}}}
+\newcommand{\cxResBusy}[0]{{\left< {\mathrm{res}}_{u} \right>}={\textcolor{statuscoul}{\mathtt{busy}}}}
+\newcommand{\cxResReady}[0]{{\left< {\mathrm{res}}_{u} \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxCycleZ}[0]{{\textcolor{funcoul}{\mbox{on\_computation\_start}}}\!\left(\right)}
 \newcommand{\cxCycleA}[0]{{\neg}{\mbox{{\tt out\_ok}}}}
-\newcommand{\cxCycleB}[0]{{\left[ T,\;X,\;t \right]} \in {{\mathrm{out}}_{u}}}
-\newcommand{\cxCycleC}[0]{{\left< \left[ T,\;X,\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}
-\newcommand{\cxCycleD}[0]{{\textcolor{funcoul}{\mbox{on\_read\_out\_arg}}}\left(\left[ T,\;X,\;t \right]\right)}
-\newcommand{\cxCycleE}[0]{{\mbox{{\tt out\_ok}}} \leftarrow {\mbox{false}}}
-\newcommand{\cxCycleF}[0]{{\textcolor{funcoul}{\mbox{on\_read\_out\_arg\_aborted}}}\left(\right)}
-\newcommand{\cxCycleG}[0]{{\mbox{{\tt out\_ok}}} \leftarrow {\mbox{true}}}
-\newcommand{\cxCycleH}[0]{{\left[ T,\;X,\;t \right]} \in {{\mathrm{in}}_{u}}}
-\newcommand{\cxCycleI}[0]{{\textcolor{funcoul}{\mbox{on\_read\_in\_arg}}}\left(\left[ T,\;X,\;t \right]\right)}
+\newcommand{\cxCycleB}[0]{{\left[ T,\;X,\;t \right]}\in{{\mathrm{out}}_{u}}}
+\newcommand{\cxCycleC}[0]{{\left< \left[ T,\;X,\;t \right] \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxCycleD}[0]{{\textcolor{funcoul}{\mbox{on\_read\_out\_arg}}}\!\left(\left[ T,\;X,\;t \right]\right)}
+\newcommand{\cxCycleE}[0]{{\mbox{{\tt out\_ok}}}\leftarrow{\mbox{false}}}
+\newcommand{\cxCycleF}[0]{{\textcolor{funcoul}{\mbox{on\_read\_out\_arg\_aborted}}}\!\left(\right)}
+\newcommand{\cxCycleG}[0]{{\mbox{{\tt out\_ok}}}\leftarrow{\mbox{true}}}
+\newcommand{\cxCycleH}[0]{{\left[ T,\;X,\;t \right]}\in{{\mathrm{in}}_{u}}}
+\newcommand{\cxCycleI}[0]{{\textcolor{funcoul}{\mbox{on\_read\_in\_arg}}}\!\left(\left[ T,\;X,\;t \right]\right)}
 \newcommand{\cxCycleJ}[0]{\mbox{{\tt is\_init}}}
-\newcommand{\cxCycleK}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{none}}}}
-\newcommand{\cxCycleL}[0]{{\alpha} \leftarrow {{\textcolor{funcoul}{\mbox{on\_write\_result}}}\left({\mathrm{res}}_{u}\right)}}
+\newcommand{\cxCycleK}[0]{{x}\leftarrow{\textcolor{statuscoul}{\mathtt{none}}}}
+\newcommand{\cxCycleL}[0]{{\alpha}\leftarrow{{\textcolor{funcoul}{\mbox{on\_write\_result}}}\!\left({\mathrm{res}}_{u}\right)}}
 \newcommand{\cxCycleM}[0]{\alpha}
-\newcommand{\cxCycleN}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{updated}}}}
-\newcommand{\cxCycleO}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{uptodate}}}}
-\newcommand{\cxCycleP}[0]{{x} \leftarrow {\textcolor{statuscoul}{\mathtt{done}}}}
-\newcommand{\cxCycleQ}[0]{{\left< {\mathrm{res}}_{u} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxCycleN}[0]{{x}\leftarrow{\textcolor{statuscoul}{\mathtt{updated}}}}
+\newcommand{\cxCycleO}[0]{{x}\leftarrow{\textcolor{statuscoul}{\mathtt{uptodate}}}}
+\newcommand{\cxCycleP}[0]{{x}\leftarrow{\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxCycleQ}[0]{{\left< {\mathrm{res}}_{u} \right>}\leftarrow{\textcolor{statuscoul}{\mathtt{ready}}}}
 \newcommand{\cxCycleR}[0]{x}
-\newcommand{\cxDIinTS}[0]{{\left[ T,\;X,\;t \right]} \in {{{\cal S}}_{T}^{t}}}
+\newcommand{\cxDIinTS}[0]{{\left[ T,\;X,\;t \right]}\in{{{\cal S}}_{T}^{t}}}
 \newcommand{\cxTSUpdt}[0]{\overline{u}}
-\newcommand{\cxUUpdt}[0]{u'}
-\newcommand{\cxUpdtPair}[0]{\left(u,u'\right)}
-\newcommand{\cxEqUpdtPair}[0]{{\overline{u}} = {\left(u,u'\right)}}
-\newcommand{\cxEqUpdtRes}[0]{{{\mathrm{res}}_{u}} = {{\mathrm{res}}_{u'}}}
+\newcommand{\cxUUpdt}[0]{{u}^{\prime}}
+\newcommand{\cxUpdtPair}[0]{\left(u,{u}^{\prime}\right)}
+\newcommand{\cxEqUpdtPair}[0]{{\overline{u}}={\left(u,{u}^{\prime}\right)}}
+\newcommand{\cxEqUpdtRes}[0]{{{\mathrm{res}}_{u}}={{\mathrm{res}}_{{u}^{\prime}}}}
 \newcommand{\cxResTSUpdt}[0]{{\mathrm{res}}_{\overline{u}}}
 \newcommand{\cxStatusTS}[0]{\left< {{\cal S}}_{T}^{t} \right>}
 \newcommand{\cxStatusTSUpdt}[0]{\left< \overline{u} \right>}
-\newcommand{\cxStatusSet}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{unbound}},\;\textcolor{statuscoul}{\mathtt{blocked}},\;\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}},\;\textcolor{statuscoul}{\mathtt{done}}\right\}}}
-\newcommand{\cxStatusTSUnbound}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{unbound}}}}
-\newcommand{\cxStatusTSBlocked}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{blocked}}}}
-\newcommand{\cxStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{relaxing}}}}
-\newcommand{\cxStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{checking}}}}
-\newcommand{\cxStatusTSDone}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{done}}}}
-\newcommand{\cxSetStatusTSUnbound}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{unbound}}}}
-\newcommand{\cxSetStatusTSBlocked}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{blocked}}}}
-\newcommand{\cxSetStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{relaxing}}}}
-\newcommand{\cxSetStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{checking}}}}
-\newcommand{\cxSetStatusTSDone}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{done}}}}
-\newcommand{\cxStatusTSUpdtImpossible}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{impossible}}}}
-\newcommand{\cxStatusTSUpdtUpdated}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{updated}}}}
-\newcommand{\cxStatusTSUpdtDone}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{done}}}}
-\newcommand{\cxStatusTSUpdtUpToDate}[0]{{\left< \overline{u} \right>} = {\textcolor{statuscoul}{\mathtt{uptodate}}}}
-\newcommand{\cxResUpdtReady}[0]{{{\mathrm{res}}_{\overline{u}}} = {\textcolor{statuscoul}{\mathtt{ready}}}}
-\newcommand{\cxTSupdtInSt}[0]{{\overline{u}} \in {{{\cal S}}_{T}^{t}}}
-\newcommand{\cxQDefs}[0]{\begin{array}{lll} {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{new}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{Newly added to the queue.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{needs to be known.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{has been detected as}}\;{\textcolor{statuscoul}{\mathtt{impossible}}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{have been seen stable for the first time are here.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}} & : & \left\{{\overline{u}} \in {{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{for which stability is confirmed.}}\right\} \end{array}}
-\newcommand{\cxJobsA}[0]{{\overline{u}} \in {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}}}
-\newcommand{\cxJobsB}[0]{{\left< \overline{u} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}}\right\}}}
-\newcommand{\cxReportA}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \cup {\left\{\overline{u}\right\}}}}
-\newcommand{\cxReportB}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {\left\{\overline{u}\right\}}}}
-\newcommand{\cxReportC}[0]{{\left< {\mathrm{res}}_{\overline{u}} \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}
-\newcommand{\cxReportD}[0]{{\left< {{\cal S}}_{T}^{t} \right>} = {\textcolor{statuscoul}{\mathtt{checking}}}}
-\newcommand{\cxReportE}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \cup {\left\{\overline{u}\right\}}}}
-\newcommand{\cxReportF}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {\left\{\overline{u}\right\}}}}
-\newcommand{\cxReportG}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\left({{\cal S}}_{T}^{t}\right)}
-\newcommand{\cxUpstatA}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \neq {\emptyset}}
-\newcommand{\cxUpstatB}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}}
-\newcommand{\cxUpstatC}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \leftarrow {\emptyset}}
-\newcommand{\cxUpstatD}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}}}
-\newcommand{\cxUpstatE}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \leftarrow {\emptyset}}
-\newcommand{\cxUpstatF}[0]{{{\cal S}}_{T'}^{t'}}
-\newcommand{\cxUpstatG}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \neq {\emptyset}}
-\newcommand{\cxUpstatH}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} = {\emptyset}}
-\newcommand{\cxUpstatI}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \leftarrow {{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}}
-\newcommand{\cxUpstatJ}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \leftarrow {\emptyset}}
-\newcommand{\cxUpstatK}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \neq {\emptyset}}
-\newcommand{\cxUpstatL}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} = {\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} = {\emptyset}}
-\newcommand{\cxUpstatM}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} = {\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} = {\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} = {\emptyset}}
-\newcommand{\cxUpstatN}[0]{{\overline{u}} \in {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}
-\newcommand{\cxUpstatO}[0]{{\left< {\mathrm{res}}_{u} \right>} \leftarrow {\textcolor{statuscoul}{\mathtt{ready}}}}
-\newcommand{\cxUpstatP}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\left({{\cal S}}_{T'}^{t'}\right)}
-\newcommand{\cxUbdA}[0]{{\textcolor{funcoul}{\mbox{has\_unbound}}}\left({{\cal S}}_{T}^{t}\right)}
-\newcommand{\cxUbdB}[0]{{{{\cal F}}_{T}^{t}} \neq {\emptyset}}
-\newcommand{\cxShiftSet}[0]{{\tau} \in {\mathbb{Z}}}
-\newcommand{\cxAnchor}[0]{\left[ T,\;X,\;{t} + {\tau} \right]}
+\newcommand{\cxStatusSet}[0]{{\left< {{\cal S}}_{T}^{t} \right>}\in{\left\{\textcolor{statuscoul}{\mathtt{unbound}},\;\textcolor{statuscoul}{\mathtt{blocked}},\;\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}},\;\textcolor{statuscoul}{\mathtt{done}}\right\}}}
+\newcommand{\cxStatusTSUnbound}[0]{{\left< {{\cal S}}_{T}^{t} \right>}={\textcolor{statuscoul}{\mathtt{unbound}}}}
+\newcommand{\cxStatusTSBlocked}[0]{{\left< {{\cal S}}_{T}^{t} \right>}={\textcolor{statuscoul}{\mathtt{blocked}}}}
+\newcommand{\cxStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>}={\textcolor{statuscoul}{\mathtt{relaxing}}}}
+\newcommand{\cxStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>}={\textcolor{statuscoul}{\mathtt{checking}}}}
+\newcommand{\cxStatusTSDone}[0]{{\left< {{\cal S}}_{T}^{t} \right>}={\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxSetStatusTSUnbound}[0]{{\left< {{\cal S}}_{T}^{t} \right>}\leftarrow{\textcolor{statuscoul}{\mathtt{unbound}}}}
+\newcommand{\cxSetStatusTSBlocked}[0]{{\left< {{\cal S}}_{T}^{t} \right>}\leftarrow{\textcolor{statuscoul}{\mathtt{blocked}}}}
+\newcommand{\cxSetStatusTSRelaxing}[0]{{\left< {{\cal S}}_{T}^{t} \right>}\leftarrow{\textcolor{statuscoul}{\mathtt{relaxing}}}}
+\newcommand{\cxSetStatusTSChecking}[0]{{\left< {{\cal S}}_{T}^{t} \right>}\leftarrow{\textcolor{statuscoul}{\mathtt{checking}}}}
+\newcommand{\cxSetStatusTSDone}[0]{{\left< {{\cal S}}_{T}^{t} \right>}\leftarrow{\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxStatusTSUpdtImpossible}[0]{{\left< \overline{u} \right>}={\textcolor{statuscoul}{\mathtt{impossible}}}}
+\newcommand{\cxStatusTSUpdtUpdated}[0]{{\left< \overline{u} \right>}={\textcolor{statuscoul}{\mathtt{updated}}}}
+\newcommand{\cxStatusTSUpdtDone}[0]{{\left< \overline{u} \right>}={\textcolor{statuscoul}{\mathtt{done}}}}
+\newcommand{\cxStatusTSUpdtUpToDate}[0]{{\left< \overline{u} \right>}={\textcolor{statuscoul}{\mathtt{uptodate}}}}
+\newcommand{\cxResUpdtReady}[0]{{{\mathrm{res}}_{\overline{u}}}={\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxTSupdtInSt}[0]{{\overline{u}}\in{{{\cal S}}_{T}^{t}}}
+\newcommand{\cxQDefs}[0]{\begin{array}{lll} {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{new}} & : & \left\{{\overline{u}}\in{{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{Newly added to the queue.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}} & : & \left\{{\overline{u}}\in{{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{needs to be known.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}} & : & \left\{{\overline{u}}\in{{{\cal S}}_{T}^{t}}\; \middle| \; {\left< \overline{u} \right>}\;{\mbox{has been detected as}}\;{\textcolor{statuscoul}{\mathtt{impossible}}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}} & : & \left\{{\overline{u}}\in{{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{have been seen stable for the first time are here.}}\right\} \\ {\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}} & : & \left\{{\overline{u}}\in{{{\cal S}}_{T}^{t}}\; \middle| \; {\overline{u}}\;{\mbox{for which stability is confirmed.}}\right\} \end{array}}
+\newcommand{\cxJobsA}[0]{{\overline{u}}\in{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}}}
+\newcommand{\cxJobsB}[0]{{\left< \overline{u} \right>}\in{\left\{\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}}\right\}}}
+\newcommand{\cxReportA}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}\leftarrow{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}} \cup {\left\{\overline{u}\right\}}}}
+\newcommand{\cxReportB}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}\leftarrow{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {\left\{\overline{u}\right\}}}}
+\newcommand{\cxReportC}[0]{{\left< {\mathrm{res}}_{\overline{u}} \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxReportD}[0]{{\left< {{\cal S}}_{T}^{t} \right>}={\textcolor{statuscoul}{\mathtt{checking}}}}
+\newcommand{\cxReportE}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}\leftarrow{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}} \cup {\left\{\overline{u}\right\}}}}
+\newcommand{\cxReportF}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\leftarrow{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {\left\{\overline{u}\right\}}}}
+\newcommand{\cxReportG}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\!\left({{\cal S}}_{T}^{t}\right)}
+\newcommand{\cxUpstatA}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}\neq{\emptyset}}
+\newcommand{\cxUpstatB}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\leftarrow{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}}
+\newcommand{\cxUpstatC}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}\leftarrow{\emptyset}}
+\newcommand{\cxUpstatD}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}\leftarrow{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}}}
+\newcommand{\cxUpstatE}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}\leftarrow{\emptyset}}
+\newcommand{\cxUpstatF}[0]{{{\cal S}}_{{T}^{\prime}}^{{t}^{\prime}}}
+\newcommand{\cxUpstatG}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}\neq{\emptyset}}
+\newcommand{\cxUpstatH}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}={\emptyset}}
+\newcommand{\cxUpstatI}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\leftarrow{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}}
+\newcommand{\cxUpstatJ}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}\leftarrow{\emptyset}}
+\newcommand{\cxUpstatK}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\neq{\emptyset}}
+\newcommand{\cxUpstatL}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}={\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}={\emptyset}}
+\newcommand{\cxUpstatM}[0]{{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{impossible}}}={\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}}={\emptyset},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}={\emptyset}}
+\newcommand{\cxUpstatN}[0]{{\overline{u}}\in{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{confirmed}}}}
+\newcommand{\cxUpstatO}[0]{{\left< {\mathrm{res}}_{u} \right>}\leftarrow{\textcolor{statuscoul}{\mathtt{ready}}}}
+\newcommand{\cxUpstatP}[0]{{\textcolor{funcoul}{\mbox{update\_status}}}\!\left({{\cal S}}_{{T}^{\prime}}^{{t}^{\prime}}\right)}
+\newcommand{\cxUbdA}[0]{{\textcolor{funcoul}{\mbox{has\_unbound}}}\!\left({{\cal S}}_{T}^{t}\right)}
+\newcommand{\cxUbdB}[0]{{{{\cal F}}_{T}^{t}}\neq{\emptyset}}
+\newcommand{\cxShiftSet}[0]{{\tau}\in{\mathbb{Z}}}
+\newcommand{\cxAnchor}[0]{\left[ T,\;X,\;{t}+{\tau} \right]}
+\newcommand{\cxAnchorScaled}[0]{\left[ T,\;X,\;{t}\times{\tau} \right]}
 \newcommand{\cxPat}[0]{\pi}
 \newcommand{\cxPatterns}[0]{{\cal P}}
 \newcommand{\cxResPat}[0]{{\mathrm{res}}_{\pi}}
 \newcommand{\cxRDIz}[0]{\left\{ T,\;X,\;0 \right\}}
-\newcommand{\cxResPatIsRDIz}[0]{{{\mathrm{res}}_{\pi}} = {\left\{ T,\;X,\;0 \right\}}}
+\newcommand{\cxResPatIsRDIz}[0]{{{\mathrm{res}}_{\pi}}={\left\{ T,\;X,\;0 \right\}}}
 \newcommand{\cxJobs}[0]{{\cal J}}
 \newcommand{\cxJob}[0]{j}
-\newcommand{\cxSimA}[0]{{\textcolor{funcoul}{\mbox{get\_one\_job}}}\left(\right)}
-\newcommand{\cxSimB}[0]{{{\cal J}} = {\emptyset}}
-\newcommand{\cxSimC}[0]{{\left< {{\cal S}}_{T}^{t} \right>} \in {\left\{\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}}\right\}}}
-\newcommand{\cxSimD}[0]{{\textcolor{funcoul}{\mbox{push}}}\left({\cal J},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\right)}
-\newcommand{\cxSimE}[0]{{\textcolor{funcoul}{\mbox{anchor\_UPs}}}\left(\right)}
-\newcommand{\cxSimF}[0]{{j} \leftarrow {{\textcolor{funcoul}{\mbox{pop}}}\left({\cal J}\right)}}
-\newcommand{\cxAnchorA}[0]{{\textcolor{funcoul}{\mbox{anchor\_UPs}}}\left(\right)}
+\newcommand{\cxSimA}[0]{{\textcolor{funcoul}{\mbox{get\_one\_job}}}\!\left(\right)}
+\newcommand{\cxSimB}[0]{{{\cal J}}={\emptyset}}
+\newcommand{\cxSimC}[0]{{\left< {{\cal S}}_{T}^{t} \right>}\in{\left\{\textcolor{statuscoul}{\mathtt{relaxing}},\;\textcolor{statuscoul}{\mathtt{checking}}\right\}}}
+\newcommand{\cxSimD}[0]{{\textcolor{funcoul}{\mbox{push}}}\!\left({\cal J},\;{{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{unstable}}} \cup {{\left[ {{\cal S}}_{T}^{t} \right]}_{\mathrm{stable}}}\right)}
+\newcommand{\cxSimE}[0]{{\textcolor{funcoul}{\mbox{anchor\_UPs}}}\!\left(\right)}
+\newcommand{\cxSimF}[0]{{j}\leftarrow{{\textcolor{funcoul}{\mbox{pop}}}\!\left({\cal J}\right)}}
+\newcommand{\cxAnchorA}[0]{{\textcolor{funcoul}{\mbox{anchor\_UPs}}}\!\left(\right)}
 \newcommand{\cxVariables}[0]{{\cal V}}
-\newcommand{\cxAnchorB}[0]{{{\cal V}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{\left(T,X\right)\; \middle| \; {{\pi} \in {{\cal P}}} \wedge {{{\mathrm{res}}_{\pi}} = {\left\{ T,\;X,\;\tau \right\}}}\right\}}}
+\newcommand{\cxAnchorB}[0]{{{\cal V}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{\left(T,X\right)\; \middle| \; {{\pi}\in{{\cal P}}} \wedge {{{\mathrm{res}}_{\pi}}={\left\{ T,\;X,\;\tau \right\}}}\right\}}}
 \newcommand{\cxMinT}[0]{{\mbox{\tt @}}{T}}
-\newcommand{\cxAnchorC}[0]{{\left(T,X\right)} \in {{\cal V}}}
-\newcommand{\cxAnchorD}[0]{{\pi} \in {{\cal P}}}
-\newcommand{\cxAnchorE}[0]{{\left\{ T,\;X,\;0 \right\}} = {{\mathrm{res}}_{\pi}}}
-\newcommand{\cxAnchorF}[0]{{\left< \left[ T,\;X,\;{\mbox{\tt @}}{T} \right] \right>} = {\textcolor{statuscoul}{\mathtt{busy}}}}
+\newcommand{\cxAnchorC}[0]{{\left(T,X\right)}\in{{\cal V}}}
+\newcommand{\cxAnchorD}[0]{{\pi}\in{{\cal P}}}
+\newcommand{\cxAnchorE}[0]{{\left\{ T,\;X,\;0 \right\}}={{\mathrm{res}}_{\pi}}}
+\newcommand{\cxAnchorF}[0]{{\left< \left[ T,\;X,\;{\mbox{\tt @}}{T} \right] \right>}={\textcolor{statuscoul}{\mathtt{busy}}}}
 \newcommand{\cxXi}[0]{\xi}
 \newcommand{\cxWi}[0]{{w}_{i}}
 \newcommand{\cxAi}[0]{{a}_{i}}
 \newcommand{\cxMatchG}[0]{{\mu}_{G}}
 \newcommand{\cxMatchT}[0]{{\mu}_{\triangle}}
-\newcommand{\cxAiDef}[0]{\forall {i},\; {{{a}_{i}} = {{\mu}\left(\xi,\;{w}_{i}\right)}}}
+\newcommand{\cxAiDef}[0]{\forall {i},\; {{{a}_{i}}={{\mu}\!\left(\xi,\;{w}_{i}\right)}}}
 \newcommand{\cxBMU}[0]{\pi}
-\newcommand{\cxMatchEq}[0]{\begin{array}{l} {{{\mu}_{G}}\left(\xi,\;w\right)}\;{\stackrel{\mathrm{def}}{=}}\;{{\exp}\left(\displaystyle\frac{{\left({\xi} - {w}\right)}^{2}}{{2}{{\sigma}^{2}}}\right)} \\ {{{\mu}_{\triangle}}\left(\xi,\;w\right)}\;{\stackrel{\mathrm{def}}{=}}\;{{\max}\left({1} - {\displaystyle\frac{\left| {\xi} - {w} \right|}{r}},\;0\right)} \end{array}}
-\newcommand{\cxMergeEq}[0]{\forall {i},\; {{{a}_{i}^{g}} = {\sqrt{ {{a}_{i}^{e}} + {{{\left({1} - {\beta}\right)}{a}}_{i}^{c}}}}}}
-\newcommand{\cxTopoMatch}[0]{{\mu}\left(i,\;\pi\right)}
-\newcommand{\cxLearnEq}[0]{\forall {i},\; {{{w}_{i}^{{t} + {1}}} = {{{{\left({1} - {{\alpha}{h}}\right)}{w}}_{i}^{t}} + {{{\alpha}{h}}{\xi}}}},\;{\mbox{with}}\;{{h} = {{\mu}\left(i,\;\pi\right)}}}
+\newcommand{\cxMatchEq}[0]{\begin{array}{l} {{{\mu}_{G}}\!\left(\xi,\;w\right)}\;{\stackrel{\mathrm{def}}{=}}\;{{\exp}\!\left(\displaystyle\frac{{\left({\xi}-{w}\right)}^{2}}{{2}{{\sigma}^{2}}}\right)} \\ {{{\mu}_{\triangle}}\!\left(\xi,\;w\right)}\;{\stackrel{\mathrm{def}}{=}}\;{{\max}\!\left({1}-{\displaystyle\frac{\left| {\xi}-{w} \right|}{r}},\;0\right)} \end{array}}
+\newcommand{\cxMergeEq}[0]{\forall {i},\; {{{a}_{i}^{g}}={\sqrt{ {{a}_{i}^{e}}+{{{\left({1}-{\beta}\right)}{a}}_{i}^{c}}}}}}
+\newcommand{\cxTopoMatch}[0]{{\mu}\!\left(i,\;\pi\right)}
+\newcommand{\cxLearnEq}[0]{\forall {i},\; {{{w}_{i}^{{t}+{1}}}={{{{\left({1}-{{\alpha}{h}}\right)}{w}}_{i}^{t}}+{{{\alpha}{h}}{\xi}}}},\;{\mbox{with}}\;{{h}={{\mu}\!\left(i,\;\pi\right)}}}
 \newcommand{\cxTSU}[0]{{{\cal U}}_{T}^{t}}
-\newcommand{\cxTSUDef}[0]{{{{\cal U}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{u\; \middle| \; {{\mathrm{res}}_{u}} \in {{{\cal S}}_{T}^{t}}\right\}}}
+\newcommand{\cxTSUDef}[0]{{{{\cal U}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{u\; \middle| \; {{\mathrm{res}}_{u}}\in{{{\cal S}}_{T}^{t}}\right\}}}
 \newcommand{\cxTSO}[0]{{{\cal O}}_{T}^{t}}
-\newcommand{\cxTSODef}[0]{{{{\cal O}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{\left[ T,\;X,\;t \right]\; \middle| \; \exists {{u} \in {{{\cal U}}_{T}^{t}}},\; {{\left[ T,\;X,\;t \right]} \in {{\mathrm{out}}_{u}}}\right\}}}
-\newcommand{\cxTSOAct}[0]{\forall {{\left[ T',\;X',\;t' \right]} \in {{{\cal O}}_{T}^{t}}},\; {{\left< \left[ T',\;X',\;t' \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}}
+\newcommand{\cxTSODef}[0]{{{{\cal O}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{\left\{\left[ T,\;X,\;t \right]\; \middle| \; \exists {{u}\in{{{\cal U}}_{T}^{t}}},\; {{\left[ T,\;X,\;t \right]}\in{{\mathrm{out}}_{u}}}\right\}}}
+\newcommand{\cxTSOAct}[0]{\forall {{\left[ {T}^{\prime},\;{X}^{\prime},\;{t}^{\prime} \right]}\in{{{\cal O}}_{T}^{t}}},\; {{\left< \left[ {T}^{\prime},\;{X}^{\prime},\;{t}^{\prime} \right] \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}}
 \newcommand{\cxTSF}[0]{{{\cal F}}_{T}^{t}}
-\newcommand{\cxTSFDef}[0]{{{{\cal F}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{{{{\cal S}}_{T}^{t}} \setminus {\left\{{\mathrm{res}}_{u}\; \middle| \; {u} \in {{{\cal U}}_{T}^{t}}\right\}}}}
-\newcommand{\cxTSFAct}[0]{\forall {{\left[ T,\;X',\;t \right]} \in {{{\cal F}}_{T}^{t}}},\; {{\left< \left[ T,\;X',\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}}
-\newcommand{\cxTSAct}[0]{{\left(\forall {{\left[ T',\;X',\;t' \right]} \in {{{\cal O}}_{T}^{t}}},\; {{\left< \left[ T',\;X',\;t' \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}\right)} \wedge {\left(\forall {{\left[ T,\;X',\;t \right]} \in {{{\cal F}}_{T}^{t}}},\; {{\left< \left[ T,\;X',\;t \right] \right>} = {\textcolor{statuscoul}{\mathtt{ready}}}}\right)}}
-\newcommand{\cxHasTSF}[0]{{{{\cal F}}_{T}^{t}} \neq {\emptyset}}
+\newcommand{\cxTSFDef}[0]{{{{\cal F}}_{T}^{t}}\;{\stackrel{\mathrm{def}}{=}}\;{{{{\cal S}}_{T}^{t}}\setminus{\left\{{\mathrm{res}}_{u}\; \middle| \; {u}\in{{{\cal U}}_{T}^{t}}\right\}}}}
+\newcommand{\cxTSFAct}[0]{\forall {{\left[ T,\;{X}^{\prime},\;t \right]}\in{{{\cal F}}_{T}^{t}}},\; {{\left< \left[ T,\;{X}^{\prime},\;t \right] \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}}
+\newcommand{\cxTSAct}[0]{{\left(\forall {{\left[ {T}^{\prime},\;{X}^{\prime},\;{t}^{\prime} \right]}\in{{{\cal O}}_{T}^{t}}},\; {{\left< \left[ {T}^{\prime},\;{X}^{\prime},\;{t}^{\prime} \right] \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}\right)} \wedge {\left(\forall {{\left[ T,\;{X}^{\prime},\;t \right]}\in{{{\cal F}}_{T}^{t}}},\; {{\left< \left[ T,\;{X}^{\prime},\;t \right] \right>}={\textcolor{statuscoul}{\mathtt{ready}}}}\right)}}
+\newcommand{\cxHasTSF}[0]{{{{\cal F}}_{T}^{t}}\neq{\emptyset}}
