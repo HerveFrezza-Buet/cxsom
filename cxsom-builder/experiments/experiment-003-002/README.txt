@@ -39,7 +39,8 @@ Then we can launch a processor, and scan the root-dir.
 
 ## Clearing all
 
-If you need to restart everything, you have to kill an eventual running processor and clear the content of the root-dir directory.
+If you need to restart everything, you have to kill an eventual
+running processor and clear the content of the root-dir directory.
 
 ~> make cxsom-kill-processor
 ~> make cxsom-clear-rootdir
@@ -83,7 +84,8 @@ You can also view the color mapping of the RGB map.
 
 ## Restart training from previous execution
 
-This tells how to restart processor and continue the work done until now. We suppose that no processor is running.
+This tells how to restart processor and continue the work done until
+now. We suppose that no processor is running.
 
 ~> make cxsom-launch-processor
 ~> make send-input-rules
@@ -92,6 +94,15 @@ This tells how to restart processor and continue the work done until now. We sup
 Then you can extend the walltime for inputs to get new ones. Here, we extend to 1000.
 
 ~> make feed WALLTIME=1000
+
+## Testing the learning
+
+Here, we set up the same architecture, but we do not learn, we use
+some of the previously saved weights. Moreover, we let RGB values be
+found from W and H. So the test architecture is slightly different
+from the one we used for learning. Let us display it.
+
+~> make show-test-archi
 
 
 

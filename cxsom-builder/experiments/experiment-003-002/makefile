@@ -16,6 +16,8 @@ help:
 	@echo "make show-rgb-mapping                              <-- displays the color map encoding by the RGB map."
 	@echo
 	@echo "make re-train WALLTIME=3000 SAVE_PERIOD=10         <-- restarts from scratch everything."
+	@echo
+	@echo "make show-test-archi                               <-- displays the test architecture."
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -65,3 +67,12 @@ show-rgb-mapping:
 re-train:
 	@make --quiet cxsom-clear-rootdir cxsom-kill-processor cxsom-launch-processor cxsom-is-processor-running
 	@make --quiet input-setup send-train-rules feed
+
+.PHONY: show-test-archi
+show-test-archi:
+	@cxsom-builder-example-003-002-experiment graph test -- test 100
+	@dot -Tpdf test.dot -o test.pdf
+	@dot -Tpdf test-updates.dot -o test-updates.pdf
+	@dot -Tpdf test-inits.dot -o test-inits.pdf
+	@rm -f test.dot test-updates.dot test-inits.dot
+	@evince test.pdf test-updates.pdf test-inits.pdf &
