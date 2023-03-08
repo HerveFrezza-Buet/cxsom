@@ -18,6 +18,7 @@
 #define CACHE              2
 #define SAVE_TRACE      1000
 #define TRAIN_TRACE    10000
+#define TEST_TRACE     10000
 #define INPUT_TRACE     2000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
@@ -211,12 +212,12 @@ void make_test_rules(unsigned int saved_weight_at) {
 
   // Let us connect the map, using non-adaptive layers and the weights
   // learnt previously, instead of internally defined weights.
-  auto Wc0 = cxsom::builder::variable("train_wgt", cxsom::builder::name("W")   / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
-  auto Wc1 = cxsom::builder::variable("train_wgt", cxsom::builder::name("W")   / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
-  auto Hc0 = cxsom::builder::variable("train_wgt", cxsom::builder::name("H")   / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
-  auto Hc1 = cxsom::builder::variable("train_wgt", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
-  auto Rc0 = cxsom::builder::variable("train_wgt", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
-  auto Rc1 = cxsom::builder::variable("train_wgt", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
+  auto Wc0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
+  auto Wc1 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
+  auto Hc0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
+  auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
+  auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
+  auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
   Wmap->contextual(Hmap, fx::match_gaussian, p.match, Wc0, saved_weight_at);
   Wmap->contextual(Rmap, fx::match_gaussian, p.match, Wc1, saved_weight_at);
   Hmap->contextual(Wmap, fx::match_gaussian, p.match, Hc0, saved_weight_at);
@@ -225,16 +226,16 @@ void make_test_rules(unsigned int saved_weight_at) {
   Rmap->contextual(Hmap, fx::match_gaussian, p.match, Rc1, saved_weight_at);
 
   // Let us declare the inputs (W, H) and the output (RGB).
-  auto W   = cxsom::builder::variable("test-data", cxsom::builder::name("w"),   "Pos1D" , CACHE, TRAIN_TRACE, OPENED);
-  auto H   = cxsom::builder::variable("test-data", cxsom::builder::name("h"),   "Pos1D" , CACHE, TRAIN_TRACE, OPENED);
-  auto RGB = cxsom::builder::variable("test-data", cxsom::builder::name("rgb"), "Array=3", CACHE, INPUT_TRACE, OPENED);
+  auto W   = cxsom::builder::variable("test-data", cxsom::builder::name("w"),   "Pos1D"  , CACHE, TEST_TRACE, OPENED);
+  auto H   = cxsom::builder::variable("test-data", cxsom::builder::name("h"),   "Pos1D"  , CACHE, TEST_TRACE, OPENED);
+  auto RGB = cxsom::builder::variable("test-data", cxsom::builder::name("rgb"), "Array=3", CACHE, TEST_TRACE, OPENED);
   W->definition();
   H->definition();
   RGB->definition();
 
   // Let us provide inputs to W, and H maps, using weights learnt previously as well.
-  auto We0 = cxsom::builder::variable("train_wgt", cxsom::builder::name("W") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
-  auto He0 = cxsom::builder::variable("train_wgt", cxsom::builder::name("H") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);  
+  auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
+  auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);  
   Wmap->external(W, fx::match_gaussian, p.match, We0, saved_weight_at);
   Hmap->external(H, fx::match_gaussian, p.match, He0, saved_weight_at);
 
@@ -244,7 +245,7 @@ void make_test_rules(unsigned int saved_weight_at) {
     ostr << "Map1D<Array=3>=" << MAP_SIZE;
     wtype = ostr.str();
   }
-  auto Re0 = cxsom::builder::variable("train_wgt", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
+  auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
 
 
   // We define all the external weights, for the sake of comprehensive
@@ -274,7 +275,9 @@ void make_test_rules(unsigned int saved_weight_at) {
   // Now, we need supplementary rules for reading the RGB
   // result. Indeed, it consists in usingr the BMU of the RGB map to
   // index the learnt RGB weights.
-  RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER);
+  W->var()   << fx::random()                                                                  | kwd::use("walltime", TEST_TRACE);
+  H->var()   << fx::random()                                                                  | kwd::use("walltime", TEST_TRACE);
+  RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER   );
 }
 
 int main(int argc, char* argv[]) {
