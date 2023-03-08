@@ -96,8 +96,6 @@ send-test-rules:
 
 .PHONY: clear-train
 clear-train:
-	@rm -rf `cat .cxsom-rootdir-config`/img
-	@rm -rf `cat .cxsom-rootdir-config`/in
 	@rm -rf `cat .cxsom-rootdir-config`/train-*
 
 .PHONY: clear-test

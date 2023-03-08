@@ -17,7 +17,7 @@
 
 #define CACHE              2
 #define SAVE_TRACE      1000
-#define TRAIN_TRACE    10000
+#define TRAIN_TRACE       10
 #define TEST_TRACE     10000
 #define INPUT_TRACE     2000
 #define OPENED          true
