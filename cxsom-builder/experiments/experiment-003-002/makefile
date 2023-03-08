@@ -14,14 +14,16 @@ help:
 	@echo "make send-train-rules SAVE_PERIOD=10               <-- sends training rules."
 	@echo "make show-weights-history                          <-- displays the saved weights."
 	@echo "make show-rgb-mapping                              <-- displays the color map encoding by the RGB map."
+	@echo "make clear-train                                   <-- remove the training variables (keeping only saved ones"
 	@echo
 	@echo "make re-train WALLTIME=3000 SAVE_PERIOD=10         <-- restarts from scratch everything."
 	@echo
 	@echo "make show-test-archi                               <-- displays the test architecture."
 	@echo "make prediction-inputs-setup                       <-- builds up the inputs for building up the predicted image."
 	@echo "make send-test-rules WEIGHTS_AT=100                <-- sends testing rules (for saved weights at 100)."
-	@echo "make clear-test                                    <-- remove the test variables"
 	@echo "                                                       (clear or restart the processor first)."
+	@echo "make show-prediction                               <-- shows prediction."
+	@echo "make clear-test                                    <-- remove the test variables"
 	@echo
 	@echo
 
@@ -92,9 +94,18 @@ send-test-rules:
 	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test ${WEIGHTS_AT}
 	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
 
+.PHONY: clear-train
+clear-train:
+	@rm -rf `cat .cxsom-rootdir-config`/img
+	@rm -rf `cat .cxsom-rootdir-config`/in
+	@rm -rf `cat .cxsom-rootdir-config`/train-*
+
 .PHONY: clear-test
 clear-test:
 	@rm -rf `cat .cxsom-rootdir-config`/test-*
 	@rm -rf `cat .cxsom-rootdir-config`/prediction-output/*
 
 
+.PHONY: show-prediction
+show-prediction:
+	@python3 show-prediction-output.py `cat .cxsom-rootdir-config` -1

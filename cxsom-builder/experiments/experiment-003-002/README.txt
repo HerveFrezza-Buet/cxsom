@@ -82,6 +82,10 @@ You can also view the color mapping of the RGB map.
 
 -> make show-rgb-mapping
 
+When you are done with training, you can clean up unsaved stuff.
+
+~> make clear-train
+
 ## Restart training from previous execution
 
 This tells how to restart processor and continue the work done until
@@ -94,6 +98,7 @@ now. We suppose that no processor is running.
 Then you can extend the walltime for inputs to get new ones. Here, we extend to 1000.
 
 ~> make feed WALLTIME=1000
+
 
 ## Testing the learning
 
@@ -114,7 +119,12 @@ We can send (the processor have to be launched first) the testing
 rules, here for the saved_weights at timestep 100 (i.e. train step
 100*SAVE_PERIOD).
 
-~ make send-test-rules WEIGHTS_AT=100
+~> make send-test-rules WEIGHTS_AT=100
+~> make show-prediction FRAME_ID=100
+
+When you are done with this test
+
+~> make clear-test
 
 
 
