@@ -226,9 +226,9 @@ void make_test_rules(unsigned int saved_weight_at) {
   Rmap->contextual(Hmap, fx::match_gaussian, p.match, Rc1, saved_weight_at);
 
   // Let us declare the inputs (W, H) and the output (RGB).
-  auto W   = cxsom::builder::variable("test-data", cxsom::builder::name("w"),   "Pos1D"  , CACHE, TEST_TRACE, OPENED);
-  auto H   = cxsom::builder::variable("test-data", cxsom::builder::name("h"),   "Pos1D"  , CACHE, TEST_TRACE, OPENED);
-  auto RGB = cxsom::builder::variable("test-data", cxsom::builder::name("rgb"), "Array=3", CACHE, TEST_TRACE, OPENED);
+  auto W   = cxsom::builder::variable("prediction-input" , cxsom::builder::name("w")  , "Pos1D"  , CACHE, TEST_TRACE, OPENED);
+  auto H   = cxsom::builder::variable("prediction-input" , cxsom::builder::name("h")  , "Pos1D"  , CACHE, TEST_TRACE, OPENED);
+  auto RGB = cxsom::builder::variable("prediction-output", cxsom::builder::name("rgb"), "Array=3", CACHE, TEST_TRACE, OPENED);
   W->definition();
   H->definition();
   RGB->definition();
@@ -276,8 +276,6 @@ void make_test_rules(unsigned int saved_weight_at) {
   // Now, we need supplementary rules for reading the RGB
   // result. Indeed, it consists in usingr the BMU of the RGB map to
   // index the learnt RGB weights.
-  W->var()   << fx::random()                                                                  | kwd::use("walltime", TEST_TRACE);
-  H->var()   << fx::random()                                                                  | kwd::use("walltime", TEST_TRACE);
   RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER   );
 }
 

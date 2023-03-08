@@ -104,7 +104,15 @@ from the one we used for learning. Let us display it.
 
 ~> make show-test-archi
 
-We can send (the processor have to be launched first) the testing rules, here for the saved_weights at timestep 100 (i.e. train step 100*SAVE_PERIOD).
+We have to build up (once, many teste can be done from the same input
+sets) the inputs. Its consists in positions spanning the [0,1]x[0,1]
+patch.
+
+~> make prediction-inputs-setup
+
+We can send (the processor have to be launched first) the testing
+rules, here for the saved_weights at timestep 100 (i.e. train step
+100*SAVE_PERIOD).
 
 ~ make send-test-rules WEIGHTS_AT=100
 

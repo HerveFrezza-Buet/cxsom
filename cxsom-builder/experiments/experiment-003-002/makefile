@@ -18,6 +18,7 @@ help:
 	@echo "make re-train WALLTIME=3000 SAVE_PERIOD=10         <-- restarts from scratch everything."
 	@echo
 	@echo "make show-test-archi                               <-- displays the test architecture."
+	@echo "make prediction-inputs-setup                       <-- builds up the inputs for building up the predicted image."
 	@echo "make send-test-rules WEIGHTS_AT=100                <-- sends testing rules (for saved weights at 100)."
 	@echo "make clear-test                                    <-- remove the test variables"
 	@echo "                                                       (clear or restart the processor first)."
@@ -82,6 +83,10 @@ show-test-archi:
 	@rm -f test.dot test-updates.dot test-inits.dot
 	@evince test.pdf test-updates.pdf test-inits.pdf &
 
+.PHONY: prediction-inputs-setup
+prediction-inputs-setup:
+	@python3 build-prediction-inputs.py `cat .cxsom-rootdir-config`
+
 .PHONY: send-test-rules
 send-test-rules:
 	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test ${WEIGHTS_AT}
@@ -90,5 +95,6 @@ send-test-rules:
 .PHONY: clear-test
 clear-test:
 	@rm -rf `cat .cxsom-rootdir-config`/test-*
+	@rm -rf `cat .cxsom-rootdir-config`/prediction-output/*
 
 
