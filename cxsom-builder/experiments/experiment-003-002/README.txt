@@ -120,11 +120,18 @@ rules, here for the saved_weights at timestep 100 (i.e. train step
 100*SAVE_PERIOD).
 
 ~> make send-test-rules WEIGHTS_AT=100
-~> make show-prediction FRAME_ID=100
+~> make show-prediction
 
 When you are done with this test
 
 ~> make clear-test
+
+And you can try another picture
+
+~> make cxsom-clear-processor
+~> make send-test-rules WEIGHTS_AT=300
+~> make show-prediction 
+
 
 
 
