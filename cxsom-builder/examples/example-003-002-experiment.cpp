@@ -81,21 +81,25 @@ void make_input_rules() {
   }
 }
 
+#define Rext .075
+#define Rctx .0075
 struct Params {
   kwd::parameters
-    main, match, learn,
+    main,
+    match_pos, match_rgb,
+    learn,
     learn_pos_e, learn_pos_c,
     learn_rgb_e, learn_rgb_c,
     external, contextual, global;
   Params() {
     main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
-    match       | main,  kwd::use("sigma", .2);
+    match_pos   | main,  kwd::use("sigma", .2);
+    match_rgb   | main,  kwd::use("sigma", .2);
     learn       | main,  kwd::use("alpha", .1);
-    learn_pos_c | learn, kwd::use("r", .02);
-    learn_pos_e | learn, kwd::use("r", .2 );
-    learn_pos_c | learn, kwd::use("r", .02);
-    learn_rgb_e | learn, kwd::use("r", .1 );
-    learn_rgb_c | learn, kwd::use("r", .01);
+    learn_pos_e | learn, kwd::use("r", Rext);
+    learn_pos_c | learn, kwd::use("r", Rctx);
+    learn_rgb_e | learn, kwd::use("r", Rext);
+    learn_rgb_c | learn, kwd::use("r", Rctx);
     external    | main;
     contextual  | main;
     global      | main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
@@ -147,17 +151,17 @@ void make_train_rules(unsigned int save_period) {
 
   // We store the layers since we have to add rules for saving weights.
   // Let us connect the maps together
-  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_rgb_c);
-  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_rgb_c);
+  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_rgb_c);
+  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_rgb_c);
 
   // Let us provide inputs to the maps.
-  *(out_layer++) = Wmap->external(W, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_e);
-  *(out_layer++) = Hmap->external(H, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_pos_e);
-  *(out_layer++) = Rmap->external(R, fx::match_gaussian, p.match, fx::learn_triangle, p.learn_rgb_e);
+  *(out_layer++) = Wmap->external(W, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_e);
+  *(out_layer++) = Hmap->external(H, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_e);
+  *(out_layer++) = Rmap->external(R, fx::match_gaussian, p.match_rgb, fx::learn_triangle, p.learn_rgb_e);
 
   // Let us build up and configure the architecture
   archi << Wmap << Hmap << Rmap;
@@ -218,12 +222,12 @@ void make_test_rules(unsigned int saved_weight_at) {
   auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
   auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
   auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
-  Wmap->contextual(Hmap, fx::match_gaussian, p.match, Wc0, saved_weight_at);
-  Wmap->contextual(Rmap, fx::match_gaussian, p.match, Wc1, saved_weight_at);
-  Hmap->contextual(Wmap, fx::match_gaussian, p.match, Hc0, saved_weight_at);
-  Hmap->contextual(Rmap, fx::match_gaussian, p.match, Hc1, saved_weight_at);
-  Rmap->contextual(Wmap, fx::match_gaussian, p.match, Rc0, saved_weight_at);
-  Rmap->contextual(Hmap, fx::match_gaussian, p.match, Rc1, saved_weight_at);
+  Wmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Wc0, saved_weight_at);
+  Wmap->contextual(Rmap, fx::match_gaussian, p.match_pos, Wc1, saved_weight_at);
+  Hmap->contextual(Wmap, fx::match_gaussian, p.match_pos, Hc0, saved_weight_at);
+  Hmap->contextual(Rmap, fx::match_gaussian, p.match_pos, Hc1, saved_weight_at);
+  Rmap->contextual(Wmap, fx::match_gaussian, p.match_pos, Rc0, saved_weight_at);
+  Rmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Rc1, saved_weight_at);
 
   // Let us declare the inputs (W, H) and the output (RGB).
   auto W   = cxsom::builder::variable("prediction-input" , cxsom::builder::name("w")  , "Pos1D"  , CACHE, TEST_TRACE, OPENED);
@@ -236,8 +240,8 @@ void make_test_rules(unsigned int saved_weight_at) {
   // Let us provide inputs to W, and H maps, using weights learnt previously as well.
   auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
   auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);  
-  Wmap->external(W, fx::match_gaussian, p.match, We0, saved_weight_at);
-  Hmap->external(H, fx::match_gaussian, p.match, He0, saved_weight_at);
+  Wmap->external(W, fx::match_gaussian, p.match_pos, We0, saved_weight_at);
+  Hmap->external(H, fx::match_gaussian, p.match_pos, He0, saved_weight_at);
 
   // We will need the external RGB weights for retreiving the RGB value.
   {
