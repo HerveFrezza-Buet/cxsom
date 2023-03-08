@@ -247,6 +247,7 @@ void make_test_rules(unsigned int saved_weight_at) {
   }
   auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
 
+ 
 
   // We define all the external weights, for the sake of comprehensive
   // graphs when the architecture is displayed.

@@ -104,6 +104,14 @@ from the one we used for learning. Let us display it.
 
 ~> make show-test-archi
 
+We can send (the processor have to be launched first) the testing rules, here for the saved_weights at timestep 100 (i.e. train step 100*SAVE_PERIOD).
+
+~ make send-test-rules WEIGHTS_AT=100
+
+
+
+
+
 
 
 

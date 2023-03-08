@@ -18,6 +18,11 @@ help:
 	@echo "make re-train WALLTIME=3000 SAVE_PERIOD=10         <-- restarts from scratch everything."
 	@echo
 	@echo "make show-test-archi                               <-- displays the test architecture."
+	@echo "make send-test-rules WEIGHTS_AT=100                <-- sends testing rules (for saved weights at 100)."
+	@echo "make clear-test                                    <-- remove the test variables"
+	@echo "                                                       (clear or restart the processor first)."
+	@echo
+	@echo
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -76,3 +81,14 @@ show-test-archi:
 	@dot -Tpdf test-inits.dot -o test-inits.pdf
 	@rm -f test.dot test-updates.dot test-inits.dot
 	@evince test.pdf test-updates.pdf test-inits.pdf &
+
+.PHONY: send-test-rules
+send-test-rules:
+	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test ${WEIGHTS_AT}
+	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
+
+.PHONY: clear-test
+clear-test:
+	@rm -rf `cat .cxsom-rootdir-config`/test-*
+
+
