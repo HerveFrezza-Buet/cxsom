@@ -5,10 +5,10 @@ help:
 	@echo
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations."
 	@echo
-	@echo "make input-setup                                   <-- sets up the input generator (sets the image and sends the rules)."
-	@echo "make send-input-rules                              <-- sets up the input rules only (in case of restart, for example)."
-	@echo "make feed WALLTIME=500                             <-- feed inputs."
-	@echo "make show-inputs                                   <-- shows current inputs."
+	@echo "make train-input-setup                             <-- sets up the input generator (sets the image and sends the rules)."
+	@echo "make send-train-input-rules                        <-- sets up the input rules only (in case of restart, for example)."
+	@echo "make feed-train-inputs WALLTIME=500                <-- feed inputs."
+	@echo "make show-train-inputs                             <-- shows current inputs."
 	@echo
 	@echo "make show-train-archi                              <-- displays the train architecture."
 	@echo "make send-train-rules SAVE_PERIOD=10               <-- sends training rules."
@@ -30,22 +30,22 @@ help:
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
 
-.PHONY: send-input-rules
-send-input-rules:
+.PHONY: send-train-input-rules
+send-train-input-rules:
 	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- input
 
-.PHONY: input-setup
-input-setup:
+.PHONY: train-input-setup
+train-input-setup:
 	@make --quiet send-input-rules
 	@python3 build-eye-input.py `cat .cxsom-rootdir-config`
 	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
 
-.PHONY: feed
-feed:
+.PHONY: feed-train-inputs
+feed-train-inputs:
 	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- walltime ${WALLTIME}
 
-.PHONY: show-inputs
-show-inputs:
+.PHONY: show-train-inputs
+show-train-inputs:
 	@python3 show-inputs.py `cat .cxsom-rootdir-config`
 
 .PHONY: show-train-archi

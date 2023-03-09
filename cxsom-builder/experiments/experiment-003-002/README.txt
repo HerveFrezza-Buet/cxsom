@@ -47,24 +47,24 @@ running processor and clear the content of the root-dir directory.
 
 Then, see the "Restart section'
 
-## Compute the data
+## Compute the data for training
 
 First, let us build-up the input generator (the null walltime warning is ok).
 
-~> make input-setup
+~> make train-input-setup
 
 Then, we can ask for inputs until some timestep.
 
-~> make feed WALLTIME=500
+~> make feed-train-inputs WALLTIME=500
 
 You can visualize the current inputs
 
-~> make show-inputs
+~> make show-train-inputs
 
 
 ## Training
 
-~> make send-train-rules SAVE_PERIOD=10
+~> make send-train-input-rules SAVE_PERIOD=10
 
 You can view the algorithm (architecture and rules)
 
@@ -72,7 +72,7 @@ You can view the algorithm (architecture and rules)
 
 You can extend inputs walltime (to 1000 here)
 
-~> make feed WALLTIME=1000
+~> make feed-train-inputs WALLTIME=1000
 
 You can view the saved weights evolution
 
@@ -97,7 +97,7 @@ now. We suppose that no processor is running.
 
 Then you can extend the walltime for inputs to get new ones. Here, we extend to 1000.
 
-~> make feed WALLTIME=1000
+~> make feed-train-inputs WALLTIME=1000
 
 
 ## Testing the learning

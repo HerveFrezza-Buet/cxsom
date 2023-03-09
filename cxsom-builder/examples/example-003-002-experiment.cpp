@@ -26,8 +26,8 @@
 #define FOREVER           -1 // Infinite walltime
 #define DEADLINE         100
 
-#define MAP_SIZE         500
-#define IMG_SIDE         100
+#define MAP_SIZE         1000
+#define IMG_SIDE          100
 
 // cxsom declarations
 using namespace cxsom::rules;
