@@ -112,7 +112,14 @@ An then let us build-up a prediction for the saved weights at 500.
 
 Then, let us display the prediction
 
-~> make show-prediction
+~> make show-predictions
+
+Clearing the prediction can be done as well.
+
+~> make cxsom-clear-processor
+~> make clear-predict
+
+
 
 
 
