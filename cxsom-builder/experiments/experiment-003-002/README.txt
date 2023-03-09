@@ -5,7 +5,7 @@ The cxsom-builder/examples/example-003-002-experiment.cpp shows the
 architecture definition. The makefile used here is also an example, as
 the *.py files.
 
-## Description
+### Description
 
 This experiments builds up 3 1D maps W, H and RGB. They are fed with
 pixels randomly tossed from an image. A pixel is (w, h, rgb), so the
@@ -13,11 +13,23 @@ scalar w feeds W, the scalar h feeds H and the Array=3 rgb feeds
 RGB.
 
 The three maps W, H and RGB are reciprocally connected. The idea is to
-learn the relation betwee,w, h and rgb, and then ask the map to deduce
+learn the relation between w, h and rgb, and then ask the map to deduce
 rgb from w and h.
 
+There are several modes during the experiments, corresponding to several
+stages.
+- inputs mode : This sets w, h, rgb samples, with (w,h) spanning [0,1]^2.
+  These are used for experiments when we test if the architecture can
+  rebuild the image.
+- train mode : This trains the map from random (w, h) and assorted rgb.
+  The weights of the maps are periodically saved.
+- check mode : We test test here how the (h, w, rgb) are well represented
+  in the map, by the external weights.
+- predict mode : We ask the map to retrieve rgb from (w, h) and rebuild
+  the picture.
 
-## Setup the demo
+
+### Setup the demo
 
 First setup a root-dir directory for our variables.
 
@@ -37,108 +49,21 @@ Then we can launch a processor, and scan the root-dir.
 ~> make cxsom-launch-processor
 ~> make cxsom-scan-vars
 
-## Clearing all
+### Clearing all
 
-If you need to restart everything, you have to kill an eventual
-running processor and clear the content of the root-dir directory.
+If you need to restart everything, you have to kill an eventual running processor and clear the content of the root-dir directory.
 
 ~> make cxsom-kill-processor
 ~> make cxsom-clear-rootdir
 
-Then, see the "Restart section'
-
-## Compute the data for training
-
-First, let us build-up the input generator (the null walltime warning is ok).
-
-~> make train-input-setup
-
-Then, we can ask for inputs until some timestep.
-
-~> make feed-train-inputs WALLTIME=500
-
-You can visualize the current inputs
-
-~> make show-train-inputs
+Then, see the "Restart" subsection in "Train mode" section
 
 
-## Training
+### Input Mode
 
-~> make send-train-input-rules SAVE_PERIOD=10
+First, we have to set up the image that corresponds to the function (w, h) -> rgb that we want to learn. The image is eye.ppm, it is a 100x100 ppm file.
 
-You can view the algorithm (architecture and rules)
-
-~> make show-train-archi
-
-You can extend inputs walltime (to 1000 here)
-
-~> make feed-train-inputs WALLTIME=1000
-
-You can view the saved weights evolution
-
-~> make show-weights-history
-
-You can also view the color mapping of the RGB map.
-
--> make show-rgb-mapping
-
-When you are done with training, you can clean up unsaved stuff.
-
-~> make clear-train
-
-## Restart training from previous execution
-
-This tells how to restart processor and continue the work done until
-now. We suppose that no processor is running.
-
-~> make cxsom-launch-processor
-~> make send-input-rules
-~> make send-train-rules
-
-Then you can extend the walltime for inputs to get new ones. Here, we extend to 1000.
-
-~> make feed-train-inputs WALLTIME=1000
-
-
-## Testing the learning
-
-Here, we set up the same architecture, but we do not learn, we use
-some of the previously saved weights. Moreover, we let RGB values be
-found from W and H. So the test architecture is slightly different
-from the one we used for learning. Let us display it.
-
-~> make show-test-archi
-
-We have to build up (once, many teste can be done from the same input
-sets) the inputs. Its consists in positions spanning the [0,1]x[0,1]
-patch.
-
-~> make prediction-inputs-setup
-
-We can send (the processor have to be launched first) the testing
-rules, here for the saved_weights at timestep 100 (i.e. train step
-100*SAVE_PERIOD).
-
-~> make send-test-rules WEIGHTS_AT=100
-~> make show-prediction
-
-When you are done with this test
-
-~> make clear-test
-
-And you can try another picture
-
-~> make cxsom-clear-processor
-~> make send-test-rules WEIGHTS_AT=300
-~> make show-prediction 
-
-
-
-
-
-
-
-
+~> make input-setup IMG_SIDE=100
 
 
 

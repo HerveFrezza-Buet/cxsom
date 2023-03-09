@@ -2,108 +2,27 @@ help:
 	@echo
 	@echo "Read the README.txt file for instructions."
 	@echo
-	@echo
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations."
 	@echo
-	@echo "make train-input-setup                             <-- sets up the input generator (sets the image and sends the rules)."
-	@echo "make send-train-input-rules                        <-- sets up the input rules only (in case of restart, for example)."
-	@echo "make feed-train-inputs WALLTIME=500                <-- feed inputs."
-	@echo "make show-train-inputs                             <-- shows current inputs."
-	@echo
-	@echo "make show-train-archi                              <-- displays the train architecture."
-	@echo "make send-train-rules SAVE_PERIOD=10               <-- sends training rules."
-	@echo "make show-weights-history                          <-- displays the saved weights."
-	@echo "make show-rgb-mapping                              <-- displays the color map encoding by the RGB map."
-	@echo "make clear-train                                   <-- remove the training variables (keeping only saved ones"
-	@echo
-	@echo "make re-train WALLTIME=3000 SAVE_PERIOD=10         <-- restarts from scratch everything."
-	@echo
-	@echo "make show-test-archi                               <-- displays the test architecture."
-	@echo "make prediction-inputs-setup                       <-- builds up the inputs for building up the predicted image."
-	@echo "make send-test-rules WEIGHTS_AT=100                <-- sends testing rules (for saved weights at 100)."
-	@echo "                                                       (clear or restart the processor first)."
-	@echo "make show-prediction                               <-- shows prediction."
-	@echo "make clear-test                                    <-- remove the test variables"
+	@echo "# Inputs mode"
+	@echo 
+	@echo "make inputs-setup IMAGE_SIDE=100                   <-- sets up inputs."
+	@echo "make show-samples                                  <-- shows the image check/test samples"
 	@echo
 	@echo
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
 
-.PHONY: send-train-input-rules
-send-train-input-rules:
-	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- input
 
-.PHONY: train-input-setup
-train-input-setup:
-	@make --quiet send-train-input-rules
+.PHONY: inputs-setup
+inputs-setup:
+	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- input ${IMAGE_SIDE}
 	@python3 build-eye-input.py `cat .cxsom-rootdir-config`
-	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
+	@python3 build-img-coords.py `cat .cxsom-rootdir-config` img ${IMAGE_SIDE}
+	@make --quiet cxsom-ping-processor
 
-.PHONY: feed-train-inputs
-feed-train-inputs:
-	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- walltime ${WALLTIME}
+.PHONY: show-samples
+show-samples:
+	@python3 show-samples.py `cat .cxsom-rootdir-config`
 
-.PHONY: show-train-inputs
-show-train-inputs:
-	@python3 show-inputs.py `cat .cxsom-rootdir-config`
-
-.PHONY: show-train-archi
-show-train-archi:
-	@cxsom-builder-example-003-002-experiment graph-full train -- train 100
-	@dot -Tpdf train.dot -o train.pdf
-	@sfdp -Tpdf -Goverlap=prism train-updates.dot -o train-updates.pdf
-	@sfdp -Tpdf -Goverlap=prism train-inits.dot -o train-inits.pdf
-	@rm -f train.dot train-updates.dot train-inits.dot
-	@evince train.pdf train-updates.pdf train-inits.pdf &
-
-.PHONY: send-train-rules
-send-train-rules:
-	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- train ${SAVE_PERIOD}
-	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
-
-.PHONY: show-weights-history
-show-weights-history:
-	@python3 show-weights-history.py `cat .cxsom-rootdir-config`
-
-.PHONY: show-rgb-mapping
-show-rgb-mapping:
-	@python3 show-rgb-mapping.py `cat .cxsom-rootdir-config`
-
-
-.PHONY: re-train
-re-train:
-	@make --quiet cxsom-clear-rootdir cxsom-kill-processor cxsom-launch-processor cxsom-is-processor-running
-	@make --quiet train-input-setup send-train-rules feed-train-inputs
-
-.PHONY: show-test-archi
-show-test-archi:
-	@cxsom-builder-example-003-002-experiment graph test -- test 100
-	@dot -Tpdf test.dot -o test.pdf
-	@dot -Tpdf test-updates.dot -o test-updates.pdf
-	@dot -Tpdf test-inits.dot -o test-inits.pdf
-	@rm -f test.dot test-updates.dot test-inits.dot
-	@evince test.pdf test-updates.pdf test-inits.pdf &
-
-.PHONY: prediction-inputs-setup
-prediction-inputs-setup:
-	@python3 build-prediction-inputs.py `cat .cxsom-rootdir-config`
-
-.PHONY: send-test-rules
-send-test-rules:
-	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test ${WEIGHTS_AT}
-	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
-
-.PHONY: clear-train
-clear-train:
-	@rm -rf `cat .cxsom-rootdir-config`/train-*
-
-.PHONY: clear-test
-clear-test:
-	@rm -rf `cat .cxsom-rootdir-config`/test-*
-	@rm -rf `cat .cxsom-rootdir-config`/prediction-output/*
-
-
-.PHONY: show-prediction
-show-prediction:
-	@python3 show-prediction-output.py `cat .cxsom-rootdir-config` -1

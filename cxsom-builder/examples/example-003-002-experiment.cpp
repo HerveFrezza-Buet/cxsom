@@ -26,43 +26,55 @@
 #define DEADLINE         100
 
 #define MAP_SIZE         1500
-#define IMG_SIDE          100
 
 // cxsom declarations
 using namespace cxsom::rules;
 context* cxsom::rules::ctx = nullptr;
 
-enum class Mode : char {Train, Test, Input, Walltime};
+enum class Mode : char {Input, Train, Check, Test, Walltime};
 
-auto img_type() {
-  std::ostringstream ostr;
-  ostr << "Map2D<Array=3>=" << IMG_SIDE;
-  return ostr.str();
-}
 
-auto rgb_inputs() {
-  auto W   = cxsom::builder::variable("in", cxsom::builder::name("w"),     "Pos1D", CACHE, TRAIN_TRACE, OPENED);
-  auto H   = cxsom::builder::variable("in", cxsom::builder::name("h"),     "Pos1D", CACHE, TRAIN_TRACE, OPENED);
-  auto RGB = cxsom::builder::variable("in", cxsom::builder::name("rgb"), "Array=3", CACHE, TRAIN_TRACE, OPENED);
+auto rgb_inputs(const std::string& timeline, unsigned int trace, bool to_be_defined) {
+  auto W   = cxsom::builder::variable(timeline, cxsom::builder::name("w"),     "Pos1D", CACHE, trace, OPENED);
+  auto H   = cxsom::builder::variable(timeline, cxsom::builder::name("h"),     "Pos1D", CACHE, trace, OPENED);
+  auto RGB = cxsom::builder::variable(timeline, cxsom::builder::name("rgb"), "Array=3", CACHE, trace, OPENED);
+  if(to_be_defined) {
+    W->definition();
+    H->definition();
+    RGB->definition();
+  }
   return std::make_tuple(W, H, RGB);
 }
 
 void make_walltime_rules(unsigned int walltime) {
   {
-    timeline t{"img"};
+    timeline t{"train-in"};
     "coord" << fx::random() | kwd::use("walltime", walltime);
   }
 }
 
-void make_input_rules() {
-  auto SRC = cxsom::builder::variable("img", cxsom::builder::name("src"),     img_type(),     1,     1, OPENED);
-  auto COORD = cxsom::builder::variable("img", cxsom::builder::name("coord"),    "Pos2D", CACHE,     1, OPENED);
-  auto [W, H, RGB] = rgb_inputs();
+void make_input_rules(unsigned int img_side) {
+  auto [W, H, RGB] = rgb_inputs("img", img_side * img_side, true);
+  auto COORD = cxsom::builder::variable("img", cxsom::builder::name("coord"), "Pos2D"                                                  , CACHE,  1, OPEN_AS_NEEDED);
+  auto SRC   = cxsom::builder::variable("img", cxsom::builder::name("src")  , std::string("Map2D<Array=3>=") + std::to_string(img_side),     1,  1, OPEN_AS_NEEDED);
+  COORD->definition();
+  SRC->definition();
+
+  
+  {
+    timeline t{"img"};
+    COORD->var() << fx::pair(W->var(), H->var())                       | kwd::use("walltime", FOREVER);
+    RGB->var()   << fx::value_at(kwd::at(SRC->var(), 0), COORD->var()) | kwd::use("walltime", FOREVER);
+  }
+  
+}
+
+void make_xxx_input_rules() {
+  auto SRC = cxsom::builder::variable("img",   cxsom::builder::name("src")  , "xxxx",     1,  1, OPENED);
+  auto COORD = cxsom::builder::variable("img", cxsom::builder::name("coord"), "Pos2D"   , CACHE,  1, OPENED);
+  auto [W, H, RGB] = rgb_inputs("toto", TRAIN_TRACE, false);
   SRC->definition();
   COORD->definition();
-  W->definition();
-  H->definition();
-  RGB->definition();
 
   auto src   = SRC->varname.value;
   auto coord = COORD->varname.value;
@@ -121,7 +133,7 @@ auto make_map_settings(const Params& p) {
 
 void make_train_rules(unsigned int save_period) {
   
-
+  /*
   Params p;
   auto map_settings = make_map_settings(p);
   
@@ -186,10 +198,12 @@ void make_train_rules(unsigned int save_period) {
     Wsaved->definition();
     Wsaved->var() << fx::copy(kwd::times(W->var(), save_period)) | kwd::use("walltime", FOREVER);
   }
+  */
 }
 
 
 void make_test_rules(unsigned int saved_weight_at) {
+  /*
   Params p;
   auto map_settings = make_map_settings(p);
   
@@ -250,8 +264,6 @@ void make_test_rules(unsigned int saved_weight_at) {
   }
   auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
 
- 
-
   // We define all the external weights, for the sake of comprehensive
   // graphs when the architecture is displayed.
   We0->definition();
@@ -280,12 +292,14 @@ void make_test_rules(unsigned int saved_weight_at) {
   // result. Indeed, it consists in usingr the BMU of the RGB map to
   // index the learnt RGB weights.
   RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER   );
+  */
 }
 
 int main(int argc, char* argv[]) {
   context c(argc, argv);
   Mode mode;
   unsigned int walltime        = 0;
+  unsigned int img_side        = 0;
   unsigned int save_period     = 0;
   unsigned int saved_weight_at = 0;
   
@@ -297,7 +311,7 @@ int main(int argc, char* argv[]) {
   if(c.user_argv.size() == 0) {
     std::cout << "You have to provide user arguments." << std::endl
 	      << "e.g:" << std::endl
-	      << "  " << prefix.str() << "input                  <-- sends the rules for the inputs." << std::endl
+	      << "  " << prefix.str() << "input <img-side>       <-- sends the rules for the inputs." << std::endl
 	      << "  " << prefix.str() << "walltime <max-time>    <-- sends the rules for the inputs wall-time redefinition." << std::endl
 	      << "  " << prefix.str() << "train <save-period>    <-- sends the rules for training." << std::endl
 	      << "  " << prefix.str() << "test <saved-weight-at> <-- sends the rules for testing." << std::endl;
@@ -307,15 +321,22 @@ int main(int argc, char* argv[]) {
 
   if(c.user_argv[0] == "walltime") {
     if(c.user_argv.size() != 2) {
-      std::cout << "The 'input' mode expects a max-time argument"  << std::endl;
+      std::cout << "The 'walltime' mode expects a max-time argument"  << std::endl;
       c.notify_user_argv_error(); 
       return 0;
     }
     walltime = stoul(c.user_argv[1]);
     mode = Mode::Walltime;
   }
-  else if(c.user_argv[0] == "input")
+  else if(c.user_argv[0] == "input") {
+    if(c.user_argv.size() != 2) {
+      std::cout << "The 'input' mode expects a img-side argument"  << std::endl;
+      c.notify_user_argv_error(); 
+      return 0;
+    }
+    img_side = stoul(c.user_argv[1]);
     mode = Mode::Input;
+  }
   else if(c.user_argv[0] == "train") {
     if(c.user_argv.size() != 2) {
       std::cout << "The 'train' mode expects a save-period argument"  << std::endl;
@@ -342,7 +363,7 @@ int main(int argc, char* argv[]) {
 
   switch(mode) {
   case Mode::Input:
-    make_input_rules();
+    make_input_rules(img_side);
     break;
   case Mode::Walltime:
     make_walltime_rules(walltime);
@@ -352,6 +373,8 @@ int main(int argc, char* argv[]) {
     break;
   case Mode::Test:
     make_test_rules(saved_weight_at);
+    break;
+  case Mode::Check:
     break;
   default:
     break;
