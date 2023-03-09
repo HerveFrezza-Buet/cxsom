@@ -18,7 +18,6 @@
 #define CACHE              2
 #define SAVE_TRACE      1000
 #define TRAIN_TRACE       10
-#define PREDICT_TRACE     10000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
@@ -175,7 +174,12 @@ void make_train_rules(unsigned int save_period, unsigned int img_side) {
   
 }
 
-void make_predict_rules(unsigned int saved_weight_at) {
+void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
+ 
+}
+
+
+void make_predict_rules(unsigned int saved_weight_at, unsigned int img_side) {
   
   Params p;
   auto map_settings = make_map_settings(p);
@@ -191,9 +195,7 @@ void make_predict_rules(unsigned int saved_weight_at) {
     ostr << "Map1D<Pos1D>=" << MAP_SIZE;
     wtype = ostr.str();
   }
-  auto cache = *(map_settings.cache_size);
-  auto trace = *(map_settings.weights_file_size);
-  auto kopen = *(map_settings.kept_opened);
+  unsigned int trace = img_side * img_side;
   
   // Let us define the maps
   auto Wmap = cxsom::builder::map::make_1D("W"  );
@@ -202,12 +204,12 @@ void make_predict_rules(unsigned int saved_weight_at) {
 
   // Let us connect the map, using non-adaptive layers and the weights
   // learnt previously, instead of internally defined weights.
-  auto Wc0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
-  auto Wc1 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
-  auto Hc0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
-  auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
-  auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, cache, trace, kopen);
-  auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, cache, trace, kopen);
+  auto Wc0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
+  auto Wc1 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
+  auto Hc0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
+  auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
+  auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
+  auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
   Wmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Wc0, saved_weight_at);
   Wmap->contextual(Rmap, fx::match_gaussian, p.match_pos, Wc1, saved_weight_at);
   Hmap->contextual(Wmap, fx::match_gaussian, p.match_pos, Hc0, saved_weight_at);
@@ -216,16 +218,16 @@ void make_predict_rules(unsigned int saved_weight_at) {
   Rmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Rc1, saved_weight_at);
 
   // Let us declare the inputs (W, H) and the output (RGB).
-  auto W   = cxsom::builder::variable("img"        , cxsom::builder::name("w")  , "Pos1D"  , CACHE, PREDICT_TRACE, OPENED);
-  auto H   = cxsom::builder::variable("img"        , cxsom::builder::name("h")  , "Pos1D"  , CACHE, PREDICT_TRACE, OPENED);
-  auto RGB = cxsom::builder::variable("predict-out", cxsom::builder::name("rgb"), "Array=3", CACHE, PREDICT_TRACE, OPENED);
+  auto W   = cxsom::builder::variable("img"        , cxsom::builder::name("w")  , "Pos1D"  , CACHE, trace, OPENED);
+  auto H   = cxsom::builder::variable("img"        , cxsom::builder::name("h")  , "Pos1D"  , CACHE, trace, OPENED);
+  auto RGB = cxsom::builder::variable("predict-out", cxsom::builder::name("rgb"), "Array=3", CACHE, trace, OPENED);
   W->definition();
   H->definition();
   RGB->definition();
 
   // Let us provide inputs to W, and H maps, using weights learnt previously as well.
-  auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
-  auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);  
+  auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W") / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
+  auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H") / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);  
   Wmap->external(W, fx::match_gaussian, p.match_pos, We0, saved_weight_at);
   Hmap->external(H, fx::match_gaussian, p.match_pos, He0, saved_weight_at);
 
@@ -235,7 +237,7 @@ void make_predict_rules(unsigned int saved_weight_at) {
     ostr << "Map1D<Array=3>=" << MAP_SIZE;
     wtype = ostr.str();
   }
-  auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), wtype, cache, trace, kopen);
+  auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
 
   // We define all the external weights, for the sake of comprehensive
   // graphs when the architecture is displayed.
@@ -264,7 +266,7 @@ void make_predict_rules(unsigned int saved_weight_at) {
   // Now, we need supplementary rules for reading the RGB
   // result. Indeed, it consists in usingr the BMU of the RGB map to
   // index the learnt RGB weights.
-  RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER   );
+  RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER);
  
 }
 
@@ -287,7 +289,8 @@ int main(int argc, char* argv[]) {
 	      << "  " << prefix.str() << "input <img-side>               <-- sends the rules for the inputs." << std::endl
 	      << "  " << prefix.str() << "walltime <max-time>            <-- sends the rules for the inputs wall-time redefinition." << std::endl
 	      << "  " << prefix.str() << "train <save-period> <img-side> <-- sends the rules for training." << std::endl
-	      << "  " << prefix.str() << "predict <saved-weight-at>         <-- sends the rules for predicting." << std::endl;
+	      << "  " << prefix.str() << "check <saved-weight-at>        <-- sends the rules for checking." << std::endl
+	      << "  " << prefix.str() << "predict <saved-weight-at>      <-- sends the rules for predicting." << std::endl;
     c.notify_user_argv_error(); 
     return 0;
   }
@@ -320,13 +323,24 @@ int main(int argc, char* argv[]) {
     img_side = stoul(c.user_argv[2]);
     mode = Mode::Train;
   }
-  else if(c.user_argv[0] == "predict") {
-    if(c.user_argv.size() != 2) {
-      std::cout << "The 'predict' mode expects a saved-weight-at argument"  << std::endl;
+  else if(c.user_argv[0] == "check") {
+    if(c.user_argv.size() != 3) {
+      std::cout << "The 'check' mode expects saved-weight-at  and img-side arguments"  << std::endl;
       c.notify_user_argv_error(); 
       return 0;
     }
     saved_weight_at = stoul(c.user_argv[1]);
+    img_side = stoul(c.user_argv[2]);
+    mode = Mode::Check;
+  }
+  else if(c.user_argv[0] == "predict") {
+    if(c.user_argv.size() != 3) {
+      std::cout << "The 'predict' mode expects saved-weight-at and img-side arguments"  << std::endl;
+      c.notify_user_argv_error(); 
+      return 0;
+    }
+    saved_weight_at = stoul(c.user_argv[1]);
+    img_side = stoul(c.user_argv[2]);
     mode = Mode::Predict;
   }
   else {
@@ -346,9 +360,10 @@ int main(int argc, char* argv[]) {
     make_train_rules(save_period, img_side);
     break;
   case Mode::Predict:
-    make_predict_rules(saved_weight_at);
+    make_predict_rules(saved_weight_at, img_side);
     break;
   case Mode::Check:
+    make_check_rules(saved_weight_at, img_side);
     break;
   default:
     break;

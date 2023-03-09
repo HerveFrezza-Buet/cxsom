@@ -108,7 +108,7 @@ An then let us build-up a prediction for the saved weights at 500.
 
 ~> make clear-predict
 ~> make cxsom-clear-processor
-~> make predict WEIGHTS_AT=500
+~> make predict WEIGHTS_AT=500 IMAGE_SIDE=100
 
 Then, let us display the prediction
 

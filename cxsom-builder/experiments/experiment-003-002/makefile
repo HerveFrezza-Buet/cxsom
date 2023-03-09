@@ -22,7 +22,7 @@ help:
 	@echo "# Predict mode"
 	@echo
 	@echo "make show-predict-rules                            <-- Shows how prediction is computed."
-	@echo "make predict WEIGHTS_AT=500                        <-- sends testing rules (for saved weights at 500)."
+	@echo "make predict WEIGHTS_AT=500 IMAGE_SIDE=100         <-- sends testing rules (for saved weights at 500)."
 	@echo "                                                       (clear or restart the processor first)."
 	@echo "make show-predictions                              <-- Shows the rgb predictions."
 	@echo "make clear-predictions                             <-- clears prediction."
@@ -97,7 +97,7 @@ clear-predict:
 
 .PHONY: predict
 predict:
-	@@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- predict ${WEIGHTS_AT}
+	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- predict ${WEIGHTS_AT} ${IMAGE_SIDE}
 
 
 .PHONY: show-predictions
