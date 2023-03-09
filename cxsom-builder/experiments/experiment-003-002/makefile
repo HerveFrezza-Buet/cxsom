@@ -36,7 +36,7 @@ send-train-input-rules:
 
 .PHONY: train-input-setup
 train-input-setup:
-	@make --quiet send-input-rules
+	@make --quiet send-train-input-rules
 	@python3 build-eye-input.py `cat .cxsom-rootdir-config`
 	@cxsom-ping `cat .cxsom-hostname-config` `cat .cxsom-port-config`
 
@@ -74,7 +74,7 @@ show-rgb-mapping:
 .PHONY: re-train
 re-train:
 	@make --quiet cxsom-clear-rootdir cxsom-kill-processor cxsom-launch-processor cxsom-is-processor-running
-	@make --quiet input-setup send-train-rules feed
+	@make --quiet train-input-setup send-train-rules feed-train-inputs
 
 .PHONY: show-test-archi
 show-test-archi:

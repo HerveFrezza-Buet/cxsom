@@ -19,14 +19,13 @@
 #define SAVE_TRACE      1000
 #define TRAIN_TRACE       10
 #define TEST_TRACE     10000
-#define INPUT_TRACE     2000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
 #define FOREVER           -1 // Infinite walltime
 #define DEADLINE         100
 
-#define MAP_SIZE         1000
+#define MAP_SIZE         1500
 #define IMG_SIDE          100
 
 // cxsom declarations
@@ -42,9 +41,9 @@ auto img_type() {
 }
 
 auto rgb_inputs() {
-  auto W   = cxsom::builder::variable("in", cxsom::builder::name("w"),     "Pos1D", CACHE, INPUT_TRACE, OPENED);
-  auto H   = cxsom::builder::variable("in", cxsom::builder::name("h"),     "Pos1D", CACHE, INPUT_TRACE, OPENED);
-  auto RGB = cxsom::builder::variable("in", cxsom::builder::name("rgb"), "Array=3", CACHE, INPUT_TRACE, OPENED);
+  auto W   = cxsom::builder::variable("in", cxsom::builder::name("w"),     "Pos1D", CACHE, TRAIN_TRACE, OPENED);
+  auto H   = cxsom::builder::variable("in", cxsom::builder::name("h"),     "Pos1D", CACHE, TRAIN_TRACE, OPENED);
+  auto RGB = cxsom::builder::variable("in", cxsom::builder::name("rgb"), "Array=3", CACHE, TRAIN_TRACE, OPENED);
   return std::make_tuple(W, H, RGB);
 }
 
@@ -81,8 +80,8 @@ void make_input_rules() {
   }
 }
 
-#define Rext .075
-#define Rctx .0075
+#define Rext .02
+#define Rctx .002
 struct Params {
   kwd::parameters
     main,
