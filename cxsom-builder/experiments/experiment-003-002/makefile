@@ -19,6 +19,10 @@ help:
 	@echo "make clear-training                                <-- clears training variables (training cannot be continued further)."
 	@echo "make clear-saved-weights                           <-- Danger zone ! You will loose the training result."
 	@echo
+	@echo "# Check mode"
+	@echo
+	@echo "make show-check-rules                              <-- Shows how checking is computed."
+	@echo
 	@echo "# Predict mode"
 	@echo
 	@echo "make show-predict-rules                            <-- Shows how prediction is computed."
@@ -82,9 +86,19 @@ clear-training:
 clear-saved-weights:
 	@rm -rf `cat .cxsom-rootdir-config`/saved
 
+
+.PHONY: show-check-rules
+show-check-rules:
+	@cxsom-builder-example-003-002-experiment graph check -- check 100 100
+	@dot -Tpdf check.dot -o check.pdf
+	@dot -Tpdf check-updates.dot -o check-updates.pdf
+	@dot -Tpdf check-inits.dot -o check-inits.pdf
+	@rm -f check.dot check-updates.dot check-inits.dot
+	@evince check.pdf check-updates.pdf check-inits.pdf &
+
 .PHONY: show-predict-rules
 show-predict-rules:
-	@cxsom-builder-example-003-002-experiment graph predict -- predict 100
+	@cxsom-builder-example-003-002-experiment graph predict -- predict 100 100
 	@dot -Tpdf predict.dot -o predict.pdf
 	@dot -Tpdf predict-updates.dot -o predict-updates.pdf
 	@dot -Tpdf predict-inits.dot -o predict-inits.pdf

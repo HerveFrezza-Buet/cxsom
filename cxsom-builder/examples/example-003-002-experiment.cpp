@@ -175,7 +175,79 @@ void make_train_rules(unsigned int save_period, unsigned int img_side) {
 }
 
 void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
- 
+  
+  Params p;
+  auto map_settings = make_map_settings(p);
+  
+  auto archi = cxsom::builder::architecture();
+  archi->timelines = {"check-wgt", "check-rlx", "check-out"};
+
+  // Let us retrieve the feature of the weight variables (only for
+  // those who host Pos1D prototypes here).
+  std::string  wtype = std::string("Map1D<Pos1D>="  ) + std::to_string(MAP_SIZE);
+  std::string  rtype = std::string("Map1D<Array=3>=") + std::to_string(MAP_SIZE);
+  unsigned int trace = img_side * img_side;
+  
+  // Let us define the maps
+  auto Wmap = cxsom::builder::map::make_1D("W"  );
+  auto Hmap = cxsom::builder::map::make_1D("H"  );  
+  auto Rmap = cxsom::builder::map::make_1D("RGB");
+
+  // Let us connect the map, using non-adaptive layers and the weights
+  // learnt previously, instead of internally defined weights.
+  auto Wc0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
+  auto Wc1 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
+  auto Hc0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
+  auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
+  auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
+  auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
+  Wmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Wc0, saved_weight_at);
+  Wmap->contextual(Rmap, fx::match_gaussian, p.match_pos, Wc1, saved_weight_at);
+  Hmap->contextual(Wmap, fx::match_gaussian, p.match_pos, Hc0, saved_weight_at);
+  Hmap->contextual(Rmap, fx::match_gaussian, p.match_pos, Hc1, saved_weight_at);
+  Rmap->contextual(Wmap, fx::match_gaussian, p.match_pos, Rc0, saved_weight_at);
+  Rmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Rc1, saved_weight_at);
+
+  // Let us declare the inputs (W, H, RGB) .
+  auto W   = cxsom::builder::variable("img", cxsom::builder::name("w")  , "Pos1D"  , CACHE, trace, OPENED);
+  auto H   = cxsom::builder::variable("img", cxsom::builder::name("h")  , "Pos1D"  , CACHE, trace, OPENED);
+  auto RGB = cxsom::builder::variable("img", cxsom::builder::name("rgb"), "Array=3", CACHE, trace, OPENED);
+  W->definition();
+  H->definition();
+  RGB->definition();
+
+  // Let us provide inputs to W, H and RGB maps, using weights learnt previously as well.
+  auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
+  auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);  
+  auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), rtype, CACHE, trace, OPENED);
+  // We expose the value of the external weights at each BMU... This is the checking. This has to be close to the input.
+  Wmap->external(W  , fx::match_gaussian, p.match_pos, We0, saved_weight_at) | cxsom::builder::expose::weight;
+  Hmap->external(H  , fx::match_gaussian, p.match_pos, He0, saved_weight_at) | cxsom::builder::expose::weight;
+  Rmap->external(RGB, fx::match_gaussian, p.match_pos, Re0, saved_weight_at) | cxsom::builder::expose::weight;
+
+  // We define all the external weights, for the sake of comprehensive
+  // graphs when the architecture is displayed.
+  We0->definition();
+  Wc0->definition();
+  Wc1->definition();
+  He0->definition();
+  Hc0->definition();
+  Hc1->definition();
+  Re0->definition();
+  Rc0->definition();
+  Rc1->definition();
+
+  // Let us build up and configure the architecture
+  archi << Wmap << Hmap << Rmap;
+  *archi = map_settings;
+  
+  // We can now produce the cxsom rules and the description graph.
+  archi->realize();
+  {
+    std::ofstream dot_file("check.dot");
+    dot_file << archi->write_dot;
+    std::cout << "File \"check.dot\" generated." << std::endl;
+  }
 }
 
 
@@ -189,12 +261,8 @@ void make_predict_rules(unsigned int saved_weight_at, unsigned int img_side) {
 
   // Let us retrieve the feature of the weight variables (only for
   // those who host Pos1D prototypes here).
-  std::string wtype;
-  {
-    std::ostringstream ostr;
-    ostr << "Map1D<Pos1D>=" << MAP_SIZE;
-    wtype = ostr.str();
-  }
+  std::string  wtype = std::string("Map1D<Pos1D>="  ) + std::to_string(MAP_SIZE);
+  std::string  rtype = std::string("Map1D<Array=3>=") + std::to_string(MAP_SIZE);
   unsigned int trace = img_side * img_side;
   
   // Let us define the maps
@@ -226,18 +294,11 @@ void make_predict_rules(unsigned int saved_weight_at, unsigned int img_side) {
   RGB->definition();
 
   // Let us provide inputs to W, and H maps, using weights learnt previously as well.
-  auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W") / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
-  auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H") / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);  
+  auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
+  auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);  
+  auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), rtype, CACHE, trace, OPENED);
   Wmap->external(W, fx::match_gaussian, p.match_pos, We0, saved_weight_at);
   Hmap->external(H, fx::match_gaussian, p.match_pos, He0, saved_weight_at);
-
-  // We will need the external RGB weights for retreiving the RGB value.
-  {
-    std::ostringstream ostr;
-    ostr << "Map1D<Array=3>=" << MAP_SIZE;
-    wtype = ostr.str();
-  }
-  auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
 
   // We define all the external weights, for the sake of comprehensive
   // graphs when the architecture is displayed.
@@ -267,7 +328,6 @@ void make_predict_rules(unsigned int saved_weight_at, unsigned int img_side) {
   // result. Indeed, it consists in usingr the BMU of the RGB map to
   // index the learnt RGB weights.
   RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER);
- 
 }
 
 int main(int argc, char* argv[]) {
