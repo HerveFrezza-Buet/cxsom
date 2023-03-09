@@ -64,6 +64,62 @@ Then, see the "Restart" subsection in "Train mode" section
 First, we have to set up the image that corresponds to the function (w, h) -> rgb that we want to learn. The image is eye.ppm, it is a 100x100 ppm file.
 
 ~> make input-setup IMG_SIDE=100
+~> make show-samples
+
+### Train mode
+
+Now we can train. Let us first see how training computation is done.
+
+~> make show-train-rules
+
+Let us emplace the training rules at server side (the null walltime warning is ok).
+
+~> make make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
+
+Indeed, computation is only done at step 0. This is due to the walltime value of the rule setting train-in/coord. In order to trigger computaion until timestep 50000, we just have to send a rule that modifies thes walltime.
+
+~> make feed-train-inputs WALLTIME=50000
+
+You can check if the training seems ok after this. If not, feed again with a higher walltime.
+
+~> make show-weights-history
+~> make show-rgb-mapping
+
+Once you are ok, you can clear the training stuff. Once you do this, the training cannot be continued for further steps.
+
+~> make cxsom-clear-processor
+~> make clear-training
+
+* Restarting
+
+If you need to restart and continue the computation (up to 100000 for example)
+
+~> make cxsom-launch-processor
+~> make make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
+~> make feed-train-inputs WALLTIME=100000
+
+### Predict mode
+
+Here, we ask the map to retrieve RGB from (w, h) values un [0,1]^2. In other words, this will draw the image. Let us first display the prediction rules.
+
+~> make show-predict-rules
+
+An then let us build-up a prediction for the saved weights at 500.
+
+~> make clear-predict
+~> make cxsom-clear-processor
+~> make predict WEIGHTS_AT=500
+
+Then, let us display the prediction
+
+~> make show-prediction
+
+
+
+
+
+
+
 
 
 

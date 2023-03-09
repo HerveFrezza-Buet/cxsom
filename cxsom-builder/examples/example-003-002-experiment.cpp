@@ -18,7 +18,7 @@
 #define CACHE              2
 #define SAVE_TRACE      1000
 #define TRAIN_TRACE       10
-#define TEST_TRACE     10000
+#define PREDICT_TRACE     10000
 #define OPENED          true
 #define OPEN_AS_NEEDED false
 #define FORGET             0
@@ -31,7 +31,7 @@
 using namespace cxsom::rules;
 context* cxsom::rules::ctx = nullptr;
 
-enum class Mode : char {Input, Train, Check, Test, Walltime};
+enum class Mode : char {Input, Train, Check, Predict, Walltime};
 
 
 auto rgb_inputs(const std::string& timeline, unsigned int trace, bool to_be_defined) {
@@ -59,41 +59,14 @@ void make_input_rules(unsigned int img_side) {
   auto SRC   = cxsom::builder::variable("img", cxsom::builder::name("src")  , std::string("Map2D<Array=3>=") + std::to_string(img_side),     1,  1, OPEN_AS_NEEDED);
   COORD->definition();
   SRC->definition();
-
   
-  {
-    timeline t{"img"};
-    COORD->var() << fx::pair(W->var(), H->var())                       | kwd::use("walltime", FOREVER);
-    RGB->var()   << fx::value_at(kwd::at(SRC->var(), 0), COORD->var()) | kwd::use("walltime", FOREVER);
-  }
+  COORD->var() << fx::pair(W->var(), H->var())                       | kwd::use("walltime", FOREVER);
+  RGB->var()   << fx::value_at(kwd::at(SRC->var(), 0), COORD->var()) | kwd::use("walltime", FOREVER);
   
 }
 
-void make_xxx_input_rules() {
-  auto SRC = cxsom::builder::variable("img",   cxsom::builder::name("src")  , "xxxx",     1,  1, OPENED);
-  auto COORD = cxsom::builder::variable("img", cxsom::builder::name("coord"), "Pos2D"   , CACHE,  1, OPENED);
-  auto [W, H, RGB] = rgb_inputs("toto", TRAIN_TRACE, false);
-  SRC->definition();
-  COORD->definition();
-
-  auto src   = SRC->varname.value;
-  auto coord = COORD->varname.value;
-  auto w     = W->varname.value;
-  auto h     = H->varname.value;
-  auto rgb   = RGB->varname.value;
-
-  make_walltime_rules(0);
-  
-  {
-    timeline t{"in"};
-    w   << fx::first (kwd::var("img", coord))                                     | kwd::use("walltime", FOREVER);
-    h   << fx::second(kwd::var("img", coord))                                     | kwd::use("walltime", FOREVER);
-    rgb << fx::value_at(kwd::at(kwd::var("img", src), 0), kwd::var("img", coord)) | kwd::use("walltime", FOREVER);
-  }
-}
-
-#define Rext .02
-#define Rctx .002
+#define Rext .03
+#define Rctx .003
 struct Params {
   kwd::parameters
     main,
@@ -131,25 +104,17 @@ auto make_map_settings(const Params& p) {
 }
 
 
-void make_train_rules(unsigned int save_period) {
+void make_train_rules(unsigned int save_period, unsigned int img_side) {
   
-  /*
   Params p;
   auto map_settings = make_map_settings(p);
   
   auto archi = cxsom::builder::architecture();
   archi->timelines = {"train-wgt", "train-rlx", "train-out"};
-
-  // Let us declare the inputs
-  auto W = cxsom::builder::variable("in", cxsom::builder::name("w")  , "Pos1D" , CACHE, TRAIN_TRACE, OPENED);
-  auto H = cxsom::builder::variable("in", cxsom::builder::name("h")  , "Pos1D" , CACHE, TRAIN_TRACE, OPENED);
-  auto R = cxsom::builder::variable("in", cxsom::builder::name("rgb"), "Array=3", CACHE, TRAIN_TRACE, OPENED);
-
-  // Sending this definition enables the server to perform type
-  // checking.
-  W->definition();
-  H->definition();
-  R->definition();
+  
+  auto [W, H, R] = rgb_inputs("train-in", TRAIN_TRACE, true);
+  auto COORD = cxsom::builder::variable("train-in", cxsom::builder::name("coord"), "Pos2D", CACHE, TRAIN_TRACE, OPENED);
+  COORD->definition();
 
   // Let us define the maps
   std::vector<cxsom::builder::Map::Layer*> layers;
@@ -191,6 +156,15 @@ void make_train_rules(unsigned int save_period) {
     std::cout << "File \"train.dot\" generated." << std::endl;
   }
 
+  // We add the rules for the computation of inputs.
+  auto SRC = cxsom::builder::variable("img", cxsom::builder::name("src"), std::string("Map2D<Array=3>=") + std::to_string(img_side), 1, 1, OPEN_AS_NEEDED);
+  SRC->definition(); // avoids ??? in architecture display.
+  COORD->var() << fx::random()                                       | kwd::use("walltime", 0);
+  W->var()     << fx::first(COORD->var())                            | kwd::use("walltime", FOREVER);
+  H->var()     << fx::second(COORD->var())                           | kwd::use("walltime", FOREVER);
+  R->var()     << fx::value_at(kwd::at(SRC->var(), 0), COORD->var()) | kwd::use("walltime", FOREVER);
+  
+  
   // We add the rules for weight savings.
   for(auto layer_ptr : layers) {
     auto W = layer_ptr->_W();
@@ -198,17 +172,16 @@ void make_train_rules(unsigned int save_period) {
     Wsaved->definition();
     Wsaved->var() << fx::copy(kwd::times(W->var(), save_period)) | kwd::use("walltime", FOREVER);
   }
-  */
+  
 }
 
-
-void make_test_rules(unsigned int saved_weight_at) {
-  /*
+void make_predict_rules(unsigned int saved_weight_at) {
+  
   Params p;
   auto map_settings = make_map_settings(p);
   
   auto archi = cxsom::builder::architecture();
-  archi->timelines = {"test-wgt", "test-rlx", "test-out"};
+  archi->timelines = {"predict-wgt", "predict-rlx", "predict-out"};
 
   // Let us retrieve the feature of the weight variables (only for
   // those who host Pos1D prototypes here).
@@ -243,9 +216,9 @@ void make_test_rules(unsigned int saved_weight_at) {
   Rmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Rc1, saved_weight_at);
 
   // Let us declare the inputs (W, H) and the output (RGB).
-  auto W   = cxsom::builder::variable("prediction-input" , cxsom::builder::name("w")  , "Pos1D"  , CACHE, TEST_TRACE, OPENED);
-  auto H   = cxsom::builder::variable("prediction-input" , cxsom::builder::name("h")  , "Pos1D"  , CACHE, TEST_TRACE, OPENED);
-  auto RGB = cxsom::builder::variable("prediction-output", cxsom::builder::name("rgb"), "Array=3", CACHE, TEST_TRACE, OPENED);
+  auto W   = cxsom::builder::variable("img"        , cxsom::builder::name("w")  , "Pos1D"  , CACHE, PREDICT_TRACE, OPENED);
+  auto H   = cxsom::builder::variable("img"        , cxsom::builder::name("h")  , "Pos1D"  , CACHE, PREDICT_TRACE, OPENED);
+  auto RGB = cxsom::builder::variable("predict-out", cxsom::builder::name("rgb"), "Array=3", CACHE, PREDICT_TRACE, OPENED);
   W->definition();
   H->definition();
   RGB->definition();
@@ -283,16 +256,16 @@ void make_test_rules(unsigned int saved_weight_at) {
   // We can now produce the cxsom rules and the description graph.
   archi->realize();
   {
-    std::ofstream dot_file("test.dot");
+    std::ofstream dot_file("predict.dot");
     dot_file << archi->write_dot;
-    std::cout << "File \"test.dot\" generated." << std::endl;
+    std::cout << "File \"predict.dot\" generated." << std::endl;
   }
 
   // Now, we need supplementary rules for reading the RGB
   // result. Indeed, it consists in usingr the BMU of the RGB map to
   // index the learnt RGB weights.
   RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER   );
-  */
+ 
 }
 
 int main(int argc, char* argv[]) {
@@ -311,10 +284,10 @@ int main(int argc, char* argv[]) {
   if(c.user_argv.size() == 0) {
     std::cout << "You have to provide user arguments." << std::endl
 	      << "e.g:" << std::endl
-	      << "  " << prefix.str() << "input <img-side>       <-- sends the rules for the inputs." << std::endl
-	      << "  " << prefix.str() << "walltime <max-time>    <-- sends the rules for the inputs wall-time redefinition." << std::endl
-	      << "  " << prefix.str() << "train <save-period>    <-- sends the rules for training." << std::endl
-	      << "  " << prefix.str() << "test <saved-weight-at> <-- sends the rules for testing." << std::endl;
+	      << "  " << prefix.str() << "input <img-side>               <-- sends the rules for the inputs." << std::endl
+	      << "  " << prefix.str() << "walltime <max-time>            <-- sends the rules for the inputs wall-time redefinition." << std::endl
+	      << "  " << prefix.str() << "train <save-period> <img-side> <-- sends the rules for training." << std::endl
+	      << "  " << prefix.str() << "predict <saved-weight-at>         <-- sends the rules for predicting." << std::endl;
     c.notify_user_argv_error(); 
     return 0;
   }
@@ -338,22 +311,23 @@ int main(int argc, char* argv[]) {
     mode = Mode::Input;
   }
   else if(c.user_argv[0] == "train") {
-    if(c.user_argv.size() != 2) {
-      std::cout << "The 'train' mode expects a save-period argument"  << std::endl;
+    if(c.user_argv.size() != 3) {
+      std::cout << "The 'train' mode expects save-period and img-side arguments"  << std::endl;
       c.notify_user_argv_error(); 
       return 0;
     }
     save_period = stoul(c.user_argv[1]);
+    img_side = stoul(c.user_argv[2]);
     mode = Mode::Train;
   }
-  else if(c.user_argv[0] == "test") {
+  else if(c.user_argv[0] == "predict") {
     if(c.user_argv.size() != 2) {
-      std::cout << "The 'test' mode expects a saved-weight-at argument"  << std::endl;
+      std::cout << "The 'predict' mode expects a saved-weight-at argument"  << std::endl;
       c.notify_user_argv_error(); 
       return 0;
     }
     saved_weight_at = stoul(c.user_argv[1]);
-    mode = Mode::Test;
+    mode = Mode::Predict;
   }
   else {
     std::cout << "Bad user arguments." << std::endl;
@@ -369,10 +343,10 @@ int main(int argc, char* argv[]) {
     make_walltime_rules(walltime);
     break;
   case Mode::Train:
-    make_train_rules(save_period);
+    make_train_rules(save_period, img_side);
     break;
-  case Mode::Test:
-    make_test_rules(saved_weight_at);
+  case Mode::Predict:
+    make_predict_rules(saved_weight_at);
     break;
   case Mode::Check:
     break;

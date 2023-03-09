@@ -32,7 +32,11 @@ class RGBView(cx.tkviewer.At):
             plt.plot(rgb[..., 0], rgb[..., 1], rgb[..., 2], lw=3, color='k')
         
 
-RGB = np.fromiter((v for _,v in cx.variable.data_range_full(cx.variable.path_from(root_dir, 'in', 'rgb'))), dtype=(float, 3))
+RGB = np.fromiter((v for _,v in cx.variable.data_range_full(cx.variable.path_from(root_dir, 'img', 'rgb'))), dtype=(float, 3))
+
+# RGB is too big, let us pick up a subset of it.
+np.random.shuffle(RGB)
+RGB = RGB[:2000]
     
 root = tk.Tk()
 root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))

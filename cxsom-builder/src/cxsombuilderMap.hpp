@@ -1184,7 +1184,7 @@ namespace cxsom {
     };
 
     enum class expose : char {weight};
-    inline void operator|(Map::Layer* l, const expose exposure) {
+    inline Map::Layer* operator|(Map::Layer* l, const expose exposure) {
       switch(exposure) {
       case expose::weight:
 	l->expose_weight = true;
@@ -1192,9 +1192,11 @@ namespace cxsom {
       default:
 	break;
       }
+      return l;
     }
 
     namespace map {
+      using ref = std::shared_ptr<Map>;
       inline auto make_1D(const std::string& map_name) {return std::make_shared<Map>(map_name, 1);}
       inline auto make_2D(const std::string& map_name) {return std::make_shared<Map>(map_name, 2);}
       inline auto make_settings() {return MapSettings();}
