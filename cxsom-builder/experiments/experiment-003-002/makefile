@@ -22,6 +22,7 @@ help:
 	@echo "# Check mode"
 	@echo
 	@echo "make show-check-rules                              <-- Shows how checking is computed."
+	@echo "make check WEIGHTS_AT=500 IMAGE_SIDE=100         <-- sends testing rules (for saved weights at 500)."
 	@echo
 	@echo "# Predict mode"
 	@echo
@@ -45,7 +46,7 @@ inputs-setup:
 
 .PHONY: show-samples
 show-samples:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` img img
+	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h img rgb
 
 .PHONY: clear-samples
 clear-samples:
@@ -96,6 +97,19 @@ show-check-rules:
 	@rm -f check.dot check-updates.dot check-inits.dot
 	@evince check.pdf check-updates.pdf check-inits.pdf &
 
+.PHONY: clear-check
+clear-check:
+	@rm -rf `cat .cxsom-rootdir-config`/check-*
+
+.PHONY: check
+check:
+	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- check ${WEIGHTS_AT} ${IMAGE_SIDE}
+	@make --quiet cxsom-ping-processor
+
+.PHONY: show-checks
+show-checks:
+	@python3 show-samples.py `cat .cxsom-rootdir-config` check-out 'W/We-0' check-out 'H/We-0' check-out 'RGB/We-0'
+
 .PHONY: show-predict-rules
 show-predict-rules:
 	@cxsom-builder-example-003-002-experiment graph predict -- predict 100 100
@@ -112,8 +126,9 @@ clear-predict:
 .PHONY: predict
 predict:
 	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- predict ${WEIGHTS_AT} ${IMAGE_SIDE}
+	@make --quiet cxsom-ping-processor
 
 
 .PHONY: show-predictions
 show-predictions:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` img predict-out
+	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h predict-out rgb

@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
   map_settings.internals_file_size = FORGET; // This is the history length of internal computation (activities, relaxing BMU...)
   map_settings.weights_file_size   = TRACE;  // This is the history length of weights.
   map_settings.bmu_file_size       = 1000;   // This is the history length of the output of the maps.
+  map_settings.exposure_file_size  = 1000;   // If not specified, this is equals bmu_file_size. This is the length of weight exposures variables (see example 002-001). Not used here.
   map_settings.kept_opened         = OPENED;
   map_settings.argmax              = fx::argmax; 
   map_settings                     = {p_external, p_contextual, p_global};

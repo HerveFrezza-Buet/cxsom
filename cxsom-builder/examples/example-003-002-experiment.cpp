@@ -176,8 +176,10 @@ void make_train_rules(unsigned int save_period, unsigned int img_side) {
 
 void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   
+  unsigned int trace = img_side * img_side;
   Params p;
   auto map_settings = make_map_settings(p);
+  map_settings.exposure_file_size = trace; // We exposed W, H and RGB weights, we keep trace of them as for a (w, h, rbb) dataset.
   
   auto archi = cxsom::builder::architecture();
   archi->timelines = {"check-wgt", "check-rlx", "check-out"};
@@ -186,7 +188,6 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   // those who host Pos1D prototypes here).
   std::string  wtype = std::string("Map1D<Pos1D>="  ) + std::to_string(MAP_SIZE);
   std::string  rtype = std::string("Map1D<Array=3>=") + std::to_string(MAP_SIZE);
-  unsigned int trace = img_side * img_side;
   
   // Let us define the maps
   auto Wmap = cxsom::builder::map::make_1D("W"  );
@@ -346,11 +347,11 @@ int main(int argc, char* argv[]) {
   if(c.user_argv.size() == 0) {
     std::cout << "You have to provide user arguments." << std::endl
 	      << "e.g:" << std::endl
-	      << "  " << prefix.str() << "input <img-side>               <-- sends the rules for the inputs." << std::endl
-	      << "  " << prefix.str() << "walltime <max-time>            <-- sends the rules for the inputs wall-time redefinition." << std::endl
-	      << "  " << prefix.str() << "train <save-period> <img-side> <-- sends the rules for training." << std::endl
-	      << "  " << prefix.str() << "check <saved-weight-at>        <-- sends the rules for checking." << std::endl
-	      << "  " << prefix.str() << "predict <saved-weight-at>      <-- sends the rules for predicting." << std::endl;
+	      << "  " << prefix.str() << "walltime <max-time>                <-- sends the rules for the inputs wall-time redefinition." << std::endl
+	      << "  " << prefix.str() << "input <img-side>                   <-- sends the rules for the inputs." << std::endl
+	      << "  " << prefix.str() << "train <save-period> <img-side>     <-- sends the rules for training." << std::endl
+	      << "  " << prefix.str() << "check <saved-weight-at> <img-side> <-- sends the rules for checking." << std::endl
+	      << "  " << prefix.str() << "predict <saved-weight-at>          <-- sends the rules for predicting." << std::endl;
     c.notify_user_argv_error(); 
     return 0;
   }
@@ -385,7 +386,7 @@ int main(int argc, char* argv[]) {
   }
   else if(c.user_argv[0] == "check") {
     if(c.user_argv.size() != 3) {
-      std::cout << "The 'check' mode expects saved-weight-at  and img-side arguments"  << std::endl;
+      std::cout << "The 'check' mode expects saved-weight-at and img-side arguments"  << std::endl;
       c.notify_user_argv_error(); 
       return 0;
     }

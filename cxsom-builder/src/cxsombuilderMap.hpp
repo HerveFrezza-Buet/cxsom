@@ -41,6 +41,7 @@ namespace cxsom {
       std::optional<std::size_t>            internals_file_size;
       std::optional<std::size_t>            weights_file_size;
       std::optional<std::size_t>            bmu_file_size; 
+      std::optional<std::size_t>            exposure_file_size; 
       std::optional<argmax_func>            argmax;
       std::optional<toward_argmax_func>     toward_argmax;
       std::optional<global_merge_func>      global_merge;
@@ -71,6 +72,7 @@ namespace cxsom {
       std::size_t internals_file_size = 0;
       std::size_t weights_file_size = 100;
       std::size_t bmu_file_size = 0; //!< This can be used to set the filesize of the output variable.
+      std::size_t exposure_file_size = 0; //!< This can be used to set the filesize of the weight exposures variable.
       bool        kept_opened = false;
       mutable rules::kwd::parameters p_external;
       mutable rules::kwd::parameters p_contextual;
@@ -92,7 +94,10 @@ namespace cxsom {
 	if(settings.cache_size)          cache_size          = *(settings.cache_size);
 	if(settings.internals_file_size) internals_file_size = *(settings.internals_file_size);
 	if(settings.weights_file_size)   weights_file_size   = *(settings.weights_file_size);
+	
 	if(settings.bmu_file_size)       bmu_file_size       = *(settings.bmu_file_size); 
+	if(settings.exposure_file_size)  exposure_file_size  = *(settings.exposure_file_size);
+	else                             exposure_file_size  = bmu_file_size;                  // If nothing is specified, exposure size is bmu size.
 	if(settings.kept_opened)         kept_opened         = *(settings.kept_opened);
 	if(settings.p_external)          p_external          = *(settings.p_external);
 	if(settings.p_contextual)        p_contextual        = *(settings.p_contextual);
@@ -146,6 +151,7 @@ namespace cxsom {
 	rules::kwd::parameters p_match;
 	rules::step at_input_read;
 	rules::step at_weight_read;
+	rules::step at_weight_exposed;
 	bool contextual;
 	bool expose_weight;
 
@@ -163,7 +169,7 @@ namespace cxsom {
 	    A_name(std::string("A") + suffix + "-" + std::to_string(rank)),
 	    match(match),
 	    p_match(p_match),
-	    at_input_read(at_input_read), at_weight_read(at_weight_read),
+	    at_input_read(at_input_read), at_weight_read(at_weight_read), at_weight_exposed(at_weight_read),
 	    contextual(false),
 	    expose_weight(false) {
 	  if(std::holds_alternative<ref_variable>(xi)) dot_input = std::get<ref_variable>(xi);
@@ -288,7 +294,9 @@ namespace cxsom {
 		      const rules::kwd::parameters& p_learn,          // The learning parameters
 		      rules::offset                 at_weight_write)  // The relative time for writing the weights
 	: Layer(owner, xi, suffix, rank, match, p_match, at_input_read, at_weight_read),
-	  learn(learn), p_learn(p_learn), at_weight_write(at_weight_write) {}
+	  learn(learn), p_learn(p_learn), at_weight_write(at_weight_write) {
+	  at_weight_exposed = at_weight_write;
+	}
 	virtual ~AdaptiveLayer() {}
 	
 	virtual void updates() const override {
@@ -848,7 +856,7 @@ namespace cxsom {
 	  auto weight_type = cxsom::type::make(wgt->type);
 	  auto expose_type = weight_type;
 	  return variable(output_timeline, wgt->varname,
-			  static_cast<const cxsom::type::Map&>(*expose_type).content_type, cache_size, bmu_file_size, kept_opened);
+			  static_cast<const cxsom::type::Map&>(*expose_type).content_type, cache_size, exposure_file_size, kept_opened);
       }
       
       void expose_weight_definitions(layer_ref l) const {
@@ -862,7 +870,7 @@ namespace cxsom {
 	  ref_variable res = expose_weight_variable(l);
 	  ref_variable wgt = l->_W();
 
-	  kwd::var(res->timeline, res->varname) << fx::value_at(kwd::var(wgt->timeline, wgt->varname),
+	  kwd::var(res->timeline, res->varname) << fx::value_at(dated(kwd::var(wgt->timeline, wgt->varname), l->at_weight_exposed),
 								kwd::var(idx->timeline, idx->varname)) | p_global;
 	}
       }

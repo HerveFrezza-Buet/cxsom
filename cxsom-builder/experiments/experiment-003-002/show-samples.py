@@ -3,23 +3,27 @@ import pycxsom as cx
 import numpy as np
 import matplotlib.pyplot as plt
 
-if len(sys.argv) < 4:
-    print(f'Usage : {sys.argv[0]} <root-dir> <wh-timeline> <rbg-timeline> [frame_id]')
+if len(sys.argv) < 8:
+    print(f'Usage : {sys.argv[0]} <root-dir> <w-timeline> <w-name> <h-timeline> <h-name> <rgb-timeline> <rgb-name> [frame_id]')
     sys.exit(0)
 
-root_dir     = sys.argv[1]
-wh_timeline  = sys.argv[2]
-rgb_timeline = sys.argv[3]
+root_dir       = sys.argv[1]
+w_timeline     = sys.argv[2]
+w_varname      = sys.argv[3]
+h_timeline     = sys.argv[4]
+h_varname      = sys.argv[5]
+rgb_timeline   = sys.argv[6]
+rgb_varname    = sys.argv[7]
 frame_id = None
-if len(sys.argv) == 5:
-    frame_id = int(sys.argv[4])
+if len(sys.argv) == 9:
+    frame_id = int(sys.argv[8])
 
-with cx.variable.Realize(cx.variable.path_from(root_dir, wh_timeline, 'w')) as var:
+with cx.variable.Realize(cx.variable.path_from(root_dir, w_timeline, w_varname)) as var:
     plot_range = var.time_range()
 
-W = np.fromiter((value for _, value in cx.variable.data_range_full(cx.variable.path_from(root_dir, wh_timeline , 'w'  ))), float           )
-H = np.fromiter((value for _, value in cx.variable.data_range_full(cx.variable.path_from(root_dir, wh_timeline , 'h'  ))), float           )
-C = np.fromiter((value for _, value in cx.variable.data_range_full(cx.variable.path_from(root_dir, rgb_timeline, 'rgb'))), dtype=(float, 3))
+W = np.fromiter((value for _, value in cx.variable.data_range_full(cx.variable.path_from(root_dir, w_timeline  , w_varname  ))), float           )
+H = np.fromiter((value for _, value in cx.variable.data_range_full(cx.variable.path_from(root_dir, h_timeline  , h_varname  ))), float           )
+C = np.fromiter((value for _, value in cx.variable.data_range_full(cx.variable.path_from(root_dir, rgb_timeline, rgb_varname))), dtype=(float, 3))
 
 plt.figure(figsize=(10,10))
 if frame_id is None:
