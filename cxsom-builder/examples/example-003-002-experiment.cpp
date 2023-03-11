@@ -30,7 +30,72 @@
 using namespace cxsom::rules;
 context* cxsom::rules::ctx = nullptr;
 
-enum class Mode : char {Input, Train, Check, Predict, Walltime};
+enum class Mode : char {Calibration, Input, Train, Check, Predict, Walltime};
+
+
+
+#define Rext .03
+#define Rctx .003
+struct Params {
+  kwd::parameters
+    main,
+    match_ctx, match_pos, match_rgb,
+    learn,
+    learn_pos_e, learn_pos_c,
+    learn_rgb_e, learn_rgb_c,
+    external, contextual, global;
+  Params() {
+    main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
+    match_ctx   | main,  kwd::use("sigma", .1);
+    match_pos   | main,  kwd::use("sigma", .1);
+    match_rgb   | main,  kwd::use("sigma", .1);
+    learn       | main,  kwd::use("alpha", .1);
+    learn_pos_e | learn, kwd::use("r", Rext);
+    learn_pos_c | learn, kwd::use("r", Rctx);
+    learn_rgb_e | learn, kwd::use("r", Rext);
+    learn_rgb_c | learn, kwd::use("r", Rctx);
+    external    | main;
+    contextual  | main;
+    global      | main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
+  }
+};
+
+auto make_map_settings(const Params& p) {
+  auto map_settings = cxsom::builder::map::make_settings();
+  map_settings.map_size          = MAP_SIZE;
+  map_settings.cache_size        = CACHE;
+  map_settings.weights_file_size = TRAIN_TRACE;
+  map_settings.kept_opened       = OPENED;
+  map_settings                   = {p.external, p.contextual, p.global};
+  map_settings.argmax            = fx::argmax;
+  map_settings.toward_argmax     = fx::toward_argmax;
+
+  return map_settings;
+}
+
+void make_calibration_rules(unsigned grid_side) {
+  Params p;
+
+  // Here are basic cxsom rules, exhibiting the matching functions.
+
+  {
+    timeline t("calibration");
+
+    
+    kwd::type("rgb-ref"    , "Array=3",                                                              2, 1, OPENED);
+    kwd::type("pos-ref"    , "Scalar"                                                              , 2, 1, OPENED);
+    kwd::type("rgb-samples", std::string("Map1D<Array=3>=") + std::to_string(grid_side * grid_side), 2, 1, OPENED);
+    kwd::type("pos-samples", std::string("Map1D<Scalar>=")  + std::to_string(grid_side)            , 2, 1, OPENED);
+    kwd::type("rgb-match"  , std::string("Map1D<Scalar>=")  + std::to_string(grid_side * grid_side), 2, 1, OPENED); 
+    kwd::type("pos-match"  , std::string("Map1D<Scalar>=")  + std::to_string(grid_side)            , 2, 1, OPENED);
+    kwd::type("ctx-match"  , std::string("Map1D<Scalar>=")  + std::to_string(grid_side)            , 2, 1, OPENED);
+
+    kwd::at("rgb-match", 0) << fx::match_gaussian(kwd::at("rgb-ref", 0), kwd::at("rgb-samples", 0)) | p.match_rgb;
+    kwd::at("pos-match", 0) << fx::match_gaussian(kwd::at("pos-ref", 0), kwd::at("pos-samples", 0)) | p.match_pos;
+    kwd::at("ctx-match", 0) << fx::match_gaussian(kwd::at("pos-ref", 0), kwd::at("pos-samples", 0)) | p.match_ctx; 
+  }
+  
+}
 
 
 auto rgb_inputs(const std::string& timeline, unsigned int trace, bool to_be_defined) {
@@ -64,44 +129,6 @@ void make_input_rules(unsigned int img_side) {
   
 }
 
-#define Rext .03
-#define Rctx .003
-struct Params {
-  kwd::parameters
-    main,
-    match_pos, match_rgb,
-    learn,
-    learn_pos_e, learn_pos_c,
-    learn_rgb_e, learn_rgb_c,
-    external, contextual, global;
-  Params() {
-    main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
-    match_pos   | main,  kwd::use("sigma", .2);
-    match_rgb   | main,  kwd::use("sigma", .2);
-    learn       | main,  kwd::use("alpha", .1);
-    learn_pos_e | learn, kwd::use("r", Rext);
-    learn_pos_c | learn, kwd::use("r", Rctx);
-    learn_rgb_e | learn, kwd::use("r", Rext);
-    learn_rgb_c | learn, kwd::use("r", Rctx);
-    external    | main;
-    contextual  | main;
-    global      | main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
-  }
-};
-
-auto make_map_settings(const Params& p) {
-  auto map_settings = cxsom::builder::map::make_settings();
-  map_settings.map_size          = MAP_SIZE;
-  map_settings.cache_size        = CACHE;
-  map_settings.weights_file_size = TRAIN_TRACE;
-  map_settings.kept_opened       = OPENED;
-  map_settings                   = {p.external, p.contextual, p.global};
-  map_settings.argmax            = fx::argmax;
-  map_settings.toward_argmax     = fx::toward_argmax;
-
-  return map_settings;
-}
-
 
 void make_train_rules(unsigned int save_period, unsigned int img_side) {
   
@@ -126,12 +153,12 @@ void make_train_rules(unsigned int save_period, unsigned int img_side) {
 
   // We store the layers since we have to add rules for saving weights.
   // Let us connect the maps together
-  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_c);
-  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_rgb_c);
-  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_rgb_c);
+  *(out_layer++) = Wmap->contextual(Hmap, fx::match_gaussian, p.match_ctx, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Wmap->contextual(Rmap, fx::match_gaussian, p.match_ctx, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Wmap, fx::match_gaussian, p.match_ctx, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Hmap->contextual(Rmap, fx::match_gaussian, p.match_ctx, fx::learn_triangle, p.learn_pos_c);
+  *(out_layer++) = Rmap->contextual(Wmap, fx::match_gaussian, p.match_ctx, fx::learn_triangle, p.learn_rgb_c);
+  *(out_layer++) = Rmap->contextual(Hmap, fx::match_gaussian, p.match_ctx, fx::learn_triangle, p.learn_rgb_c);
 
   // Let us provide inputs to the maps.
   *(out_layer++) = Wmap->external(W, fx::match_gaussian, p.match_pos, fx::learn_triangle, p.learn_pos_e);
@@ -202,12 +229,12 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
   auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
   auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
-  Wmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Wc0, saved_weight_at);
-  Wmap->contextual(Rmap, fx::match_gaussian, p.match_pos, Wc1, saved_weight_at);
-  Hmap->contextual(Wmap, fx::match_gaussian, p.match_pos, Hc0, saved_weight_at);
-  Hmap->contextual(Rmap, fx::match_gaussian, p.match_pos, Hc1, saved_weight_at);
-  Rmap->contextual(Wmap, fx::match_gaussian, p.match_pos, Rc0, saved_weight_at);
-  Rmap->contextual(Hmap, fx::match_gaussian, p.match_pos, Rc1, saved_weight_at);
+  Wmap->contextual(Hmap, fx::match_gaussian, p.match_ctx, Wc0, saved_weight_at);
+  Wmap->contextual(Rmap, fx::match_gaussian, p.match_ctx, Wc1, saved_weight_at);
+  Hmap->contextual(Wmap, fx::match_gaussian, p.match_ctx, Hc0, saved_weight_at);
+  Hmap->contextual(Rmap, fx::match_gaussian, p.match_ctx, Hc1, saved_weight_at);
+  Rmap->contextual(Wmap, fx::match_gaussian, p.match_ctx, Rc0, saved_weight_at);
+  Rmap->contextual(Hmap, fx::match_gaussian, p.match_ctx, Rc1, saved_weight_at);
 
   // Let us declare the inputs (W, H, RGB) .
   auto W   = cxsom::builder::variable("img", cxsom::builder::name("w")  , "Pos1D"  , CACHE, trace, OPENED);
@@ -224,7 +251,7 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   // We expose the value of the external weights at each BMU... This is the checking. This has to be close to the input.
   Wmap->external(W  , fx::match_gaussian, p.match_pos, We0, saved_weight_at) | cxsom::builder::expose::weight;
   Hmap->external(H  , fx::match_gaussian, p.match_pos, He0, saved_weight_at) | cxsom::builder::expose::weight;
-  Rmap->external(RGB, fx::match_gaussian, p.match_pos, Re0, saved_weight_at) | cxsom::builder::expose::weight;
+  Rmap->external(RGB, fx::match_gaussian, p.match_rgb, Re0, saved_weight_at) | cxsom::builder::expose::weight;
 
   // We define all the external weights, for the sake of comprehensive
   // graphs when the architecture is displayed.
@@ -298,8 +325,8 @@ void make_predict_rules(unsigned int saved_weight_at, unsigned int img_side) {
   auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
   auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);  
   auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), rtype, CACHE, trace, OPENED);
-  Wmap->external(W, fx::match_gaussian, p.match_pos, We0, saved_weight_at);
-  Hmap->external(H, fx::match_gaussian, p.match_pos, He0, saved_weight_at);
+  Wmap->external(W, fx::match_gaussian, p.match_ctx, We0, saved_weight_at);
+  Hmap->external(H, fx::match_gaussian, p.match_ctx, He0, saved_weight_at);
 
   // We define all the external weights, for the sake of comprehensive
   // graphs when the architecture is displayed.
@@ -335,6 +362,7 @@ int main(int argc, char* argv[]) {
   context c(argc, argv);
   Mode mode;
   unsigned int walltime        = 0;
+  unsigned int grid_side       = 0;
   unsigned int img_side        = 0;
   unsigned int save_period     = 0;
   unsigned int saved_weight_at = 0;
@@ -347,6 +375,7 @@ int main(int argc, char* argv[]) {
   if(c.user_argv.size() == 0) {
     std::cout << "You have to provide user arguments." << std::endl
 	      << "e.g:" << std::endl
+	      << "  " << prefix.str() << "calibration <grid-side>            <-- sends the rules for calibration." << std::endl
 	      << "  " << prefix.str() << "walltime <max-time>                <-- sends the rules for the inputs wall-time redefinition." << std::endl
 	      << "  " << prefix.str() << "input <img-side>                   <-- sends the rules for the inputs." << std::endl
 	      << "  " << prefix.str() << "train <save-period> <img-side>     <-- sends the rules for training." << std::endl
@@ -356,7 +385,16 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  if(c.user_argv[0] == "walltime") {
+  if(c.user_argv[0] == "calibration") {
+    if(c.user_argv.size() != 2) {
+      std::cout << "The 'calibration' mode expects a grid_side argument"  << std::endl;
+      c.notify_user_argv_error(); 
+      return 0;
+    }
+    grid_side = stoul(c.user_argv[1]);
+    mode = Mode::Calibration;
+  }
+  else if(c.user_argv[0] == "walltime") {
     if(c.user_argv.size() != 2) {
       std::cout << "The 'walltime' mode expects a max-time argument"  << std::endl;
       c.notify_user_argv_error(); 
@@ -411,11 +449,14 @@ int main(int argc, char* argv[]) {
   }
 
   switch(mode) {
-  case Mode::Input:
-    make_input_rules(img_side);
+  case Mode::Calibration:
+    make_calibration_rules(grid_side);
     break;
   case Mode::Walltime:
     make_walltime_rules(walltime);
+    break;
+  case Mode::Input:
+    make_input_rules(img_side);
     break;
   case Mode::Train:
     make_train_rules(save_period, img_side);

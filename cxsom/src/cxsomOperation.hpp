@@ -2026,7 +2026,7 @@ namespace cxsom {
 		 << " while weights is " << args[1]->name() << '.';
 	}
 	else
-	  ostr << "Checking types for Match: Result has invalid type " << res->name() << '.';
+	  ostr << "Checking types for Match: Result has invalid type " << res->name() << " (should be MapXD<Scalar>=Y).";
       }
       else
 	ostr << "Checking types for Match : Exactly 2 arguments are expected (got " << args.size() << ").";

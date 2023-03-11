@@ -58,6 +58,20 @@ If you need to restart everything, you have to kill an eventual running processo
 
 Then, see the "Restart" subsection in "Train mode" section
 
+### Calibration
+
+The demo is already calibrated, i.e. the matching sensitivities are set with suitable values. So you can skip this and go directly to next "Input Mode" section.
+
+Let us here display the effect of the current matching parameters setting. You can change them (but you will need to re-compile). They are defined in the example-003-002-experiment.cpp example file, as the sigma values in the Params class.
+
+~> make clear-calibration
+~> make cxsom-clear-processor
+~> make calibration-setup GRID_SIDE=100
+~> make calibrate
+~> make show-calibration 
+
+
+
 
 ### Input Mode
 

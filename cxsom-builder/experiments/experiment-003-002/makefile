@@ -3,6 +3,13 @@ help:
 	@echo "Read the README.txt file for instructions."
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations."
 	@echo
+	@echo "# Calibration"
+	@echo
+	@echo "make clear-calibration                             <-- clears calibration stuff."
+	@echo "make calibration-setup GRID_SIDE=100               <-- sends calibration rules."
+	@echo "make calibrate                                     <-- sets calibration variable content."
+	@echo "make show-calibration                              <-- plots the calibration."
+	@echo
 	@echo "# Inputs mode"
 	@echo 
 	@echo "make inputs-setup IMAGE_SIDE=100                   <-- sets up inputs."
@@ -37,6 +44,25 @@ help:
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
+
+
+.PHONY: clear-calibration
+clear-calibration :
+	@rm -rf `cat .cxsom-rootdir-config`/calibration
+
+.PHONY: calibration-setup
+calibration-setup:
+	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- calibration ${GRID_SIDE}
+
+.PHONY: calibrate
+calibrate:
+	@python3 set-calibration.py `cat .cxsom-rootdir-config`
+	@make --quiet cxsom-ping-processor
+
+.PHONY: show-calibration
+show-calibration:
+	@python3 show-calibration.py `cat .cxsom-rootdir-config`
+
 
 
 .PHONY: inputs-setup
