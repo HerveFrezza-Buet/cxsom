@@ -187,9 +187,10 @@ clear-frames:
 
 .PHONY: frame-check
 frame-check:
-	@make --quiet cxsom-clear-processor
+	@make --quiet cxsom-kill-processor
 	@make --quiet clear-checks
-	@make --quiet clear-frames
+	@sleep 1
+	@make --quiet cxsom-launch-processor
 	@make --quiet check
 	@sleep 1
 	@python3 wait_stable.py `cat .cxsom-rootdir-config` check-out 'H/We-0'
