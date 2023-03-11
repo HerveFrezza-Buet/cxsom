@@ -22,7 +22,9 @@ help:
 	@echo "# Check mode"
 	@echo
 	@echo "make show-check-rules                              <-- Shows how checking is computed."
-	@echo "make check WEIGHTS_AT=500 IMAGE_SIDE=100         <-- sends testing rules (for saved weights at 500)."
+	@echo "make check WEIGHTS_AT=500 IMAGE_SIDE=100           <-- sends testing rules (for saved weights at 500)."
+	@echo "make show-checks                                   <-- Shows the (w, h, rgb) checks."
+	@echo "make clear-checks                                  <-- clears checkings."
 	@echo
 	@echo "# Predict mode"
 	@echo
@@ -97,8 +99,8 @@ show-check-rules:
 	@rm -f check.dot check-updates.dot check-inits.dot
 	@evince check.pdf check-updates.pdf check-inits.pdf &
 
-.PHONY: clear-check
-clear-check:
+.PHONY: clear-checks
+clear-checks:
 	@rm -rf `cat .cxsom-rootdir-config`/check-*
 
 .PHONY: check

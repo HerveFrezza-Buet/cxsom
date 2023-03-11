@@ -98,6 +98,28 @@ If you need to restart and continue the computation (up to 100000 for example)
 ~> make make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
 ~> make feed-train-inputs WALLTIME=100000
 
+### Check mode
+
+In this mode, we check wether the map is able to encode in its external weights a good representation of the (w, h, rgb) triplets. To do so, we feed the map with (w, h, rgb) triplets, with (w, h) spanning [0, 1]^2, and we get the (W/We-0, H/We-0, RGB/We-0) at corresponding bmus (W/BMU, H/BMU, RGB/BMU). The rules for this are the following:
+
+~> make show-check-rules
+
+We can, for example, build up the checking.
+
+~> make cxsom-clear-processor
+~> make clear-checks
+~> make check WEIGHTS_AT=500 IMAGE_SIDE=100
+
+Then, let us display the prediction
+
+~> make show-checks
+
+Clearing the checkings can be done as well.
+
+~> make cxsom-clear-processor
+~> make clear-checks
+
+
 ### Predict mode
 
 Here, we ask the map to retrieve RGB from (w, h) values un [0,1]^2. In other words, this will draw the image. Let us first display the prediction rules.
@@ -106,8 +128,8 @@ Here, we ask the map to retrieve RGB from (w, h) values un [0,1]^2. In other wor
 
 An then let us build-up a prediction for the saved weights at 500.
 
-~> make clear-predict
 ~> make cxsom-clear-processor
+~> make clear-predict
 ~> make predict WEIGHTS_AT=500 IMAGE_SIDE=100
 
 Then, let us display the prediction
