@@ -189,10 +189,10 @@ clear-frames:
 frame-check:
 	@make --quiet cxsom-kill-processor
 	@make --quiet clear-checks
-	@sleep 1
+	@sleep 2
 	@make --quiet cxsom-launch-processor
 	@make --quiet check
-	@sleep 1
+	@sleep 2
 	@python3 wait_stable.py `cat .cxsom-rootdir-config` check-out 'H/We-0'
 	@make --quiet show-checks FRAME_ID=${WEIGHTS_AT}
 
