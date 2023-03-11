@@ -35,7 +35,8 @@ enum class Mode : char {Calibration, Input, Train, Check, Predict, Walltime};
 
 
 #define Rext .05
-#define Rctx .003
+#define Rctx .002
+#define SIGMA .75
 struct Params {
   kwd::parameters
     main,
@@ -46,14 +47,14 @@ struct Params {
     external, contextual, global;
   Params() {
     main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
-    match_ctx   | main,  kwd::use("sigma", .1);
-    match_pos   | main,  kwd::use("sigma", .1);
-    match_rgb   | main,  kwd::use("sigma", .1);
-    learn       | main,  kwd::use("alpha", .1);
-    learn_pos_e | learn, kwd::use("r", Rext);
-    learn_pos_c | learn, kwd::use("r", Rctx);
-    learn_rgb_e | learn, kwd::use("r", Rext);
-    learn_rgb_c | learn, kwd::use("r", Rctx);
+    match_ctx   | main,  kwd::use("sigma", SIGMA);
+    match_pos   | main,  kwd::use("sigma", SIGMA);
+    match_rgb   | main,  kwd::use("sigma", SIGMA);
+    learn       | main,  kwd::use("alpha", .1   );
+    learn_pos_e | learn, kwd::use("r"    , Rext);
+    learn_pos_c | learn, kwd::use("r"    , Rctx);
+    learn_rgb_e | learn, kwd::use("r"    , Rext);
+    learn_rgb_c | learn, kwd::use("r"    , Rctx);
     external    | main;
     contextual  | main;
     global      | main,  kwd::use("random-bmu", 1), kwd::use("beta", .5), kwd::use("delta", .02), kwd::use("deadline", DEADLINE);
@@ -179,7 +180,6 @@ void make_train_rules(unsigned int save_period, unsigned int img_side) {
   {
     std::ofstream dot_file("train.dot");
     dot_file << archi->write_dot;
-    std::cout << "File \"train.dot\" generated." << std::endl;
   }
 
   // We add the rules for the computation of inputs.
@@ -274,7 +274,6 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   {
     std::ofstream dot_file("check.dot");
     dot_file << archi->write_dot;
-    std::cout << "File \"check.dot\" generated." << std::endl;
   }
 }
 
@@ -349,7 +348,6 @@ void make_predict_rules(unsigned int saved_weight_at, unsigned int img_side) {
   {
     std::ofstream dot_file("predict.dot");
     dot_file << archi->write_dot;
-    std::cout << "File \"predict.dot\" generated." << std::endl;
   }
 
   // Now, we need supplementary rules for reading the RGB

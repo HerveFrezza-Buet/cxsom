@@ -41,6 +41,23 @@ help:
 	@echo "make show-predictions                              <-- Shows the rgb predictions."
 	@echo "make clear-predictions                             <-- clears prediction."
 	@echo
+	@echo "# Making movies"
+	@echo
+	@echo "make movie-help"
+	@echo
+	@echo
+
+movie-help:
+	@echo
+	@echo "For making movies, a processor has to be started."
+	@echo
+	@echo "make check-movie IMAGE_SIDE=100   <-- generates the check movie."
+	@echo
+	@echo "--------"
+	@echo
+	@echo "make clear-frames"
+	@echo "make frame-check WEIGHTS_AT=500 IMAGE_SIDE=100"
+	@echo
 
 # Adapt this path if needed.
 include /usr/share/cxsom/cxsom-makefile
@@ -74,7 +91,7 @@ inputs-setup:
 
 .PHONY: show-samples
 show-samples:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h img rgb
+	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h img rgb ${FRAME_ID}
 
 .PHONY: clear-samples
 clear-samples:
@@ -136,7 +153,7 @@ check:
 
 .PHONY: show-checks
 show-checks:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` check-out 'W/We-0' check-out 'H/We-0' check-out 'RGB/We-0'
+	@python3 show-samples.py `cat .cxsom-rootdir-config` check-out 'W/We-0' check-out 'H/We-0' check-out 'RGB/We-0' ${FRAME_ID}
 
 .PHONY: show-predict-rules
 show-predict-rules:
@@ -156,7 +173,30 @@ predict:
 	@cxsom-builder-example-003-002-experiment send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- predict ${WEIGHTS_AT} ${IMAGE_SIDE}
 	@make --quiet cxsom-ping-processor
 
-
 .PHONY: show-predictions
 show-predictions:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h predict-out rgb
+	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h predict-out rgb ${FRAME_ID}
+
+
+
+
+
+.PHONY: clear-frames
+clear-frames:
+	@rm -f frame-*.png
+
+.PHONY: frame-check
+frame-check:
+	@make --quiet cxsom-clear-processor
+	@make --quiet clear-checks
+	@make --quiet clear-frames
+	@make --quiet check
+	@sleep 1
+	@python3 wait_stable.py `cat .cxsom-rootdir-config` check-out 'H/We-0'
+	@make --quiet show-checks FRAME_ID=${WEIGHTS_AT}
+
+
+.PHONY: check-movie
+check-movie:
+	@make --quiet clear-frames
+	@python3 frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE} check

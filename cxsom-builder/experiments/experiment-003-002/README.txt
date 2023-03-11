@@ -158,7 +158,13 @@ Clearing the prediction can be done as well.
 ~> make clear-predict
 
 
+### Making movies
 
+See the instructions for this:
+
+~> make movie-help
+
+This relies on ffmpeg.
 
 
 
