@@ -201,3 +201,8 @@ frame-check:
 check-movie:
 	@make --quiet clear-frames
 	@python3 frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE} check
+
+.PHONY: movie
+movie:
+	@rm -f expe-003-002.ogg
+	@ffmpeg -i frame-%06d.png -b:v 5M expe-003-002.ogg
