@@ -34,7 +34,7 @@ enum class Mode : char {Calibration, Input, Train, Check, Predict, Walltime};
 
 
 
-#define Rext .03
+#define Rext .05
 #define Rctx .003
 struct Params {
   kwd::parameters
