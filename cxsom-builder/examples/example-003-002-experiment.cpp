@@ -35,8 +35,7 @@ enum class Mode : char {Calibration, Input, Train, Check, Predict, Walltime};
 
 
 #define Rext .05
-#define Rctx .002
-#define SIGMA .75
+#define Rctx .003
 struct Params {
   kwd::parameters
     main,
@@ -47,9 +46,9 @@ struct Params {
     external, contextual, global;
   Params() {
     main        | kwd::use("walltime", FOREVER), kwd::use("epsilon", 0);
-    match_ctx   | main,  kwd::use("sigma", SIGMA);
-    match_pos   | main,  kwd::use("sigma", SIGMA);
-    match_rgb   | main,  kwd::use("sigma", SIGMA);
+    match_ctx   | main,  kwd::use("sigma", .075);
+    match_pos   | main,  kwd::use("sigma", .075);
+    match_rgb   | main,  kwd::use("sigma", .075);
     learn       | main,  kwd::use("alpha", .1   );
     learn_pos_e | learn, kwd::use("r"    , Rext);
     learn_pos_c | learn, kwd::use("r"    , Rctx);

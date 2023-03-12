@@ -90,9 +90,9 @@ Let us emplace the training rules at server side (the null walltime warning is o
 
 ~> make make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
 
-Indeed, computation is only done at step 0. This is due to the walltime value of the rule setting train-in/coord. In order to trigger computation until timestep 50000, we just have to send a rule that modifies thes walltime.
+Indeed, computation is only done at step 0. This is due to the walltime value of the rule setting train-in/coord. In order to trigger computation until timestep 30000, we just have to send a rule that modifies thes walltime.
 
-~> make feed-train-inputs WALLTIME=50000
+~> make feed-train-inputs WALLTIME=30000
 
 Once again, check the variable scanning and wait for the termination of the computing.
 
@@ -124,7 +124,7 @@ We can, for example, build up the checking.
 
 ~> make cxsom-clear-processor
 ~> make clear-checks
-~> make check WEIGHTS_AT=500 IMAGE_SIDE=100
+~> make check WEIGHTS_AT=300 IMAGE_SIDE=100
 
 Check the variable scanning and wait for the termination of the computing. Then, let us display the prediction
 
@@ -142,11 +142,11 @@ Here, we ask the map to retrieve rgb from (w, h) values un [0,1]^2. In other wor
 
 ~> make show-predict-rules
 
-An then let us build-up a prediction for the saved weights at 500.
+An then let us build-up a prediction for the saved weights at 300.
 
 ~> make cxsom-clear-processor
 ~> make clear-predict
-~> make predict WEIGHTS_AT=500 IMAGE_SIDE=100
+~> make predict WEIGHTS_AT=300 IMAGE_SIDE=100
 
 Check the variable scanning and wait for the termination of the computing. Then, let us display the prediction
 

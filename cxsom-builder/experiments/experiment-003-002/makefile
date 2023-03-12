@@ -20,7 +20,7 @@ help:
 	@echo
 	@echo "make show-train-rules                              <-- Shows how training is computed."
 	@echo "make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100    <-- sets up training rules, saving weights periodically."
-	@echo "make feed-train-inputs WALLTIME=50000              <-- feed inputs for training."
+	@echo "make feed-train-inputs WALLTIME=30000              <-- feed inputs for training."
 	@echo "make show-weights-history       	                  <-- displays the saved weights."
 	@echo "make show-rgb-mapping                              <-- displays the color map encoding by the RGB map."
 	@echo "make clear-training                                <-- clears training variables (training cannot be continued further)."
@@ -29,14 +29,14 @@ help:
 	@echo "# Check mode"
 	@echo
 	@echo "make show-check-rules                              <-- Shows how checking is computed."
-	@echo "make check WEIGHTS_AT=500 IMAGE_SIDE=100           <-- sends testing rules (for saved weights at 500)."
+	@echo "make check WEIGHTS_AT=300 IMAGE_SIDE=100           <-- sends testing rules (for saved weights at 300)."
 	@echo "make show-checks                                   <-- Shows the (w, h, rgb) checks."
 	@echo "make clear-checks                                  <-- clears checkings."
 	@echo
 	@echo "# Predict mode"
 	@echo
 	@echo "make show-predict-rules                            <-- Shows how prediction is computed."
-	@echo "make predict WEIGHTS_AT=500 IMAGE_SIDE=100         <-- sends testing rules (for saved weights at 500)."
+	@echo "make predict WEIGHTS_AT=300 IMAGE_SIDE=100         <-- sends testing rules (for saved weights at 300)."
 	@echo "                                                       (clear or restart the processor first)."
 	@echo "make show-predictions                              <-- Shows the rgb predictions."
 	@echo "make clear-predictions                             <-- clears prediction."
@@ -51,12 +51,13 @@ movie-help:
 	@echo
 	@echo "For making movies, a processor has to be started."
 	@echo
-	@echo "make check-movie IMAGE_SIDE=100   <-- generates the check movie."
+	@echo "make movie-frames IMAGE_SIDE=100   <-- generates the frames."
+	@echo "make movie-generation              <-- generates the movie from the frames."
 	@echo
 	@echo "--------"
 	@echo
 	@echo "make clear-frames"
-	@echo "make one-frame WEIGHTS_AT=500 IMAGE_SIDE=100"
+	@echo "make one-frame WEIGHTS_AT=300 IMAGE_SIDE=100"
 	@echo
 
 # Adapt this path if needed.
@@ -196,7 +197,7 @@ one-frame:
 	@sleep 2
 	@python3 wait_stable.py `cat .cxsom-rootdir-config` check-out 'H/We-0'
 	@python3 wait_stable.py `cat .cxsom-rootdir-config` predict-out rgb
-	@python3 make_frame.py ${WEIGHTS_AT}
+	@python3 make-frame.py  `cat .cxsom-rootdir-config` ${WEIGHTS_AT}
 
 
 .PHONY: movie-frames
@@ -204,7 +205,7 @@ movie-frames:
 	@make --quiet clear-frames
 	@python3 frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE}
 
-.PHONY: movie
-movie:
+.PHONY: movie-generation
+movie-generation:
 	@rm -f expe-003-002.ogg
 	@ffmpeg -i frame-%06d.png -b:v 5M expe-003-002.ogg
