@@ -56,7 +56,7 @@ movie-help:
 	@echo "--------"
 	@echo
 	@echo "make clear-frames"
-	@echo "make frame-check WEIGHTS_AT=500 IMAGE_SIDE=100"
+	@echo "make one-frame WEIGHTS_AT=500 IMAGE_SIDE=100"
 	@echo
 
 # Adapt this path if needed.
@@ -164,8 +164,8 @@ show-predict-rules:
 	@rm -f predict.dot predict-updates.dot predict-inits.dot
 	@evince predict.pdf predict-updates.pdf predict-inits.pdf &
 
-.PHONY: clear-predict
-clear-predict:
+.PHONY: clear-predictions
+clear-predictions:
 	@rm -rf `cat .cxsom-rootdir-config`/predict-*
 
 .PHONY: predict
@@ -185,22 +185,24 @@ show-predictions:
 clear-frames:
 	@rm -f frame-*.png
 
-.PHONY: frame-check
-frame-check:
+.PHONY: one-frame
+one-frame:
 	@make --quiet cxsom-kill-processor
-	@make --quiet clear-checks
-	@sleep 2
+	@make --quiet clear-checks clear-predictions
+	@sleep 1
 	@make --quiet cxsom-launch-processor
-	@make --quiet check
+	@sleep 1
+	@make --quiet check predict
 	@sleep 2
 	@python3 wait_stable.py `cat .cxsom-rootdir-config` check-out 'H/We-0'
-	@make --quiet show-checks FRAME_ID=${WEIGHTS_AT}
+	@python3 wait_stable.py `cat .cxsom-rootdir-config` predict-out rgb
+	@python3 make_frame.py ${WEIGHTS_AT}
 
 
-.PHONY: check-movie
-check-movie:
+.PHONY: movie-frames
+movie-frames:
 	@make --quiet clear-frames
-	@python3 frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE} check
+	@python3 frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE}
 
 .PHONY: movie
 movie:
