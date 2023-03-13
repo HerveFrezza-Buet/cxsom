@@ -52,8 +52,8 @@ movie-help:
 	@echo
 	@echo "For making movies, a processor has to be started."
 	@echo
-	@echo "make movie-frames IMAGE_SIDE=100   <-- generates the frames."
-	@echo "make movie-generation              <-- generates the movie from the frames."
+	@echo "make checkpredict-frames IMAGE_SIDE=100                    <-- generates the frames."
+	@echo "make movie-generation MOVIE_FILE=movie-expe-003-002.ogg   <-- generates the movie from the frames."
 	@echo
 	@echo "--------"
 	@echo
@@ -203,12 +203,12 @@ one-frame:
 	@python3 make-frame.py  `cat .cxsom-rootdir-config` ${WEIGHTS_AT}
 
 
-.PHONY: movie-frames
-movie-frames:
+.PHONY: checkpredictframes
+checkpredictframes:
 	@make --quiet clear-frames
 	@python3 frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE}
 
 .PHONY: movie-generation
 movie-generation:
-	@rm -f movie-expe-003-002.ogg
-	@ffmpeg -i frame-%06d.png -b:v 5M movie-expe-003-002.ogg
+	@rm -f ${MOVIE_FILE}
+	@ffmpeg -i frame-%06d.png -b:v 5M ${MOVIE_FILE}

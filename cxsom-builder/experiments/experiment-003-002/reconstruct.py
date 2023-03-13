@@ -16,4 +16,11 @@ side = int(np.sqrt(len(SRC)))
 SRC  = SRC.reshape (side, side, 3)
 PRED = PRED.reshape(side, side, 3)
 
+RES = (np.stack((SRC, PRED), axis=1).reshape(-1)*255).astype(np.uint8)
+with open('reconstruct.ppm', 'bw') as ppm:
+    ppm.write('P6\n200 100\n255\n'.encode('ascii'))
+    ppm.write(RES.tobytes())
+
+print('Image "reconstruct.ppm" generated.')
+
 
