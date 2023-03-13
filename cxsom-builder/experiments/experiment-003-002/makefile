@@ -53,10 +53,10 @@ movie-help:
 	@echo "For making movies, a processor has to be started."
 	@echo
 	@echo "make checkpredict-frames IMAGE_SIDE=100                   <-- generates the frames."
-	@echo "make movie-generation MOVIE_FILE=movie-expe-003-002.ogg   <-- generates the movie from the frames."
+	@echo "make movie-generation MOVIE_FILE=expe-003-002-predict.ogg <-- generates the movie from the frames."
 	@echo
 	@echo "make weights-frames                                       <-- generates the frames."
-	@echo "make movie-generation MOVIE_FILE=expe-003-002-predict.ogg <-- generates the movie from the frames."
+	@echo "make movie-generation MOVIE_FILE=expe-003-002-weights.ogg <-- generates the movie from the frames."
 	@echo
 	@echo "--------"
 	@echo
