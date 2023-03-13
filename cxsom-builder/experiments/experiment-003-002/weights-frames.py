@@ -39,8 +39,7 @@ def idx(W):
     return (W*map_coef).astype(int)
 
 s = 10
-#for frame_id in range(last_frame_id+1):
-for frame_id in range(295,301):
+for frame_id in range(last_frame_id+1):
     
     with data['W']['e'][0] as var:
         We0 = var[frame_id]
