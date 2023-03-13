@@ -151,6 +151,7 @@ An then let us build-up a prediction for the saved weights at 300.
 Check the variable scanning and wait for the termination of the computing. Then, let us display the prediction
 
 ~> make show-predictions
+~> make reconstruct-image
 
 Clearing the prediction can be done as well.
 

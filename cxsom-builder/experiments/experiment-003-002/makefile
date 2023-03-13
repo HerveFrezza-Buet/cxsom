@@ -39,6 +39,7 @@ help:
 	@echo "make predict WEIGHTS_AT=300 IMAGE_SIDE=100         <-- sends testing rules (for saved weights at 300)."
 	@echo "                                                       (clear or restart the processor first)."
 	@echo "make show-predictions                              <-- Shows the rgb predictions."
+	@echo "make reconstruct-image                             <-- generates the reconstructed image."
 	@echo "make clear-predictions                             <-- clears prediction."
 	@echo
 	@echo "# Making movies"
@@ -179,7 +180,9 @@ show-predictions:
 	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h predict-out rgb ${FRAME_ID}
 
 
-
+.PHONY: reconstruct-image
+reconstruct-image:
+	@python3 reconstruct.py `cat .cxsom-rootdir-config`
 
 
 .PHONY: clear-frames
@@ -207,5 +210,5 @@ movie-frames:
 
 .PHONY: movie-generation
 movie-generation:
-	@rm -f expe-003-002.ogg
-	@ffmpeg -i frame-%06d.png -b:v 5M expe-003-002.ogg
+	@rm -f movie-expe-003-002.ogg
+	@ffmpeg -i frame-%06d.png -b:v 5M movie-expe-003-002.ogg
