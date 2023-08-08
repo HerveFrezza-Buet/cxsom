@@ -18,13 +18,13 @@ namespace cxsom {
   namespace timestep {
 
     enum class Status : char {
-			      Unbound  = 'u', //!< The timestep handles updates whose in-arg cannot be updated (unbound).
-			      Blocked  = 'b', //!< The timestep is blocked due to impossible updates.
-			      Relaxing = 'r', //!< The timestep is under unstable computation.
-			      Checking = 'c', //!< Every update seem stable, we are checking this.
-			      Done     = 'd'  //!< The timestep is done, all updates have been made ready and removed.
+      Unbound  = 'u', //!< The timestep handles updates whose in-arg cannot be updated (unbound).
+      Blocked  = 'b', //!< The timestep is blocked due to impossible updates.
+      Relaxing = 'r', //!< The timestep is under unstable computation.
+      Checking = 'c', //!< Every update seem stable, we are checking this.
+      Done     = 'd'  //!< The timestep is done, all updates have been made ready and removed.
     };
-
+    
     inline std::ostream& operator<<(std::ostream& os, const Status& s) {
       switch(s) {
       case Status::Unbound  : os << "unbound" ; break;
@@ -442,12 +442,12 @@ namespace cxsom {
 	// comes back from evaluation, we cannot know where it is
 	// (with the no_processing==false attribute).
 
-	for(unsigned int num = 0; num < 4; ++num) {
-	  auto begin = queues[num].begin();
-	  auto end = queues[num].end();
+	for(auto& queue: queues) {
+	  auto begin = queue.begin();
+	  auto end = queue.end();
 	  for(auto it = begin; it != end; ++it)
 	    if(*it == varname) {
-	      queues[num].erase(it);
+	      queue.erase(it);
 	      return;
 	    }
 	}
