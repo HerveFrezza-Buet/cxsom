@@ -57,7 +57,8 @@ As just introduced in the previous section, let us call a \ConceptDef{time step}
 
 As detailed in next paragraph, all the DIs in a timestep will be updated several times until they reach some kind of consensus on the final values of the DIs.
 
-Let us denote all the updates defined for a timestep by $\cxTSUDef$. Let us denote by $\cxTSUDef$ the set of their out-arguments. One immediate condition for activating the computation related to some timestep $\cxDftTS$ is to have $\cxTSOAct$.
+Let us denote all the updates defined for a timestep by
+$$\cxTSUDef.\nonumber$$ Let us denote by $$\cxTSODef\nonumber$$ the set of their out-arguments. One immediate condition for activating the computation related to some timestep $\cxDftTS$ is to have $\cxTSOAct$.
 
 Another condition is less obvious. Indeed, there may be some in-arguments in a timestep for which no update are defined. Such arguments need to be set externally, they are typically inputs provided to our simulation. Let us call them \ConceptDef{unbound} DIs of a timestep $\cxDftTS$, and denote them by $\cxTSFDef$. The second condition for activating  the computation related to some timestep $\cxDftTS$ is then to have $\cxTSFAct$.
 
@@ -176,11 +177,11 @@ The timestep structures $\cxDftTS$ at the simulator level have a status $$\cxSta
 
 \subsubsection{Timestep update queues}
 
-The timestep structures $\cxDftTS$ at the simulator level are doted each with 5~update queues, where the updates $\cxTSUpdt$ are stored. Each the $\cxTSupdtInSt$ belongs to one of the 4~queues of $\cxDftTS$.
+The timestep structures $\cxDftTS$ at the simulator level are doted each with 5~update queues, where the updates $\cxTSUpdt$ are stored. Each the $\cxTSupdtInSt$ belongs to one of the $\cxNbTSQ$~queues of $\cxDftTS$.
 
 When a timestep is asked by the simulator to provide computation, it extracts updates from some of the queues. When the update is performed by the simulator, it is given back to the timestep, with the return status resulting from algorithm~\ref{algo:update}. According to this status, the update is stored in the appropriate queue, and some supplementary transfers from one queue to another queue may happen. This will be detailed further, as the \ConceptDef{timestep state machine}.
 
-For now, let us present the 4~queues used by a timestep $\cxDftTS$.
+For now, let us present the $\cxNbTSQ$~queues used by a timestep $\cxDftTS$.
 \begin{equation}
   \cxQDefs \nonumber
 \end{equation}
@@ -188,7 +189,7 @@ For now, let us present the 4~queues used by a timestep $\cxDftTS$.
 
 \subsubsection{Providing jobs \label{sec:providejobs}}
 
-A timestep is periodically asked by the simulator to provide tasks, i.e. to offer updates that will be evaluated by the simulator. These updates are extracted from the timestep and inserted in a pool task, waiting for execution. The timestep keeps trace of their existency while they are outside, waiting for being executed.
+A timestep is periodically asked by the simulator to provide tasks, i.e. to offer updates that will be evaluated by the simulator. These updates are extracted from the timestep and inserted in a pool task, waiting for execution. The timestep keeps trace of their existency while they are outside, waiting for their execution.
 
 So when a timestep $\cxDftTS$ is asked for new updates to be done, it provides (and extracts) :
 \begin{itemize}

@@ -54,6 +54,7 @@ TSQu = TSQ(TS, 'unstable')
 TSQi = TSQ(TS, 'impossible')
 TSQs = TSQ(TS, 'stable')
 TSQc = TSQ(TS, 'confirmed')
+nbTSQ = 5
 
 def datation(x):
     return nb.rm('d')@nb.to(x)
@@ -105,6 +106,7 @@ with nb.files.defs('commands.tex') as defs:
     defs['DftUpdt'] = u
     defs['DftShift'] = dt
 
+    defs['NbTSQ']   = nbTSQ
     defs['DftTSQn'] = TSQn
     defs['DftTSQu'] = TSQu
     defs['DftTSQi'] = TSQi
@@ -314,8 +316,8 @@ with nb.files.defs('commands.tex') as defs:
     defs['TSU'] = TSU
     defs['TSUDef'] = nb.define(TSU, nb.sets.bydef(u, nb.sets.isin(res_u, TS)))
     defs['TSO'] = TSO
-    defs['TSODef'] = nb.define(TSO, nb.sets.bydef(DI,
-                                                  nb.math.exists(nb.sets.isin(u, TSU), nb.sets.isin(DI, out_arg_u))))
+    defs['TSODef'] = nb.define(TSO, nb.sets.bydef(DDI,
+                                                  nb.math.exists(nb.sets.isin(u, TSU), nb.sets.isin(DDI, out_arg_u))))
     act1 = nb.math.forall(nb.sets.isin(DDI, TSO), status(DDI) == ready)
     defs['TSOAct'] = act1
     
