@@ -38,6 +38,9 @@ int main(int argc, char* argv[]) try {
 #ifdef cxsomLOG
   nb_threads = 1;
 #endif
+#ifdef cxsomMONITOR
+  nb_threads = 1;
+#endif
 
   cxsom::jobs::UpdateFactory update_factory;
   cxsom::jobs::fill(update_factory);

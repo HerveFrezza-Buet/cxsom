@@ -74,14 +74,28 @@ namespace cxsom {
     TIMESTEP_LINE := timestep TIMESTEP TIMESTEP_INFO
     JOB_LINE := job JOB_INFO
 
-    JOB_INFO := remove TIMESTEP
+    JOB_INFO :=   remove TIMESTEP
+                | out-of-tasks OUT_OF_TASK_REASON
+		| tasks TASK_LIST
 
     TIMESTEP_INFO := add VARNAME
 
-    TIMESTEP := S(<timeline>, <at>)
+    TIMESTEP := S(<timeline>,<at>)
+    INSTANCE := I(<timeline>,<varname>,<at>)
+
+    OUT_OF_TASK_REASON :=   no-pending-tasks
+                          | none-from-timesteps
+			  | none-from-patterns
+
+    TASK_LIST = INSTANCE TASK_LIST_END
+    TASK_LIST_END = TASK_LIST | <empty>
+
+    
 
    */
   class Monitor {
+  public:
+    enum class OutOfTasksReason : unsigned int {NoPendingTasks, NoneFromTimeSteps, NoneFromPatterns};
   private:
 
     mutable std::mutex mutex;
@@ -92,9 +106,10 @@ namespace cxsom {
     void tag(const std::string& t) const {out << t;}
     void job_header() const {tag("job");}
     void timestep_header(const symbol::TimeStep& ts) const {tag("timestep"); sep(); timestep(ts);}
-    void timestep(const symbol::TimeStep& ts) const {out << "S(" << ts.timeline << ", " << ts.at << ')';}
+    void timestep(const symbol::TimeStep& ts) const {out << "S(" << ts.timeline << ',' << ts.at << ')';}
     void varname(const std::string& name) const {tag(name);}
     void varname(const symbol::Instance& instance) const {varname(instance.variable.name);}
+    void instance(const symbol::Instance& instance) const {out << "I(" << instance.variable.timeline << ',' << instance.variable.name << ',' <<  instance.at << ')';} 
     
   public:
 
@@ -103,6 +118,24 @@ namespace cxsom {
     void job_remove_timestep(const symbol::TimeStep& ts) const {
       std::lock_guard<std::mutex> lock(mutex);
       job_header(); sep(); tag("remove"); sep(); timestep(ts); eol();
+    }
+
+    void job_out_of_task(OutOfTasksReason why) {
+      job_header(); sep(); tag("out-of-tasks"); sep();
+      switch(why) {
+      case OutOfTasksReason::NoPendingTasks: tag("no-pending-tasks"); break;
+      case OutOfTasksReason::NoneFromTimeSteps: tag("none-from-timesteps"); break;
+      default: tag("none-from-patterns"); break;
+      };
+      eol();
+    }
+
+    template<typename INSTANCE_IT>
+    void job_task_list(INSTANCE_IT it, INSTANCE_IT end) {
+      std::lock_guard<std::mutex> lock(mutex);
+      job_header(); sep(); tag("tasks");
+      while(it != end) {sep(); instance(*(it++));}
+      eol();
     }
 
     void timestep_add_udate(const symbol::TimeStep& ts, const symbol::Instance& res_update) const {

@@ -402,6 +402,9 @@ namespace cxsom {
 	logger->msg("... mutex passed.");
 #endif
 	if(tasks.empty()) {
+#ifdef cxsomMONITOR
+	  monitor->job_out_of_task(Monitor::OutOfTasksReason::NoPendingTasks);
+#endif
 #ifdef cxsomLOG
 	  logger->msg("No more tasks, purging done timesteps and ask new jobs to the remaining ones.");
 	  logger->push();
@@ -448,6 +451,9 @@ namespace cxsom {
 #endif
 	}
 	if(tasks.empty()) {
+#ifdef cxsomMONITOR
+	  monitor->job_out_of_task(Monitor::OutOfTasksReason::NoneFromTimeSteps);
+#endif
 #ifdef cxsomLOG
 	  logger->msg("Still no more tasks, realizing patterns.");
 	  logger->push();
@@ -498,12 +504,26 @@ namespace cxsom {
 
 	
 	if(tasks.empty())  {
+#ifdef cxsomMONITOR
+	  monitor->job_out_of_task(Monitor::OutOfTasksReason::NoneFromPatterns);
+#endif
 #ifdef cxsomLOG
 	  logger->msg("There are really no more tasks, no jobs found.");
 	  logger->pop();
 #endif
 	  return {};
 	}
+
+#ifdef cxsomMONITOR
+	{
+	  std::vector<symbol::Instance> tbd_instances;
+	  auto tbd_out = std::back_inserter(tbd_instances);
+	  for(auto& task : tasks)
+	    *(tbd_out++) = task.update.usual->result.who;
+	  monitor->job_task_list(tbd_instances.begin(), tbd_instances.end());
+	}
+#endif
+	
 	
 	auto task = tasks.front();
 #ifdef cxsomLOG

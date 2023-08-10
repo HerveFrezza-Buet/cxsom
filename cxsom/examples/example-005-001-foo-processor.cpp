@@ -47,6 +47,10 @@ int main(int argc, char* argv[]) try {
   nb_threads = 1;
 #endif
 
+#ifdef cxsomMONITOR // This is not mandatory, monitoring is thread safe.
+  nb_threads = 1;
+#endif
+
   cxsom::jobs::UpdateFactory update_factory;  // This is the factory producing updates.
   cxsom::jobs::fill(update_factory);          // We add the basic cxsom updates.
   foo::fill(update_factory);                  // We add the foo updates.
