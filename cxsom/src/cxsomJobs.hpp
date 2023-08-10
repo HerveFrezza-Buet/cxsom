@@ -70,7 +70,7 @@ namespace cxsom {
 	    logger->msg(ostr.str());
 #endif
 #ifdef cxsomMONITOR
-	    monitor->job_remove_timestep(symbol::TimeStep(*(curr->second)));
+	    monitor->job_remove_timestep(*(curr->second));
 #endif
 	    timesteps.erase(curr);
 	  }
@@ -120,6 +120,9 @@ namespace cxsom {
 	  ostr << updt;
 	  logger->_msg(ostr.str());
 	}
+#endif
+#ifdef cxsomMONITOR
+	monitor->timestep_add_udate(*ts, updt.res);
 #endif
 	auto& usual = updt.usual; 
 	update::arg arg_res {updt.res, data_center.type_of(updt.res)};

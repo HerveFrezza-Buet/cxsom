@@ -71,10 +71,14 @@ namespace cxsom {
   /*
 
     INFO_LINE := JOB_LINE | TIMESTEP_LINE
-    TIMESTEP_LINE := timestep <timeline> <at> TIMESTEP_INFO
+    TIMESTEP_LINE := timestep TIMESTEP TIMESTEP_INFO
     JOB_LINE := job JOB_INFO
 
     JOB_INFO := remove TIMESTEP
+
+    TIMESTEP_INFO := add VARNAME
+
+    TIMESTEP := S(<timeline>, <at>)
 
    */
   class Monitor {
@@ -83,26 +87,14 @@ namespace cxsom {
     mutable std::mutex mutex;
     mutable std::ofstream out;
 
-    void sep() const {
-      out << ' ';
-    }
-    
-    void eol() const {
-      out << std::endl;
-    }
-    
-    void tag(const std::string& t) const {
-      out << t;
-    }
-    
-
-    void job_header() const {
-      out << "job";
-    }
-
-    void timestep(const symbol::TimeStep& ts) const {
-      out << ts.timeline << ' ' << ts.at;
-    }
+    void sep() const {out << ' ';}
+    void eol() const {out << std::endl;}
+    void tag(const std::string& t) const {out << t;}
+    void job_header() const {tag("job");}
+    void timestep_header(const symbol::TimeStep& ts) const {tag("timestep"); sep(); timestep(ts);}
+    void timestep(const symbol::TimeStep& ts) const {out << "S(" << ts.timeline << ", " << ts.at << ')';}
+    void varname(const std::string& name) const {tag(name);}
+    void varname(const symbol::Instance& instance) const {varname(instance.variable.name);}
     
   public:
 
@@ -111,6 +103,11 @@ namespace cxsom {
     void job_remove_timestep(const symbol::TimeStep& ts) const {
       std::lock_guard<std::mutex> lock(mutex);
       job_header(); sep(); tag("remove"); sep(); timestep(ts); eol();
+    }
+
+    void timestep_add_udate(const symbol::TimeStep& ts, const symbol::Instance& res_update) const {
+      std::lock_guard<std::mutex> lock(mutex);
+      timestep_header(ts); sep(); tag("add"); sep(); varname(res_update); eol();
     }
   };
 }
