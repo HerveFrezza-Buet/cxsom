@@ -4,8 +4,9 @@
 
 // This is used in case of some macros are set. You can remove this
 // lines otherwise... or keep it.
-cxsom::Tick* cxsom::ticker = new cxsom::Tick();
-cxsom::Log*  cxsom::logger = new cxsom::Log();
+cxsom::Tick*    cxsom::ticker  = new cxsom::Tick();
+cxsom::Log*     cxsom::logger  = new cxsom::Log();
+cxsom::Monitor* cxsom::monitor = new cxsom::Monitor();
 
 
 #include <random>

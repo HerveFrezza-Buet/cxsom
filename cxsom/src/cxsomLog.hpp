@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <fstream>
+
+#include <mutex>
 
 #include <cxsomSymbols.hpp>
 
@@ -58,5 +61,56 @@ namespace cxsom {
     Tick() : time(0) {}
 
     std::size_t t() {return time++;}
+  };
+
+
+  class Monitor;
+
+  extern Monitor* monitor;
+
+  /*
+
+    INFO_LINE := JOB_LINE | TIMESTEP_LINE
+    TIMESTEP_LINE := timestep <timeline> <at> TIMESTEP_INFO
+    JOB_LINE := job JOB_INFO
+
+    JOB_INFO := remove TIMESTEP
+
+   */
+  class Monitor {
+  private:
+
+    mutable std::mutex mutex;
+    mutable std::ofstream out;
+
+    void sep() const {
+      out << ' ';
+    }
+    
+    void eol() const {
+      out << std::endl;
+    }
+    
+    void tag(const std::string& t) const {
+      out << t;
+    }
+    
+
+    void job_header() const {
+      out << "job";
+    }
+
+    void timestep(const symbol::TimeStep& ts) const {
+      out << ts.timeline << ' ' << ts.at;
+    }
+    
+  public:
+
+    Monitor() : out("monitoring.data") {}
+
+    void job_remove_timestep(const symbol::TimeStep& ts) const {
+      std::lock_guard<std::mutex> lock(mutex);
+      job_header(); sep(); tag("remove"); sep(); timestep(ts); eol();
+    }
   };
 }

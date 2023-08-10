@@ -69,6 +69,9 @@ namespace cxsom {
 	    ostr << "Removing timestep " << symbol::TimeStep(*(curr->second)) << ", since its status is done.";
 	    logger->msg(ostr.str());
 #endif
+#ifdef cxsomMONITOR
+	    monitor->job_remove_timestep(symbol::TimeStep(*(curr->second)));
+#endif
 	    timesteps.erase(curr);
 	  }
 	  else {

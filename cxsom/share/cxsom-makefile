@@ -77,16 +77,31 @@ cxsom-clear-rootdir:
 cxsom-launch-processor:
 	@cxsom-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)`&
 
+.PHONY: cxsom-launch-verbose-processor
+cxsom-launch-verbose-processor:
+	@cxsom-verbose-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)`&
+
+.PHONY: cxsom-launch-monitored-processor
+cxsom-launch-monitored-processor:
+	@cxsom-monitored-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)`&
+
 .PHONY: cxsom-is-processor-running
 cxsom-is-processor-running:
-	@ps -aux | grep 'cxsom-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "A cxsom-proccessor is currently running." "No cxsom-proccessor is running."; echo
+	@echo "Checking usual processor..."
+	@ps -aux | grep 'cxsom-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "  ... A cxsom-proccessor is currently running." "  ...No cxsom-proccessor is running."; echo
+	@echo "Checking verbose processor..."
+	@ps -aux | grep 'cxsom-verbose-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "  ... A cxsom-verbose-proccessor is currently running." "  ...No cxsom-verbose-proccessor is running."; echo
+	@echo "Checking monitored processor..."
+	@ps -aux | grep 'cxsom-monitored-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "  ... A cxsom-monitored-proccessor is currently running." "  ...No cxsom-monitored-proccessor is running."; echo
 
 .PHONY: cxsom-kill-processor
 cxsom-kill-processor:
-	@killall -q cxsom-processor || echo 'Nothing to kill'
+	@killall -q cxsom-processor || echo 'No cxsom-processor to kill'
+	@killall -q cxsom-verbose-processor || echo 'No cxsom-verbose-processor to kill'
+	@killall -q cxsom-monitored-processor || echo 'No cxsom-monitored-processor to kill'
 	@sleep 1
 	@echo
-	@echo 'cxsom processor should be killed : Is it running ?'
+	@echo 'cxsom processors should have been killed now : Is it running ?'
 	@make --quiet cxsom-is-processor-running
 
 .PHONY: cxsom-ping-processor
