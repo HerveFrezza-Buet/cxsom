@@ -36,6 +36,12 @@ namespace cxsom {
       return os;
     }
 
+    inline std::string to_string(Status s) {
+      std::ostringstream ostr;
+      ostr << s;
+      return ostr.str();
+    }
+    
     struct content {
       update::ref init;
       update::ref usual;
@@ -69,11 +75,11 @@ namespace cxsom {
     
 #define cxsomTIME_STEP_NB_QUEUES 5
     enum class Queue : unsigned int {
-				     Unstable   = 0, //!< Updates whose status need to be known.
-				     Impossible = 1, //!< Updates that have been detected as impossible.
-				     Stable     = 2, //!< Updates that have been seen stable once are here.
-				     Confirmed  = 3, //!< Updates whose stability is confirmed.
-				     New        = 4  //!< The updates newly added to the queue. They stay here until all unbound variables in their arguments (in-arguments) are ready.
+      Unstable   = 0, //!< Updates whose status need to be known.
+      Impossible = 1, //!< Updates that have been detected as impossible.
+      Stable     = 2, //!< Updates that have been seen stable once are here.
+      Confirmed  = 3, //!< Updates whose stability is confirmed.
+      New        = 4  //!< The updates newly added to the queue. They stay here until all unbound variables in their arguments (in-arguments) are ready.
     };
 
     inline std::ostream& operator<<(std::ostream& os, const Queue& s) {
@@ -85,6 +91,12 @@ namespace cxsom {
       case Queue::New        : os << "new" ; break;
       };
       return os;
+    }
+    
+    inline std::string to_string(Queue q) {
+      std::ostringstream ostr;
+      ostr << q;
+      return ostr.str();
     }
 
     struct Task {
@@ -179,9 +191,9 @@ namespace cxsom {
 		
 #ifdef cxsomLOG
 		else {
-		    std::ostringstream ostr;
-		    ostr << arg.who.variable << " is bound.";
-		    logger->msg(ostr.str());
+		  std::ostringstream ostr;
+		  ostr << arg.who.variable << " is bound.";
+		  logger->msg(ostr.str());
 		}
 #endif
 
@@ -265,6 +277,9 @@ namespace cxsom {
 	  ostr << " to " << status << '.';
 	  logger->msg(ostr.str());
 #endif
+#ifdef cxsomMONITOR
+	  notify_update_to_monitor(Monitor::TimeStepUpdateReason::Notification);
+#endif
 	  return status;
 	}
 	
@@ -282,6 +297,9 @@ namespace cxsom {
 	  ostr << " to " << status << '.';
 	  logger->msg(ostr.str());
 #endif
+#ifdef cxsomMONITOR
+	  notify_update_to_monitor(Monitor::TimeStepUpdateReason::Notification);
+#endif
 	  return status;
 	}
 
@@ -293,6 +311,9 @@ namespace cxsom {
 	  ostr << " to " << status << '.';
 	  logger->msg(ostr.str());
 #endif
+#ifdef cxsomMONITOR
+	  notify_update_to_monitor(Monitor::TimeStepUpdateReason::Notification);
+#endif
 	  return status;
 	}
 	
@@ -301,6 +322,9 @@ namespace cxsom {
 #ifdef cxsomLOG
 	  ostr << " to " << status << '.';
 	  logger->msg(ostr.str());
+#endif
+#ifdef cxsomMONITOR
+	  notify_update_to_monitor(Monitor::TimeStepUpdateReason::Notification);
 #endif
 	  return status;
 	}
@@ -314,6 +338,9 @@ namespace cxsom {
 	ostr << " to " << status << '.';
 	logger->msg(ostr.str());
 #endif
+#ifdef cxsomMONITOR
+	notify_update_to_monitor(Monitor::TimeStepUpdateReason::Notification);
+#endif
 	return status;
       }
       
@@ -325,7 +352,42 @@ namespace cxsom {
       Instance(Instance&&)                 = default;
       Instance& operator=(Instance&&)      = default;
 
-      Instance(const symbol::TimeStep& who) : who(who) {}
+      Instance(const symbol::TimeStep& who) : who(who) {
+#ifdef cxsomMONITOR
+	monitor->timestep_launch(who, to_string(status));
+#endif
+      }
+
+      void notify_update_to_monitor(Monitor::TimeStepUpdateReason why) {
+	
+	std::vector<symbol::Instance> new_content;
+	for(auto& c : queues[static_cast<unsigned int>(Queue::New)])
+	  new_content.push_back(c()->result.who);
+	
+	std::vector<symbol::Instance> unstable_content;
+	for(auto& c : queues[static_cast<unsigned int>(Queue::Unstable)])
+	  unstable_content.push_back(c()->result.who);
+	
+	std::vector<symbol::Instance> impossible_content;
+	for(auto& c : queues[static_cast<unsigned int>(Queue::Impossible)])
+	  impossible_content.push_back(c()->result.who);
+	
+	std::vector<symbol::Instance> stable_content;
+	for(auto& c : queues[static_cast<unsigned int>(Queue::Stable)])
+	  stable_content.push_back(c()->result.who);
+	
+	std::vector<symbol::Instance> confirmed_content;
+	for(auto& c : queues[static_cast<unsigned int>(Queue::Confirmed)])
+	  confirmed_content.push_back(c()->result.who);
+	
+	monitor->timestep_update(who, to_string(status), why,
+				 to_string(Queue::New), new_content.begin(), new_content.end(),
+				 to_string(Queue::Unstable), unstable_content.begin(), unstable_content.end(),
+				 to_string(Queue::Impossible), impossible_content.begin(), impossible_content.end(),
+				 to_string(Queue::Stable), stable_content.begin(), stable_content.end(),
+				 to_string(Queue::Confirmed), confirmed_content.begin(), confirmed_content.end());
+	
+      }
       
       operator Status()           const {return status;}
       operator symbol::TimeStep() const {return who;}
@@ -359,6 +421,10 @@ namespace cxsom {
 	status = Status::Relaxing;
 #ifdef cxsomLOG
 	logger->pop();
+#endif
+
+#ifdef cxsomMONITOR
+	notify_update_to_monitor(Monitor::TimeStepUpdateReason::BlockingInfoCleared);
 #endif
       }
 
@@ -419,6 +485,9 @@ namespace cxsom {
        */
       void add(const content& update) {
 	queues[static_cast<unsigned int>(Queue::New)].push_back(update);
+#ifdef cxsomMONITOR
+	notify_update_to_monitor(Monitor::TimeStepUpdateReason::NewUpdate);
+#endif
       }
 
       /** 
