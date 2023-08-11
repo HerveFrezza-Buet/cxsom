@@ -78,23 +78,27 @@ namespace cxsom {
     TIMESTEP_LINE := timestep _ TIMESTEP _ TIMESTEP_INFO
     JOB_LINE := job _ JOB_INFO
 
-    JOB_INFO :=   remove _ TIMESTEP
-                | out-of-tasks _ OUT_OF_TASK_REASON
+    JOB_INFO :=   out-of-tasks _ OUT_OF_TASK_REASON
 		| tasks _ TASK_LIST
 		| execute INSTANCE
 
-    TIMESTEP_INFO :=   launch _ TIME_STEP_STATUS
+    TIMESTEP_INFO :=   launch _ TIMESTEP_STATUS
+                     | terminated _ TIMESTEP_TERMINATED_REASON
                      | add _ VARNAME
-		     | update _ TIME_STEP_UPDATE_REASON _ TIME_STEP_STATUS _ TIMESTEP_QUEUES _ TIMESTEP_BLOCKERS
+		     | update _ TIMESTEP_UPDATE_REASON _ TIMESTEP_STATUS _ TIMESTEP_QUEUES _ TIMESTEP_BLOCKERS
+		     | report _ VARNAME _ UPDATE_STATUS
     
 
     TIMESTEP := S(<timeline>,<at>)
     INSTANCE := I(<timeline>,<varname>,<at>)
-    TIME_STEP_STATUS := [ TS_STATUS ]
+    TIMESTEP_STATUS := [ TS_STATUS ]
     TS_STATUS := unbound | blocked | relaxing | checking | done
+    UPDATE_STATUS := [ UPDT_STATUS ]
+    UPDT_STATUS := impossible | up-to-date | updated | done | none
 
     OUT_OF_TASK_REASON := no-pending-tasks | none-from-timesteps | none-from-patterns  
-    TIME_STEP_UPDATE_REASON := notification | new-update | blocking-info-cleared
+    TIMESTEP_UPDATE_REASON := notification | new-update | blocking-info-cleared
+    TIMESTEP_TERMINATED_REASON := done | clear-all
 
     TASK_LIST := INSTANCE TASK_LIST_END
     TASK_LIST_END := _ TASK_LIST | <empty>
@@ -116,6 +120,7 @@ namespace cxsom {
   public:
     enum class OutOfTasksReason : unsigned int {NoPendingTasks, NoneFromTimeSteps, NoneFromPatterns};
     enum class TimeStepUpdateReason : unsigned int {Notification, NewUpdate, BlockingInfoCleared};
+    enum class TimeStepTerminatedReason : unsigned int {Done, ClearAll};
   private:
 
     mutable std::mutex mutex;
@@ -130,21 +135,19 @@ namespace cxsom {
     void timestep_header(const symbol::TimeStep& ts) const {tag("timestep"); sep(); timestep(ts);}
     void timestep(const symbol::TimeStep& ts) const {out << "S(" << ts.timeline << ',' << ts.at << ')';}
     void timestep_status(const std::string& status) const {out << '[' << status << ']';}
+    void update_status(const std::string& status) const {timestep_status(status);}
     void varname(const std::string& name) const {tag(name);}
     void varname(const symbol::Instance& instance) const {varname(instance.variable.name);}
     void instance(const symbol::Instance& instance) const {out << "I(" << instance.variable.timeline << ',' << instance.variable.name << ',' <<  instance.at << ')';}
     
-    void checkpoint() const {tag("#"); sep(); nb(checkpoint_id++); eol();}
 
     
   public:
 
     Monitor() : out("monitoring.data") {}
+    
+    void checkpoint() const {tag("#"); sep(); nb(checkpoint_id++); eol();}
 
-    void job_remove_timestep(const symbol::TimeStep& ts) const {
-      std::lock_guard<std::mutex> lock(mutex);
-      job_header(); sep(); tag("remove"); sep(); timestep(ts); eol();
-    }
 
     void job_out_of_task(OutOfTasksReason why) {
       job_header(); sep(); tag("out-of-tasks"); sep();
@@ -166,19 +169,31 @@ namespace cxsom {
     }
 
     void job_execute(const symbol::Instance& res_update) const {
-      checkpoint();
       job_header(); sep(); tag("execute"); sep(); instance(res_update); eol();
     }
 
-    void timestep_add_udate(const symbol::TimeStep& ts, const symbol::Instance& res_update) const {
+    void timestep_add_update(const symbol::TimeStep& ts, const symbol::Instance& res_update) const {
       std::lock_guard<std::mutex> lock(mutex);
       timestep_header(ts); sep(); tag("add"); sep(); varname(res_update); eol();
     }
 
-    void timestep_launch(const symbol::TimeStep& ts, std::string status) const {
+    void timestep_launch(const symbol::TimeStep& ts, const std::string& status) const {
       timestep_header(ts); sep(); tag("launch"); sep(); timestep_status(status); eol();
     }
 
+    void timestep_terminated(const symbol::TimeStep& ts, TimeStepTerminatedReason why) const {
+      timestep_header(ts); sep(); tag("terminated"); sep();
+      switch(why) {
+      case TimeStepTerminatedReason::Done: tag("done"); break;
+      case TimeStepTerminatedReason::ClearAll:
+      default: tag("done"); break;
+      }
+      eol();
+    }
+    
+    void timestep_update_report(const symbol::TimeStep& ts, const symbol::Instance& res_update, const std::string& status) {
+      timestep_header(ts); sep(); tag("report"); sep(); varname(res_update); sep(); update_status(status); eol();
+    }
     template<typename INSTANCE_IT, typename TIMESTEP_IT>
     void timestep_update(const symbol::TimeStep& ts, std::string status, TimeStepUpdateReason why,
 			 const std::string& new_name, INSTANCE_IT new_begin, INSTANCE_IT new_end,

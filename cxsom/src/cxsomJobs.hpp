@@ -70,7 +70,7 @@ namespace cxsom {
 	    logger->msg(ostr.str());
 #endif
 #ifdef cxsomMONITOR
-	    monitor->job_remove_timestep(*(curr->second));
+	    monitor->timestep_terminated(curr->first, Monitor::TimeStepTerminatedReason::Done);
 #endif
 	    timesteps.erase(curr);
 	  }
@@ -122,7 +122,7 @@ namespace cxsom {
 	}
 #endif
 #ifdef cxsomMONITOR
-	monitor->timestep_add_udate(*ts, updt.res);
+	monitor->timestep_add_update(*ts, updt.res);
 #endif
 	auto& usual = updt.usual; 
 	update::arg arg_res {updt.res, data_center.type_of(updt.res)};
@@ -361,6 +361,10 @@ namespace cxsom {
 #ifdef cxsomLOG
 	logger->msg("clearing everything !.");
 #endif
+#ifdef cxsomMONITOR
+	for(const auto& [ts, ts_ref] : timesteps)
+	  monitor->timestep_terminated(ts, Monitor::TimeStepTerminatedReason::ClearAll);
+#endif
 	timesteps.clear();
 	tasks.clear();
 	patterns.clear();
@@ -391,7 +395,11 @@ namespace cxsom {
       /**
        * Call this in mono-thread mode in order to get the next job to do.
        */
-      std::function<void ()> get_one() {
+      std::function<void ()> get_one() {	
+#ifdef cxsomMONITOR
+	monitor->checkpoint();
+#endif
+	
 #ifdef cxsomLOG
 	logger->msg("");
 	logger->msg("get_one()...");

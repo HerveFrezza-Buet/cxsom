@@ -545,6 +545,15 @@ namespace cxsom {
 	update::Base::blockers_iter_type begin, end;
 	content update = task.update;
 	remove_update(update.varname());
+
+#ifdef cxsomMONITOR
+	{
+	  std::ostringstream ostr;
+	  ostr << task.report;
+	  monitor->timestep_update_report(who, task.update.usual->result.who, ostr.str());
+	}
+#endif
+	
 	switch(task.report) {
 	case update::Status::Impossible:
 	  queues[static_cast<unsigned int>(Queue::Impossible)].push_back(update);
