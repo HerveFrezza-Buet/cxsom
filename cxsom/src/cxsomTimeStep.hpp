@@ -385,7 +385,8 @@ namespace cxsom {
 				 to_string(Queue::Unstable), unstable_content.begin(), unstable_content.end(),
 				 to_string(Queue::Impossible), impossible_content.begin(), impossible_content.end(),
 				 to_string(Queue::Stable), stable_content.begin(), stable_content.end(),
-				 to_string(Queue::Confirmed), confirmed_content.begin(), confirmed_content.end());
+				 to_string(Queue::Confirmed), confirmed_content.begin(), confirmed_content.end(),
+				 blockers.begin(), blockers.end());
 	
       }
       

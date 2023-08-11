@@ -534,6 +534,11 @@ namespace cxsom {
 	  logger->_msg(ostr.str());
 	}
 #endif
+
+	
+#ifdef cxsomMONITOR
+	monitor->job_execute(task.update.usual->result.who);
+#endif
 	
 	tasks.pop_front();
 #ifdef cxsomLOG

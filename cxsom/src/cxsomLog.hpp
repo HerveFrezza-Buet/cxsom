@@ -72,17 +72,20 @@ namespace cxsom {
   /*
     _ is a space caracter
 
-    INFO_LINE := JOB_LINE | TIMESTEP_LINE
+    INFO_LINE := JOB_LINE | TIMESTEP_LINE | CHECKPOINT
+
+    CHECKPOINT := @ _ <number>
     TIMESTEP_LINE := timestep _ TIMESTEP _ TIMESTEP_INFO
     JOB_LINE := job _ JOB_INFO
 
     JOB_INFO :=   remove _ TIMESTEP
                 | out-of-tasks _ OUT_OF_TASK_REASON
 		| tasks _ TASK_LIST
+		| execute INSTANCE
 
     TIMESTEP_INFO :=   launch _ TIME_STEP_STATUS
                      | add _ VARNAME
-		     | update _ TIME_STEP_UPDATE_REASON _ TIME_STEP_STATUS _ TIMESTEP_QUEUES
+		     | update _ TIME_STEP_UPDATE_REASON _ TIME_STEP_STATUS _ TIMESTEP_QUEUES _ TIMESTEP_BLOCKERS
     
 
     TIMESTEP := S(<timeline>,<at>)
@@ -102,6 +105,10 @@ namespace cxsom {
 
     QUEUE_ELEMS :=   _ VARNAME QUEUE_ELEMS
                    | <empty>
+
+    TIMESTEP_BLOCKERS := blockers <nb-elems> BLOCKERS_ELEMS
+    BLOCKERS_ELEMS :=   _ TIMESTEP  BLOCKERS_ELEMS
+                      | <empty>
     
 
    */
@@ -113,6 +120,7 @@ namespace cxsom {
 
     mutable std::mutex mutex;
     mutable std::ofstream out;
+    mutable unsigned int checkpoint_id = 0;
 
     void sep() const {out << ' ';}
     void eol() const {out << std::endl;}
@@ -124,7 +132,10 @@ namespace cxsom {
     void timestep_status(const std::string& status) const {out << '[' << status << ']';}
     void varname(const std::string& name) const {tag(name);}
     void varname(const symbol::Instance& instance) const {varname(instance.variable.name);}
-    void instance(const symbol::Instance& instance) const {out << "I(" << instance.variable.timeline << ',' << instance.variable.name << ',' <<  instance.at << ')';} 
+    void instance(const symbol::Instance& instance) const {out << "I(" << instance.variable.timeline << ',' << instance.variable.name << ',' <<  instance.at << ')';}
+    
+    void checkpoint() const {tag("#"); sep(); nb(checkpoint_id++); eol();}
+
     
   public:
 
@@ -154,6 +165,11 @@ namespace cxsom {
       eol();
     }
 
+    void job_execute(const symbol::Instance& res_update) const {
+      checkpoint();
+      job_header(); sep(); tag("execute"); sep(); instance(res_update); eol();
+    }
+
     void timestep_add_udate(const symbol::TimeStep& ts, const symbol::Instance& res_update) const {
       std::lock_guard<std::mutex> lock(mutex);
       timestep_header(ts); sep(); tag("add"); sep(); varname(res_update); eol();
@@ -163,13 +179,14 @@ namespace cxsom {
       timestep_header(ts); sep(); tag("launch"); sep(); timestep_status(status); eol();
     }
 
-    template<typename INSTANCE_IT>
+    template<typename INSTANCE_IT, typename TIMESTEP_IT>
     void timestep_update(const symbol::TimeStep& ts, std::string status, TimeStepUpdateReason why,
 			 const std::string& new_name, INSTANCE_IT new_begin, INSTANCE_IT new_end,
 			 const std::string& unstable_name, INSTANCE_IT unstable_begin, INSTANCE_IT unstable_end,
 			 const std::string& impossible_name, INSTANCE_IT impossible_begin, INSTANCE_IT impossible_end,
 			 const std::string& stable_name, INSTANCE_IT stable_begin, INSTANCE_IT stable_end,
-			 const std::string& confirmed_name, INSTANCE_IT confirmed_begin, INSTANCE_IT confirmed_end) const {
+			 const std::string& confirmed_name, INSTANCE_IT confirmed_begin, INSTANCE_IT confirmed_end,
+			 TIMESTEP_IT blockers_begin, TIMESTEP_IT blockers_end) const {
       timestep_header(ts); sep(); tag("update"); sep(); 
       switch(why) {
       case TimeStepUpdateReason::Notification: tag("notification"); break;
@@ -194,6 +211,9 @@ namespace cxsom {
       
       sep(); tag(confirmed_name); sep(); nb(std::distance(confirmed_begin, confirmed_end));
       while(confirmed_begin != confirmed_end) {sep(); varname(*(confirmed_begin++));}
+      
+      sep(); tag("blockers"); sep(); nb(std::distance(blockers_begin, blockers_end));
+      while(blockers_begin != blockers_end) {sep(); timestep(*(blockers_begin++));}
 
       eol();
     }
