@@ -74,7 +74,7 @@ namespace cxsom {
 
     INFO_LINE := JOB_LINE | TIMESTEP_LINE | CHECKPOINT
 
-    CHECKPOINT := @ _ <number>
+    CHECKPOINT := # _ <number>
     TIMESTEP_LINE := timestep _ TIMESTEP _ TIMESTEP_INFO
     JOB_LINE := job _ JOB_INFO
 
@@ -90,6 +90,7 @@ namespace cxsom {
     
 
     TIMESTEP := S(<timeline>,<at>)
+    VARNAME := <varname>
     INSTANCE := I(<timeline>,<varname>,<at>)
     TIMESTEP_STATUS := [ TS_STATUS ]
     TS_STATUS := unbound | blocked | relaxing | checking | done
