@@ -2,7 +2,8 @@ from pathlib import Path
 
 class Monitor:
     def __init__(self, filepath=Path('monitoring.data')):
-        self.datafile = open(filepath, 'r')
+        self.filepath = Path(filepath)
+        self.datafile = open(self.filepath, 'r')
         self.checkpoint = None
         self.checkpoint_head = None
         self.goto(0)
@@ -36,6 +37,23 @@ class Monitor:
         else:
             self.datafile.seek(self.checkpoint_head)
 
+    def __len__(self):
+        """
+        Returns: The number of checkpoints.
+        
+        Warning: After this, the next line is the one just next to the position before len was called.
+        """
+        curr = self.checkpoint
+        cp = self.checkpoint
+        last = cp - 1
+        while cp != last:
+            last = cp
+            self += 1000
+            cp =  self.position()
+        res = cp
+        self.goto(curr)
+        return res+1
+
     def __iadd__(self, value):
         self.goto(self.checkpoint + value)
         return self
@@ -68,6 +86,15 @@ class Monitor:
             return self._parse_job_info(line[1:])
         else:
             raise ValueError(f'ParseError: invalid info ({info}).')
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        data = self.next()
+        if data == None:
+            raise StopIteration
+        return data
         
     def _parse_timestep_info(self, timestep, line):
         info = line[0]
