@@ -20,7 +20,10 @@ cxsom-help:
 	@echo
 	@echo "# at server side"
 	@echo
-	@echo "  make cxsom-launch-processor"
+	@echo "  make cxsom-launch-processor           // Usual processor"
+	@echo "  make cxsom-launch-monitored-processor // Enables monitoring (generates a monitoring.data file)."
+	@echo "  make cxsom-launch-verbose-processor   // Very verbose, for developpers."
+	@echo
 	@echo "  make cxsom-is-processor-running"
 	@echo "  make cxsom-kill-processor"
 	@echo
@@ -29,6 +32,9 @@ cxsom-help:
 	@echo "  make cxsom-clear-processor"
 	@echo "  make cxsom-ping-processor"
 	@echo "  make cxsom-scan-vars"
+	@echo 
+	@echo "  make cxsom-monitoring-report"
+	@echo
 	@echo
 
 ROOTDIR_CONFIG_FILE   = .cxsom-rootdir-config
@@ -119,3 +125,8 @@ cxsom-show-vars:
 .PHONY: cxsom-scan-vars
 cxsom-scan-vars:
 	@gnome-terminal --title='scanning '`cat $(ROOTDIR_CONFIG_FILE)` --working-directory=$(PWD) -- /bin/bash -c 'while sleep 1; do clear; make --quiet cxsom-show-vars; done'
+
+.PHONY: cxsom-monitoring-report
+cxsom-monitoring-report:
+	@cxsom-monitor-situation-report.py > monitoring.md
+	@echo File monitoring.md is the generated report.
