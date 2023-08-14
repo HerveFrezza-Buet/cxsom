@@ -93,12 +93,9 @@ cxsom-launch-monitored-processor:
 
 .PHONY: cxsom-is-processor-running
 cxsom-is-processor-running:
-	@echo "Checking usual processor..."
-	@ps -aux | grep 'cxsom-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "  ... A cxsom-proccessor is currently running." "  ...No cxsom-proccessor is running."; echo
-	@echo "Checking verbose processor..."
-	@ps -aux | grep 'cxsom-verbose-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "  ... A cxsom-verbose-proccessor is currently running." "  ...No cxsom-verbose-proccessor is running."; echo
-	@echo "Checking monitored processor..."
-	@ps -aux | grep 'cxsom-monitored-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "  ... A cxsom-monitored-proccessor is currently running." "  ...No cxsom-monitored-proccessor is running."; echo
+	@ps -aux | grep 'cxsom-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l |           cxsom-conditional-message "          processor [RUNNING]" "          processor [       ]"; echo
+	@ps -aux | grep 'cxsom-verbose-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l |   cxsom-conditional-message "verbose   processor [RUNNING]" "verbose   processor [       ]"; echo
+	@ps -aux | grep 'cxsom-monitored-processor' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "monitored processor [RUNNING]" "monitored processor [       ]"; echo
 
 .PHONY: cxsom-kill-processor
 cxsom-kill-processor:
