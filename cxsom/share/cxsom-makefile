@@ -33,7 +33,10 @@ cxsom-help:
 	@echo "  make cxsom-ping-processor"
 	@echo "  make cxsom-scan-vars"
 	@echo 
-	@echo "  make cxsom-monitoring-report"
+	@echo "  make cxsom-monitoring-report  // If some monitoring.data file has been generated, this command"
+	@echo "                                // parses it and generates a monitoring.md report. You can use "
+	@echo "                                // the command 'grip monitoring.md' to render the report on a "
+	@echo "                                // web page (the page will update each time you re-build the report)."
 	@echo
 	@echo
 
