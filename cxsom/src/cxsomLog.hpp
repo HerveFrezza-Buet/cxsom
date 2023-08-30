@@ -86,6 +86,7 @@ namespace cxsom {
     TIMESTEP_INFO :=   launch _ TIMESTEP_STATUS
                      | terminated _ TIMESTEP_TERMINATED_REASON
                      | add _ VARNAME
+                     | dont-add _ VARNAME
 		     | update _ TIMESTEP_UPDATE_REASON _ TIMESTEP_STATUS _ TIMESTEP_QUEUES _ TIMESTEP_BLOCKERS _ TIMESTEP_UNBOUNDS
 		     | report _ VARNAME _ UPDATE_STATUS
     
@@ -144,6 +145,7 @@ namespace cxsom {
     void update_status(const std::string& status) const {timestep_status(status);}
     void varname(const std::string& name) const {tag(name);}
     void varname(const symbol::Instance& instance) const {varname(instance.variable.name);}
+    void varname(const symbol::Variable& var) const {varname(var.name);}
     void instance(const symbol::Instance& instance) const {out << "I(" << instance.variable.timeline << ',' << instance.variable.name << ',' <<  instance.at << ')';}
     
 
@@ -182,6 +184,12 @@ namespace cxsom {
     void timestep_add_update(const symbol::TimeStep& ts, const symbol::Instance& res_update) const {
       std::lock_guard<std::mutex> lock(mutex);
       timestep_header(ts); sep(); tag("add"); sep(); varname(res_update); eol();
+    }
+
+    void timestep_dont_add_update(const symbol::Variable& var, unsigned int at) const {
+      std::lock_guard<std::mutex> lock(mutex);
+      symbol::TimeStep ts {var.timeline, at};
+      timestep_header(ts); sep(); tag("dont-add"); sep(); varname(var); eol();
     }
 
     void timestep_launch(const symbol::TimeStep& ts, const std::string& status) const {

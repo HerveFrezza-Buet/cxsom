@@ -182,6 +182,9 @@ namespace cxsom {
 	    ostr2 << "History length (" << at << ") > walltime (" << pattern::walltime_to_string(kv.second.walltime) << ')';
 	    logger->msg(ostr2.str());
 #endif
+#ifdef cxsomMONITOR
+	    monitor->timestep_dont_add_update(kv.first, at);
+#endif
 	  }
 
 	  

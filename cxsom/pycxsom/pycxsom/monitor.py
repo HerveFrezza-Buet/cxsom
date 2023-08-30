@@ -108,6 +108,9 @@ class Monitor:
         if info == 'add':
             res['var'] = line[1]
             return res
+        if info == 'dont-add':
+            res['var'] = line[1]
+            return res
         if info == 'update':
             res['why'] = line[1]
             res['status'] = Monitor._parse_status(line[2])
