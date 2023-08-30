@@ -6,7 +6,7 @@ SET(PACKAGE_VERSION "2.10")
 SET(PACKAGE_LICENSE "GPL")
 SET(PROJECT_DESCRIPTION_SUMMARY "CXSOM is a multi-SOM computer")
 SET(CMAKE_BUILD_TYPE Release)
-SET(PROJECT_CFLAGS "-Wall -Wextra -Wno-missing-braces -std=c++17")
+SET(PROJECT_CFLAGS "-Wall -Wextra -Wno-missing-braces -std=c++20")
 
 SET(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}/" CACHE PATH "The subdirectory to the header prefix")
 

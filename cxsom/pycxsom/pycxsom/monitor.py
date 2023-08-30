@@ -118,6 +118,7 @@ class Monitor:
             line = Monitor._parse_queue(res, line, Monitor._parse_varname)
             line = Monitor._parse_queue(res, line, Monitor._parse_varname)
             line = Monitor._parse_queue(res, line, Monitor._parse_timestep)
+            line = Monitor._parse_queue(res, line, Monitor._parse_varname)
             return res
         if info == 'report':
             res['var'] = line[1]

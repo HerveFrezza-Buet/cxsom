@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <iterator>
+#include <set>
 
 #include <mutex>
 
@@ -85,7 +86,7 @@ namespace cxsom {
     TIMESTEP_INFO :=   launch _ TIMESTEP_STATUS
                      | terminated _ TIMESTEP_TERMINATED_REASON
                      | add _ VARNAME
-		     | update _ TIMESTEP_UPDATE_REASON _ TIMESTEP_STATUS _ TIMESTEP_QUEUES _ TIMESTEP_BLOCKERS
+		     | update _ TIMESTEP_UPDATE_REASON _ TIMESTEP_STATUS _ TIMESTEP_QUEUES _ TIMESTEP_BLOCKERS _ TIMESTEP_UNBOUNDS
 		     | report _ VARNAME _ UPDATE_STATUS
     
 
@@ -98,7 +99,7 @@ namespace cxsom {
     UPDT_STATUS := impossible | up-to-date | updated | done | none
 
     OUT_OF_TASK_REASON := no-pending-tasks | none-from-timesteps | none-from-patterns  
-    TIMESTEP_UPDATE_REASON := notification | new-update | blocking-info-cleared
+    TIMESTEP_UPDATE_REASON := notification | new-update | blocking-info-cleared | unbound
     TIMESTEP_TERMINATED_REASON := done | clear-all
 
     TASK_LIST := INSTANCE TASK_LIST_END
@@ -114,13 +115,17 @@ namespace cxsom {
     TIMESTEP_BLOCKERS := blockers <nb-elems> BLOCKERS_ELEMS
     BLOCKERS_ELEMS :=   _ TIMESTEP  BLOCKERS_ELEMS
                       | <empty>
+
+    TIMESTEP_UNBOUNDS := unbounds <nb-elems> UNBOUNDS_ELEMS
+    UNBOUNDS_ELEMS :=   _ VARNAME  UNBOUNDS_ELEMS
+                      | <empty>
     
 
    */
   class Monitor {
   public:
     enum class OutOfTasksReason : unsigned int {NoPendingTasks, NoneFromTimeSteps, NoneFromPatterns};
-    enum class TimeStepUpdateReason : unsigned int {Notification, NewUpdate, BlockingInfoCleared};
+    enum class TimeStepUpdateReason : unsigned int {Notification, NewUpdate, BlockingInfoCleared, Unbound};
     enum class TimeStepTerminatedReason : unsigned int {Done, ClearAll};
   private:
 
@@ -142,6 +147,7 @@ namespace cxsom {
     void instance(const symbol::Instance& instance) const {out << "I(" << instance.variable.timeline << ',' << instance.variable.name << ',' <<  instance.at << ')';}
     
 
+    std::set<symbol::Variable> unbound_variables;
     
   public:
 
@@ -191,6 +197,9 @@ namespace cxsom {
       }
       eol();
     }
+
+    void clear_unbounds() {unbound_variables.clear();}
+    void unbound_variable_found(const symbol::Variable& v) {unbound_variables.insert(v);}
     
     void timestep_update_report(const symbol::TimeStep& ts, const symbol::Instance& res_update, const std::string& status) {
       timestep_header(ts); sep(); tag("report"); sep(); varname(res_update); sep(); update_status(status); eol();
@@ -207,8 +216,9 @@ namespace cxsom {
       switch(why) {
       case TimeStepUpdateReason::Notification: tag("notification"); break;
       case TimeStepUpdateReason::NewUpdate: tag("new-update"); break;
-      case TimeStepUpdateReason::BlockingInfoCleared:
-      default: tag("blocking-info-cleared"); break;
+      case TimeStepUpdateReason::BlockingInfoCleared: tag("blocking-info-cleared"); break;
+      case TimeStepUpdateReason::Unbound:
+      default: tag("unbound"); break;
       }
       sep();
       timestep_status(status);
@@ -230,6 +240,9 @@ namespace cxsom {
       
       sep(); tag("blockers"); sep(); nb(std::distance(blockers_begin, blockers_end));
       while(blockers_begin != blockers_end) {sep(); timestep(*(blockers_begin++));}
+      
+      sep(); tag("unbounds"); sep(); nb(unbound_variables.size());
+      for(auto& var : unbound_variables) {sep(); varname(var.name);}
 
       eol();
     }

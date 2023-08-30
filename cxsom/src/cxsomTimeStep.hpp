@@ -175,6 +175,9 @@ namespace cxsom {
 #ifdef cxsomLOG
 		    logger->_msg("... it is busy, the timestep is to be blocked by unbounds.");
 #endif
+#ifdef cxsomMONITOR
+		    monitor->unbound_variable_found(arg.who.variable);
+#endif
 		    unbound_busy = true;
 		    that_update_has_unbound_busy = true;
 		    break;
@@ -498,10 +501,17 @@ namespace cxsom {
      
       // This sets the timestep status to Unbound if unbound DIs are found.
       void check_unbound() {
+#ifdef cxsomMONITOR
+	monitor->clear_unbounds();
+#endif
 	if(unbound_manager.busy_unbounds_found(queues[static_cast<unsigned int>(Queue::New)],
 					       queues[static_cast<unsigned int>(Queue::Unstable)],
 					       variables))
 	  status = Status::Unbound;
+#ifdef cxsomMONITOR
+	  notify_update_to_monitor(Monitor::TimeStepUpdateReason::Unbound);
+	  monitor->clear_unbounds();
+#endif
       }
 
       /**

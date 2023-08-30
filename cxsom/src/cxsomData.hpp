@@ -23,7 +23,7 @@ namespace cxsom {
     };
     
     struct type_parsing : public std::logic_error {
-      using std::logic_error::logic_error;
+      using std::logic_error::logic_error; // TO DO :  ajouter constructeur avec is pour montrer la suite de ce qui ne marche pas.
     };
   }
 
