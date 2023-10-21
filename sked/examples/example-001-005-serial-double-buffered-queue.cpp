@@ -4,6 +4,7 @@
 
 #define NB_THREADS 10
 #define NB_ROUNDS  10
+#define NB_JOBS     2
 
 int main(int argc, char* argv[]) {
   sked::serial<sked::double_buffered::queue> queue;
@@ -14,7 +15,7 @@ int main(int argc, char* argv[]) {
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
     tasks.emplace_back([i, &t, &queue]() {
       sked::verbose::message(t, i, "starts", i);
-      for(int job = 1; job < 3; ++job)  {
+      for(int job = 1; job <= NB_JOBS; ++job)  {
 	std::string job_id = std::to_string(job);
 	sked::verbose::message(t, i, std::string("preparing job ") + job_id, 2);
 	sked::verbose::message(t, i, std::string("ready for job ") + job_id, 0);
