@@ -67,13 +67,14 @@ namespace sked {
     serial& operator=(serial&&) = delete;
     
     ack_info_type go_ahead() {
+      auto res = this->QUEUE::go_ahead();
       exec_mutex.lock();
-      return this->QUEUE::go_ahead();
+      return res;
     }
     
     void done(ack_info_type ai) {
-      this->QUEUE::done(ai);
       exec_mutex.unlock();
+      this->QUEUE::done(ai);
     }
   };
   
