@@ -1,11 +1,9 @@
 #include <sked.hpp>
 #include <vector>
 
-
 #define NB_THREADS 10
 
 int main(int argc, char* argv[]) {
-  
   sked::queue queue;
   sked::verbose::timer t;
   
@@ -13,7 +11,7 @@ int main(int argc, char* argv[]) {
 
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
     tasks.emplace_back([i, &t, &queue]() {
-      sked::verbose::message(t, i, "starts", i /* duration */);
+      sked::verbose::message(t, i, "starts",   i);
       sked::verbose::message(t, i, "go ahead", 0);
       queue.go_ahead(); // blocking
       sked::verbose::message(t, i, "passed", NB_THREADS + 1 - i);
