@@ -88,11 +88,14 @@ namespace sked {
       std::mutex                all_done_mutex;
       std::atomic<unsigned int> size = 0;
       
-      void skip_when_empty() {
+      bool skip_when_empty() {
+	bool res = false;
 	if(size > 0) {
+	  res = true;
 	  std::unique_lock<std::mutex> lock(all_done_mutex);
 	  all_done.wait(lock);
 	}
+	return res;
       }
       
     public:
@@ -111,9 +114,12 @@ namespace sked {
 	return {};
       }
 
-      void flush() {
+      /**
+       * @return true if there were actual pending jobs.
+       */
+      bool flush() {
 	this->sked::queue::flush();
-	skip_when_empty();
+	return skip_when_empty();
       }
 
       void done(ack_info_type) {
@@ -155,14 +161,14 @@ namespace sked {
 	return q_ptr;
       }
 
-      void flush() {
+      bool flush() {
 	sked::ack::queue* q_ptr;
 	{
 	  std::unique_lock<std::mutex> lock(swap_mutex);
 	  q_ptr = back;
 	  std::swap(front, back);
 	}
-	q_ptr->flush();
+	return q_ptr->flush();
       }
 
       void done(ack_info_type q_ptr) {

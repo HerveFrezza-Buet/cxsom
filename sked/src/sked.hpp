@@ -4,6 +4,7 @@
 #include <skedCheckings.hpp>
 #include <skedQueue.hpp>
 #include <skedVerbosity.hpp>
+#include <skedXRSW.hpp>
 
 /**
  * @example example-001-001-basic-queue.cpp  
