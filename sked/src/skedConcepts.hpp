@@ -24,5 +24,11 @@ namespace sked {
       p.done(cait);
       {p.flush()} -> std::same_as<bool>;
     };
+
+    template<typename CALLBACK>
+    concept callback =
+      requires(const CALLBACK cb) {
+      cb();
+    };
   }
 }
