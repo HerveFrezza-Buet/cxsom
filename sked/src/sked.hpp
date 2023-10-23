@@ -13,4 +13,5 @@
  * @example example-001-004-serial-ack-queue.cpp
  * @example example-001-005-serial-double-buffered-queue.cpp
  * @example example-001-006-flushing.cpp
+ * @example example-002-001-xrsw.cpp
  */

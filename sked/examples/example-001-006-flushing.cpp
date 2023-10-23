@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     }).detach();
 
   // The main thread runs the queue processing.
-  while(true) {
+  while(remaining > 0) {
     sked::verbose::message(t, std::to_string(remaining) + " active thread(s).", 0);
     while(queue.flush())
       sked::verbose::message(t, "tasks performed", 0);
