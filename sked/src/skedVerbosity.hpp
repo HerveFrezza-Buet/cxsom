@@ -9,6 +9,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <tuple>
 
 namespace sked {
 
@@ -58,11 +59,15 @@ namespace sked {
 		 
   }
   namespace json {
+
+    using rgb = std::tuple<double, double, double>;
+    
     struct timeline {
     public:
       struct content {
 	std::string message;
 	unsigned int duration;
+	rgb color;
       };
     private:
       std::string filename;
@@ -77,40 +82,55 @@ namespace sked {
     public:
       timeline(const std::string& filename) : filename(filename), t(), schedule(), indent(0) {}
       
-      void operator()(const std::string& tag, const std::string& message, unsigned int duration_seconds) {
+      void operator()(const std::string& tag, const std::string& message, unsigned int duration_seconds, const rgb& color) {
 	auto& tl = schedule[tag];
-	tl.insert({t(), {message, duration_seconds}});
+	tl.insert({t(), {message, duration_seconds, color}});
 	verbose::message(t, tag, message, duration_seconds);
       }
       
       void operator()(unsigned int thrd_id, const std::string& msg,
-		      unsigned int duration_seconds) {
+		      unsigned int duration_seconds,
+		      const rgb& color) {
 	std::ostringstream os;
 	os << "Thread " << std::setw(3) << thrd_id;
-	(*this)(os.str(), msg, duration_seconds);
+	(*this)(os.str(), msg, duration_seconds, color);
       }
     
       void operator()(const std::string& msg,
-		      unsigned int duration_seconds) {
-	(*this)("===MAIN===", msg, duration_seconds);
+		      unsigned int duration_seconds,
+		      const rgb& color) {
+	(*this)("===MAIN===", msg, duration_seconds, color);
       }
       
       ~timeline() {
 	std::ofstream file(filename);
-	file << '{' << std::endl;
+	file << '{';
 	indent++;
+	std::string new_line1 {"\n"};
+	std::string next_line1 {",\n"};
+	new_line1 += tab();
+	next_line1 += tab();
 	for(auto& [tag, info] : schedule) {
-	  file << tab() << '\"' << tag << "\": {" << std::endl;
+	  file << new_line1 << '\"' << tag << "\": {";
 	  indent++;
-	  for(auto& [date, elem] : info) {
-	    file << tab() << '\"' << date << "\": {\"msg\": \""  << elem.message << "\", \"duration\": " << elem.duration << '}' << std::endl;
+	  std::string new_line2 {"\n"};
+	  std::string next_line2 {",\n"};
+	  new_line2 += tab();
+	  next_line2 += tab();
+	  for(auto& [date, elem] : info) { 
+	    file << new_line2 << '\"' << date
+		 << "\": {\"msg\": \""  << elem.message
+		 << "\", \"duration\": " << elem.duration
+		 << ", \"color\": [" << std::get<0>(elem.color) << ", " <<  std::get<1>(elem.color) << ", " << std::get<2>(elem.color) << "]}";
+	    new_line2 = next_line2;
 	  }
 	  indent--;
-	  file << tab() << '}' << std::endl;
+	  file << std::endl << tab() << '}';
+	  new_line1 = next_line1;
 	}
 	
 	indent--;
-	file << '}' << std::endl;
+	file << std::endl << '}' << std::endl;
 	file.close();
       }
     };

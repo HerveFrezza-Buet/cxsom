@@ -11,8 +11,18 @@ int main(int argc, char* argv[]) {
   sked::json::timeline timeline("timeline-002-001.json");
   std::atomic<unsigned int> remaining {NB_THREADS};
 
+  struct colormap {
+    sked::json::rgb prepare {.8, .8, .8};
+    sked::json::rgb ready   {.5, .5, .5};
+    sked::json::rgb startr   {.2, 1., .2};
+    sked::json::rgb startw   {1., .2, .2};
+    sked::json::rgb done    {.8, 0., 0.};
+    sked::json::rgb after   {.8, 0., 0.};
+    sked::json::rgb count   {0., 0., .8};
+  } cmap;
+
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
-    std::thread([i, &timeline, &queue, &remaining]() {
+    std::thread([i, &timeline, &queue, &remaining, &cmap]() {
       std::random_device rd;
       std::mt19937 gen(rd());
 
@@ -20,32 +30,32 @@ int main(int argc, char* argv[]) {
 	std::string r = std::string("round ") + std::to_string(round) + " : ";
 	std::uniform_int_distribution<unsigned int> delay(0, 3);
 	
-	timeline(i, r + "preparing write", delay(gen));
-	timeline(i, r + "ready to write", 0);
+	timeline(i, r + "preparing write", delay(gen), cmap.prepare);
+	timeline(i, r + "ready to write", 0, cmap.ready);
 	{
 	  auto lock = sked::xrsw::writer_scope(queue);
-	  timeline(i, r + "start write", 1);
-	  timeline(i, r + "writing done", 0); 
+	  timeline(i, r + "start write", 1, cmap.startw);
+	  timeline(i, r + "writing done", 0, cmap.done); 
 	}
-	timeline(i, r + "preparing read", delay(gen));
-	timeline(i, r + "ready to read", 0);
+	timeline(i, r + "preparing read", delay(gen), cmap.prepare);
+	timeline(i, r + "ready to read", 0, cmap.ready);
 	{
 	  auto lock = sked::xrsw::reader_scope(queue);
-	  timeline(i, r + "start read", 1);
-	  timeline(i, r + "reading done", 0); 
+	  timeline(i, r + "start read", 1, cmap.startr);
+	  timeline(i, r + "reading done", 0, cmap.done); 
 	}
       }
-      timeline(i, "after work", 5);
-      timeline(i, "finished",   0);
+      timeline(i, "after work", 5, cmap.after);
+      timeline(i, "finished",   0, cmap.done);
       remaining--;
     }).detach();
 
   // The main thread runs the queue processing.
   while(remaining > 0) {
-    timeline(std::to_string(remaining) + " active thread(s).", 0);
+    timeline(std::to_string(remaining) + " active thread(s).", 0, cmap.count);
     while(queue.flush())
-      timeline("tasks performed", 0);
-    timeline("all flushes done, waiting", 1);
+      timeline("tasks performed", 0, cmap.done);
+    timeline("all flushes done, waiting", 1, cmap.done);
   }
 
   return 0;
