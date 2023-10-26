@@ -7,7 +7,6 @@
 #include <syncstream>
 #include <thread>
 #include <fstream>
-#include <map>
 #include <vector>
 #include <tuple>
 
@@ -63,76 +62,33 @@ namespace sked {
     using rgb = std::tuple<double, double, double>;
     
     struct timeline {
-    public:
-      struct content {
-	std::string message;
-	unsigned int duration;
-	rgb color;
-      };
     private:
-      std::string filename;
+      std::ofstream file;
       verbose::timer t;
-      std::map<std::string, std::multimap<double, content> > schedule;
-      unsigned int indent;
-
-      std::string tab() {
-	return std::string(2*indent, ' ');
-      }
       
     public:
-      timeline(const std::string& filename) : filename(filename), t(), schedule(), indent(0) {}
+      timeline(const std::string& filename) : file(filename), t() {}
       
-      void operator()(const std::string& tag, const std::string& message, unsigned int duration_seconds, const rgb& color) {
-	auto& tl = schedule[tag];
-	tl.insert({t(), {message, duration_seconds, color}});
-	verbose::message(t, tag, message, duration_seconds);
+      void operator()(const std::string& tag, const std::string& msg, unsigned int duration_seconds, const rgb& color) {
+	std::osyncstream(file) << tag << ';' << t() << ';' << msg << ';' << duration_seconds << ';' << std::get<0>(color) << ' ' <<  std::get<1>(color) << ' ' << std::get<2>(color) << std::endl;
+	verbose::message(t, tag, msg, duration_seconds);
       }
       
       void operator()(unsigned int thrd_id, const std::string& msg,
 		      unsigned int duration_seconds,
 		      const rgb& color) {
-	std::ostringstream os;
-	os << "Thread " << std::setw(3) << thrd_id;
-	(*this)(os.str(), msg, duration_seconds, color);
+	std::osyncstream(file) << "Thread " << std::setw(3) << thrd_id << ';' << t() << ';' << msg << ';' << duration_seconds << ';' << std::get<0>(color) << ' ' <<  std::get<1>(color) << ' ' << std::get<2>(color) << std::endl;
+	verbose::message(t, thrd_id, msg, duration_seconds);
       }
     
       void operator()(const std::string& msg,
 		      unsigned int duration_seconds,
 		      const rgb& color) {
-	(*this)("===MAIN===", msg, duration_seconds, color);
+	std::osyncstream(file) << "===MAIN===" << ';' << t() << ';' << msg << ';' << duration_seconds << ';' << std::get<0>(color) << ' ' <<  std::get<1>(color) << ' ' << std::get<2>(color) << std::endl;
+	verbose::message(t, msg, duration_seconds);
       }
       
-      ~timeline() {
-	std::ofstream file(filename);
-	file << '{';
-	indent++;
-	std::string new_line1 {"\n"};
-	std::string next_line1 {",\n"};
-	new_line1 += tab();
-	next_line1 += tab();
-	for(auto& [tag, info] : schedule) {
-	  file << new_line1 << '\"' << tag << "\": {";
-	  indent++;
-	  std::string new_line2 {"\n"};
-	  std::string next_line2 {",\n"};
-	  new_line2 += tab();
-	  next_line2 += tab();
-	  for(auto& [date, elem] : info) { 
-	    file << new_line2 << '\"' << date
-		 << "\": {\"msg\": \""  << elem.message
-		 << "\", \"duration\": " << elem.duration
-		 << ", \"color\": [" << std::get<0>(elem.color) << ", " <<  std::get<1>(elem.color) << ", " << std::get<2>(elem.color) << "]}";
-	    new_line2 = next_line2;
-	  }
-	  indent--;
-	  file << std::endl << tab() << '}';
-	  new_line1 = next_line1;
-	}
-	
-	indent--;
-	file << std::endl << '}' << std::endl;
-	file.close();
-      }
+      ~timeline() {}
     };
   }
 }
