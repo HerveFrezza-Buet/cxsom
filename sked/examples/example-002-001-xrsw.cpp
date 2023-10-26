@@ -6,29 +6,15 @@
 #define NB_THREADS 10
 #define NB_ROUNDS   3
 
+#include "colormap.hpp"
 
 int main(int argc, char* argv[]) {
   sked::xrsw::queue queue;
   sked::json::timeline timeline("timeline-002-001.tml");
   std::atomic<unsigned int> remaining {NB_THREADS};
 
-  struct colormap {
-    sked::json::rgb preparer {.5, .5, .7};
-    sked::json::rgb readyr   {0., 0., 1.};
-    sked::json::rgb startr   {.2, .2, 1.};
-    
-    sked::json::rgb preparew {7., .5, .5};
-    sked::json::rgb readyw   {1., 0., 0.};
-    sked::json::rgb startw   {1., .2, .2};
-    
-    sked::json::rgb count  {0., .7, 0.};
-    sked::json::rgb sync   {0., .0, 0.};
-    sked::json::rgb wait   {.5, .7, .5};
-    
-    sked::json::rgb after   {.8, 8., .3};
-    sked::json::rgb done    {0., 0., 0};
-  } cmap;
-
+  colormap cmap;
+  
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
     std::thread([i, &timeline, &queue, &remaining, &cmap]() {
       std::random_device rd;

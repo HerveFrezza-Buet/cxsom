@@ -5,38 +5,47 @@
 
 #define NB_THREADS 20
 
+#include "colormap.hpp"
+
 int main(int argc, char* argv[]) {
   sked::double_buffered::queue queue;
-  sked::verbose::timer t;
+  sked::json::timeline timeline("timeline-001-006.tml");
   std::atomic<unsigned int> remaining {NB_THREADS};
 
+  colormap cmap;
+
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
-    std::thread([i, &t, &queue, &remaining]() {
+    std::thread([i, &timeline, &queue, &remaining, &cmap]() {
       std::random_device rd;
       std::mt19937 gen(rd());
       auto wake_up_duration = std::uniform_int_distribution<unsigned int>(5, 10)(gen);
       auto job_duration     = std::uniform_int_distribution<unsigned int>(1, 5)(gen);
       
-      sked::verbose::message  (t, i, "wake up",       wake_up_duration);
-      sked::verbose::message  (t, i, "ready to work", 0);
+      timeline(i, "wake up",       wake_up_duration, cmap.wait);
+      timeline(i, "ready to work", 0, cmap.readyr);
       {
 	auto in_job = sked::job_scope(queue);
-	sked::verbose::message(t, i, "start job ", job_duration);
-	sked::verbose::message(t, i, "job done",   0); 
+	timeline(i, "start job ", job_duration, cmap.startr);
+	timeline(i, "job done",   0, cmap.done); 
       }
-      sked::verbose::message  (t, i, "after work", 5);
-      sked::verbose::message  (t, i, "finished",   0);
+      timeline(i, "after work", 5, cmap.after);
+      timeline(i, "finished",   0, cmap.done);
       remaining--;
     }).detach();
 
   // The main thread runs the queue processing.
   while(remaining > 0) {
-    sked::verbose::message(t, std::to_string(remaining) + " active thread(s).", 0);
+    timeline(std::to_string(remaining) + " active thread(s).", 0, cmap.count);
     while(queue.flush())
-      sked::verbose::message(t, "tasks performed", 0);
-    sked::verbose::message(t, "all flushes done, waiting", 1);
+      timeline("tasks performed", 0, cmap.sync);
+    timeline("all flushes done, waiting", 1, cmap.done);
   }
 
+
+  std::cout << std::endl
+	    << std::endl
+	    << "You can use pysked-timeline-to-pdf to view the generated timeline-001-006.tml file." << std::endl
+	    << std::endl;
   return 0;
 }
 
