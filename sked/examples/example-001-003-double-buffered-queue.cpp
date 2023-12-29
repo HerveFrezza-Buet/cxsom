@@ -3,10 +3,13 @@
 #include <string>
 
 #define NB_THREADS 10
-#define NB_ROUNDS  10
 #define NB_JOBS     2
 
 #include "colormap.hpp"
+
+// Double-bufferred queues host two queues internally. Jobs register to a 'back' queue when they ask for execution. When flush occurs, the back-queu becomes the front queue, and jobs in that queue are executed. 
+  // When jobs get flushed, is another job is required, it get stored
+  // in another queue fir exectution in a incomming flushing stage.
 
 int main(int argc, char* argv[]) {
   sked::double_buffered::queue queue;
@@ -34,10 +37,10 @@ int main(int argc, char* argv[]) {
     });
   
   timeline("sleeping", 5, cmap.wait);
-  for(int round = 1; round <= NB_ROUNDS; ++round) {
-    timeline(std::string("Round ") + std::to_string(round), 0, cmap.sync);
-    queue.flush();
-  }
+  unsigned int round = 1;
+  do 
+    timeline(std::string("Round ") + std::to_string(round++), 0, cmap.sync);
+  while(queue.flush());
 
   timeline("All rounds done, joining now", 0, cmap.wait);
   for(auto& t : tasks) t.join();

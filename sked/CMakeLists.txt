@@ -4,7 +4,7 @@ project(sked)
 
 SET(PACKAGE_VERSION "1.00")
 SET(PACKAGE_LICENSE "GPL")
-SET(PROJECT_DESCRIPTION_SUMMARY "sked offers skedulin tools for interacting with a simulation.")
+SET(PROJECT_DESCRIPTION_SUMMARY "sked offers skeduling tools for interacting with a simulation.")
 SET(CMAKE_BUILD_TYPE Release)
 SET(PROJECT_CFLAGS "-Wall -std=c++20")
 

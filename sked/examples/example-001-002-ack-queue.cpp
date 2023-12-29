@@ -5,8 +5,11 @@
 
 #include "colormap.hpp"
 
+// The sked::ack::queue is a queue that 'knows' if some tasks are
+// still in progress. The flush call returns a boolean.
+
 int main(int argc, char* argv[]) {
-  sked::ack::queue queue; // Thasks in this queue acknowledge when they are done.
+  sked::ack::queue queue; // Tasks in this queue acknowledge when they are done.
   sked::json::timeline timeline("timeline-001-002.tml");
   
   colormap cmap;
@@ -33,14 +36,15 @@ int main(int argc, char* argv[]) {
 
   timeline("sleeping", NB_THREADS + 3, cmap.wait);
   timeline("flushing now", 0, cmap.sync);
-  queue.flush();
+  if(queue.flush()) // true if pending jobs are remaining
+    std::cout << "No jobs should be still pending... this message will never be printed." << std::endl;
   timeline("All jobs done, joining now", 0, cmap.wait);
   for(auto& t : tasks) t.join();
   timeline("joined", 0, cmap.done);
   
   std::cout << std::endl
 	    << std::endl
-	    << "You can use pysked-timeline-to-pdf to view the generated timeline-001-002.tml file." << std::endl
+	    << "You can use pysked-timeline-to-pdf.py to view the generated timeline-001-002.tml file." << std::endl
 	    << std::endl;
 
   return 0;

@@ -5,8 +5,12 @@
 
 #include "colormap.hpp"
 
+// Basic sked::queues enables tasks to get locked on a barrier. They
+// are all unlocked when we flush.
+
 int main(int argc, char* argv[]) {
   sked::queue queue;
+  
   sked::json::timeline timeline("timeline-001-001.tml");
   
   colormap cmap;
@@ -17,7 +21,7 @@ int main(int argc, char* argv[]) {
     tasks.emplace_back([i, &timeline, &queue, &cmap]() {
       timeline(i, "starts",   i, cmap.preparer);
       timeline(i, "go ahead", 0, cmap.readyr);
-      queue.go_ahead(); // blocking
+      queue.go_ahead(); // blocked until the main thread flushes.
       timeline(i, "passed", NB_THREADS + 1 - i, cmap.after);
       timeline(i, "finished", 0, cmap.done);
     });
@@ -33,7 +37,7 @@ int main(int argc, char* argv[]) {
 
   std::cout << std::endl
 	    << std::endl
-	    << "You can use pysked-timeline-to-pdf to view the generated timeline-001-001.tml file." << std::endl
+	    << "You can use pysked-timeline-to-pdf.py to view the generated timeline-001-001.tml file." << std::endl
 	    << std::endl;
 
   
