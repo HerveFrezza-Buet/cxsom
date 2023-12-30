@@ -22,21 +22,18 @@ int main(int argc, char* argv[]) {
       timeline(i, "wait for job execution", 0, cmap.readyr);
       {
 	auto in_job = sked::job_scope(queue);
-	// auto ack_info = queue.go_ahead(); 
 	
 	timeline(i, "start job", NB_THREADS + 1 - i, cmap.startr);
 	timeline(i, "job done", 0, cmap.done);
-	
-	// queue.done(ac_info);
       }
       
       timeline(i, "after work", 5, cmap.after);
       timeline(i, "finished", 0, cmap.done);
     });
 
-  timeline("sleeping", NB_THREADS + 3, cmap.wait);
+  timeline("sleeping", 3, cmap.wait);
   timeline("flushing now", 0, cmap.sync);
-  queue.flush();
+  while(queue.flush());
   timeline("All jobs done, joining now", 0, cmap.wait);
   for(auto& t : tasks) t.join();
   timeline("joined", 0, cmap.done);
