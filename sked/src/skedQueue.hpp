@@ -6,6 +6,7 @@
 #include <condition_variable>
 #include <atomic>
 
+
 #include <skedConcepts.hpp>
 
 namespace sked {
@@ -88,15 +89,6 @@ namespace sked {
       std::mutex                all_done_mutex;
       std::atomic<unsigned int> size = 0;
       
-      bool skip_when_empty() {
-	bool res = false;
-	if(size > 0) {
-	  res = true;
-	  std::unique_lock<std::mutex> lock(all_done_mutex);
-	  all_done.wait(lock);
-	}
-	return res;
-      }
       
     public:
       using ack_info_type = no_info;
@@ -118,12 +110,20 @@ namespace sked {
        * @return true if there were actual pending jobs.
        */
       bool flush() {
-	this->sked::queue::flush();
-	return skip_when_empty();
+	bool res = false;
+	
+	while(size > 0) {
+	  res = true;
+	  this->sked::queue::flush();
+	  std::unique_lock<std::mutex> lock(all_done_mutex);
+	  all_done.wait(lock);
+	}
+	return res;
       }
 
       void done(ack_info_type) {
-	if(--size == 0) all_done.notify_all();
+	--size;
+	all_done.notify_one();
       }
     };
   }

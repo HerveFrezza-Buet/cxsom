@@ -6,7 +6,12 @@
 #include "colormap.hpp"
 
 // The sked::ack::queue is a queue that 'knows' if some tasks are
-// still in progress. The flush call returns a boolean.
+// still waiting for execution. The flush call returns a boolean,
+// telling wether jobs have been started. Flush blocks until all
+// current jobs are done.
+
+// While flushing is in progress, new jobs can enter the queue, this
+// may increase the current flush duration.
 
 int main(int argc, char* argv[]) {
   sked::ack::queue queue; // Tasks in this queue acknowledge when they are done.
@@ -34,10 +39,12 @@ int main(int argc, char* argv[]) {
       timeline(i, "finished", 0, cmap.done);
     });
 
-  timeline("sleeping", NB_THREADS + 3, cmap.wait);
-  timeline("flushing now", 0, cmap.sync);
-  if(queue.flush()) // true if pending jobs are remaining
-    std::cout << "No jobs should be still pending... this message will never be printed." << std::endl;
+  timeline("sleeping", 3, cmap.wait);
+  unsigned int nb_flushes = 1;
+  timeline("start flushing", 0, cmap.wait);
+  while(queue.flush())
+    timeline(std::string("flush #") + std::to_string(nb_flushes++) + ".", 0, cmap.sync);
+  
   timeline("All jobs done, joining now", 0, cmap.wait);
   for(auto& t : tasks) t.join();
   timeline("joined", 0, cmap.done);

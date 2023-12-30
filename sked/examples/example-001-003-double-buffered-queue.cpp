@@ -7,9 +7,12 @@
 
 #include "colormap.hpp"
 
-// Double-bufferred queues host two queues internally. Jobs register to a 'back' queue when they ask for execution. When flush occurs, the back-queu becomes the front queue, and jobs in that queue are executed. 
-  // When jobs get flushed, is another job is required, it get stored
-  // in another queue fir exectution in a incomming flushing stage.
+// Double-bufferred queues host two queues internally. Jobs register
+// to a 'back' queue when they ask for execution. When flush occurs,
+// the back-queue becomes the front queue, and jobs in that queue are
+// executed. When jobs get flushed, if another job is required, it get
+// stored in another queue for execution in a incomming flushing
+// stage.
 
 int main(int argc, char* argv[]) {
   sked::double_buffered::queue queue;
