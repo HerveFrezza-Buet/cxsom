@@ -6,6 +6,13 @@
 #define NB_THREADS 10
 #define NB_ROUNDS   3
 
+// xrsw stands for multiple-reader, single writer. A xrsw queue
+// handles two double-buffered queues, one for the readers, one for
+// thewriters. The one for the writer is serial, so that only one
+// writer writes at a time.
+//
+// Flushing consists in flusing writers first, and thean readers.
+
 #include "colormap.hpp"
 
 int main(int argc, char* argv[]) {
