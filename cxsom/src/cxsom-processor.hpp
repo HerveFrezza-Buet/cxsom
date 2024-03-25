@@ -211,7 +211,7 @@ namespace cxsom {
       }
       ServiceThread(const ServiceThread& cp) = default;
 
-      void operator()(void) {
+      void operator()() {
 	asio::ip::tcp::iostream& socket = *p_socket;
 	std::string command;
 	char c;
