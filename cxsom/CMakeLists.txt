@@ -11,7 +11,7 @@ SET(PROJECT_CFLAGS "-Wall -Wextra -Wno-missing-braces -std=c++20")
 SET(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}/" CACHE PATH "The subdirectory to the header prefix")
 
 
-find_package(Boost REQUIRED system)
+#find_package(Boost REQUIRED system)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFTCONV fftconv REQUIRED)
 
@@ -22,7 +22,7 @@ Name: ${CMAKE_PROJECT_NAME}
 Description: ${PROJECT_DESCRIPTION_SUMMARY}
 Version: ${PACKAGE_VERSION}
 Requires: 
-Libs: -lpthread -lboost_system
+Libs: -lpthread 
 Cflags: -I${INCLUDE_INSTALL_DIR}
 "
 )
@@ -42,7 +42,7 @@ Name: ${CMAKE_PROJECT_NAME}
 Description: ${PROJECT_DESCRIPTION_SUMMARY}
 Version: ${PACKAGE_VERSION}
 Requires: 
-Libs: -lpthread -lboost_system
+Libs: -lpthread 
 Cflags: -I${INCLUDE_INSTALL_DIR}
 "
 )

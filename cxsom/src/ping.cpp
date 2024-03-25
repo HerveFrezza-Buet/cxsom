@@ -1,7 +1,9 @@
 
 #include <string>
 #include <iostream>
-#include <boost/asio.hpp>
+
+#include <utility> // should be included by asio
+#include <asio.hpp>
 
 int main(int argc, char* argv[]) {
   if(argc != 3) {
@@ -13,7 +15,7 @@ int main(int argc, char* argv[]) {
   std::string port    (argv[2]);
   
   
-  boost::asio::ip::tcp::iostream socket;
+  asio::ip::tcp::iostream socket;
   socket.exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
   try {
     socket.connect(hostname, port);

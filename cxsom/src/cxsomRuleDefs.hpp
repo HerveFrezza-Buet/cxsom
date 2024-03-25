@@ -19,7 +19,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include <boost/asio.hpp>
+
+#include <utility> // should be included by asio
+#include <asio.hpp>
 
 namespace cxsom {
   namespace rules {
@@ -357,7 +359,7 @@ namespace cxsom {
 
       void check_walltimes() const;
       void check_orphan_inits() const;
-      void handle_answer(boost::asio::ip::tcp::iostream& socket);
+      void handle_answer(asio::ip::tcp::iostream& socket);
       void send(const std::string& hostname, int port);
       void print_graph(std::ostream& file, std::map<value_at_key, update>& rules, bool full_names);
       void notify_user_argv_error() {user_argv_error = true;}

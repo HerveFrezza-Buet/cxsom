@@ -6,7 +6,10 @@
 #include <string>
 #include <memory>
 #include <stdexcept>
-#include <boost/asio.hpp>
+
+#include <utility> // should be included by asio
+#include <asio.hpp>
+
 #include <sstream>
 #include <iomanip>
 
@@ -20,7 +23,7 @@ namespace cxsom {
 
       cxsom::data::Center& data_center;
       cxsom::jobs::Center& jobs_center;
-      std::shared_ptr<boost::asio::ip::tcp::iostream>  p_socket;
+      std::shared_ptr<asio::ip::tcp::iostream>  p_socket;
 
       void process_ping() {
 #ifdef cxsomDEBUG_PROTOCOL
@@ -62,7 +65,7 @@ namespace cxsom {
 	std::istringstream socket(buf);
 	std::cout << ">> " << buf << " // process_declare(...) >>>>" << std::endl;
 #else
-	boost::asio::ip::tcp::iostream& socket = *p_socket;
+	asio::ip::tcp::iostream& socket = *p_socket;
 #endif
 	try {
 	  auto v = cxsom::protocol::read::variable(socket);
@@ -125,7 +128,7 @@ namespace cxsom {
 #ifdef cxsomDEBUG_PROTOCOL
 	std::cout << ">>  // process_updates() >>>>" << std::endl;
 #endif
-	boost::asio::ip::tcp::iostream& socket = *p_socket;
+	asio::ip::tcp::iostream& socket = *p_socket;
 	std::string command;
 	char c;
 	std::size_t number = nb_updates();
@@ -151,7 +154,7 @@ namespace cxsom {
 	std::istringstream socket(buf);
 	std::cout << ">> " << buf << "// process_static() >>>> " << std::endl;
 #else
-	boost::asio::ip::tcp::iostream& socket = *p_socket;
+	asio::ip::tcp::iostream& socket = *p_socket;
 #endif
 	try {
 	  jobs_center += cxsom::protocol::read::update(socket);
@@ -178,7 +181,7 @@ namespace cxsom {
 	std::istringstream socket(buf);
 	std::cout << ">> " << buf << "// process_pattern() >>>> " << std::endl;
 #else
-	boost::asio::ip::tcp::iostream& socket = *p_socket;
+	asio::ip::tcp::iostream& socket = *p_socket;
 #endif
 	try {
 	  jobs_center += cxsom::protocol::read::pattern::update(socket);
@@ -202,14 +205,14 @@ namespace cxsom {
 
       ServiceThread(cxsom::data::Center& data_center,
 		    cxsom::jobs::Center& jobs_center,
-		    boost::asio::ip::tcp::acceptor& acceptor) 
-	: data_center(data_center), jobs_center(jobs_center), p_socket(new boost::asio::ip::tcp::iostream()) {
+		    asio::ip::tcp::acceptor& acceptor) 
+	: data_center(data_center), jobs_center(jobs_center), p_socket(new asio::ip::tcp::iostream()) {
 	acceptor.accept(*(p_socket->rdbuf())); // Blocking is here
       }
       ServiceThread(const ServiceThread& cp) = default;
 
       void operator()(void) {
-	boost::asio::ip::tcp::iostream& socket = *p_socket;
+	asio::ip::tcp::iostream& socket = *p_socket;
 	std::string command;
 	char c;
 	try {
@@ -248,9 +251,9 @@ namespace cxsom {
       for(int i = 0; i < nb_threads; ++i)
 	workers.emplace_back([&jobs_center](){jobs_center.worker_thread();});
       
-      boost::asio::io_service        ios;
-      boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
-      boost::asio::ip::tcp::acceptor acceptor(ios, endpoint);
+      asio::io_service        ios;
+      asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port);
+      asio::ip::tcp::acceptor acceptor(ios, endpoint);
       
       while(true) {
 	std::thread service(ServiceThread(data_center, jobs_center, acceptor));

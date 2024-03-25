@@ -584,7 +584,7 @@ inline void cxsom::rules::context::print_graph(std::ostream& file, std::map<valu
 
 
 
-inline void cxsom::rules::context::handle_answer(boost::asio::ip::tcp::iostream& socket) {
+inline void cxsom::rules::context::handle_answer(asio::ip::tcp::iostream& socket) {
   std::string line;
   std::getline(socket, line, '\n');
 #ifdef cxsomDEBUG_PROTOCOL
@@ -603,7 +603,7 @@ inline void cxsom::rules::context::handle_answer(boost::asio::ip::tcp::iostream&
 }
 
 inline void cxsom::rules::context::send(const std::string& hostname, int port) {
-  boost::asio::ip::tcp::iostream socket;
+  asio::ip::tcp::iostream socket;
   socket.exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
   try {
     socket.connect(hostname, std::to_string(port));
