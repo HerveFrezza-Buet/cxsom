@@ -1,39 +1,47 @@
 #pragma once
 
+#include <thread>
+#include <chrono>
 #include <sked.hpp>
 
 namespace sked {
   namespace net {
-
-    namespace main {
-      class xrsw {
+    namespace xrsw {
+      class main {
       public:
-	void loop() {}
+	sked::xrsw::queue queue;
+	template <typename Duration>
+	void loop(const Duration& check_period) {
+	  while(true) {
+	    while(!queue.flush()) std::this_thread::sleep_for(check_period);
+	    while(queue.flush());
+	  }
+	}
       };
     }
     
-    namespace service {
+    class core_service {
+      std::shared_ptr<asio::ip::tcp::iostream>  p_socket;
+    public:
+      core(asio::ip::tcp::acceptor& acceptor) 
+	: p_socket(new asio::ip::tcp::iostream()) {
+	acceptor.accept(*(p_socket->rdbuf())); // Blocking is here
+      }
+      
+    protected:
+      asio::ip::tcp::iostream& socket() {return *p_socket;}
+    };
 
-      class core {
-	std::shared_ptr<asio::ip::tcp::iostream>  p_socket;
-      public:
-	core(asio::ip::tcp::acceptor& acceptor) 
-	  : p_socket(new asio::ip::tcp::iostream()) {
-	  acceptor.accept(*(p_socket->rdbuf())); // Blocking is here
-	}
-
-      protected:
-	asio::ip::tcp::iostream& socket() {return *p_socket;}
-      };
-
-      class xrsw : public core {
+    namespace xrsw {
+    
+      class service : public core_service {
       private:
 
-	main::xrsw& context;
+	main& context;
 	
       public:
 
-	xrsw(main::xrsw& context, asio::ip::tcp::acceptor& acceptor) : core(acceptor), context(context) {}
+	xrsw(main& context, asio::ip::tcp::acceptor& acceptor) : core_service(acceptor), context(context) {}
 	  
 	void operator()() {
 	  try {
@@ -51,9 +59,6 @@ namespace sked {
 	  catch(std::exception& e) {
 	    std::cout << "Exception caught : " << e.what() << " --> " << typeid(e).name() << std::endl;
 	  }
-	}
-
-	void loop() {
 	}
       };
 	

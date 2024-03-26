@@ -2,6 +2,7 @@
 #include <iostream>
 #include <thread>
 #include <memory>
+#include <chrono>
 
 #include <utility> // should be included by asio
 #include <asio.hpp>
@@ -9,6 +10,7 @@
 #include <skednet.hpp>
 
 
+using namespace std::literals::chrono_literals;
 
 int main(int argc, char* argv[]) {
 
@@ -20,16 +22,16 @@ int main(int argc, char* argv[]) {
   asio::io_service        ios;
   sked::net::main::xrsw context;
 
-  std::thread listen = [&ios, &context, port = std::stoi(argv[1])](){
+  std::thread listen {[&ios, &context, port = std::stoi(argv[1])](){
     asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port);
     asio::ip::tcp::acceptor acceptor(ios, endpoint);
     while(true) {
       std::thread service {sked::net::service::xrsw(context, acceptor)};
       service.detach();
     }
-  };
+  }};
 
-  context.loop();
+  context.loop(500ms);
 
   listen.join();
   return 0;
