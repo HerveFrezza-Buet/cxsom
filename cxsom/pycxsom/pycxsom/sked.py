@@ -9,9 +9,9 @@ class _locker:
         self.s.connect((hostname, port))
         
     def _interact(self):
-        s.sendall(bytes(self.client_tag))
-        line = s.recv(1024).decode("utf-8").split('\n')[0]
-        if line != server_tag:
+        self.s.sendall(bytes(self.client_tag, encoding='utf-8'))
+        line = self.s.recv(1024).decode("utf-8").split('\n')[0]
+        if line != self.server_tag:
             raise ValueError('sked protocol error : '+line)
     
     def __enter__(self):
