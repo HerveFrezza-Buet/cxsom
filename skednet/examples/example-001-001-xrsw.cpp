@@ -51,7 +51,7 @@ void process(sked::json::timeline& timeline, unsigned int id, const std::string&
       }
       else {
 	sked::net::scope::xrsw::read lock {socket, socket};
-	timeline(id, "write", job_duration(gen), write_color);
+	timeline(id, "read", job_duration(gen), read_color);
       }
   }
   catch(std::exception& e) {
@@ -70,10 +70,16 @@ int main(int argc, char* argv[]) {
   std::string hostname {argv[1]};
   std::string port     {argv[2]};
   sked::json::timeline timeline("timeline-001-001.tml");
+  sked::json::rgb wait_color  {.6, .4, .5};
   std::vector<std::thread> threads;
-  
-  for(unsigned int t = 0; t < nb_threads; ++t)
-    threads.emplace_back([&timeline, id=t+1, hostname, port](){process(timeline, id, hostname, port);});
+
+  unsigned int thread_id = 0;
+  for(int i = 0; i < 2; ++i) {
+    for(unsigned int t = 0; t < NB_THREADS; ++t)
+      threads.emplace_back([&timeline, id=++thread_id, hostname, port](){process(timeline, id, hostname, port);});
+    timeline("Waiting for next threads", 10, wait_color);
+  }
+  timeline("All threads are started.", 2, wait_color);
   for(auto& t: threads) t.join();
 
   
@@ -85,8 +91,3 @@ int main(int argc, char* argv[]) {
   
 }
 
-
-  
-  
-  return 0;
-}
