@@ -10,8 +10,11 @@ class _locker:
         
     def _interact(self):
         self.s.sendall(bytes(self.client_tag, encoding='utf-8'))
-        line = self.s.recv(1024).decode("utf-8").split('\n')[0]
-        if line != self.server_tag:
+        buf = self.s.recv(1024).decode("utf-8")
+        tag = buf[0]
+        if len(buf) < 2: # buf should be 'X\n'... but sometimes, I get 'X' only, and '\n' stays in the stream
+            self.s.recv(1024) # I flush the remaining byte.
+        if tag != self.server_tag:
             raise ValueError('sked protocol error : '+line)
     
     def __enter__(self):
