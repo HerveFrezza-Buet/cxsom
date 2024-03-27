@@ -59,6 +59,7 @@ namespace cxsom {
       std::atomic<bool>               interaction_ongoing;
       mutable std::mutex              job_mutex;
       mutable std::condition_variable pending_jobs;
+      std::atomic<unsigned int>       nb_ongoing_processes;
 
       std::vector<type::ref> arg_types_tmp;
       
@@ -315,8 +316,8 @@ namespace cxsom {
       }
 
 
-      bool flushing_in_progress;
       std::shared_ptr<sked::net::scope::xrsw::write_explicit> xrsw_writer;
+      bool flushing_tasks_in_progress;
       void on_start_flushing_tasks() {
 	if(xrsw_writer) xrsw_writer->enter();
       }
@@ -343,8 +344,9 @@ namespace cxsom {
 	  interaction_ongoing(false),
 	  job_mutex(),
 	  pending_jobs(),
-	  flushing_in_progress(false),
-	  xrsw_writer(xrsw_writer)
+	  nb_ongoing_processes(0),
+	  xrsw_writer(xrsw_writer),
+	  flushing_tasks_in_progress(false)
       {}
       Center()                         = delete;
       Center(const Center&)            = default;
@@ -414,7 +416,7 @@ namespace cxsom {
       }
 
       /**
-       * Call this in mono-thread mode in order to get the next job to do.
+       * We call this in mono-thread mode (locking integrity_mutex) in order to get the next job to do.
        */
       std::function<void ()> get_one() {	
 #ifdef cxsomMONITOR
@@ -431,8 +433,8 @@ namespace cxsom {
 	logger->msg("... mutex passed.");
 #endif
 	if(tasks.empty()) {
-	  if(flushing_in_progress) {
-	    flushing_in_progress = false;
+	  if(nb_ongoing_processes == 0 and flushing_tasks_in_progress) {
+	    flushing_tasks_in_progress = false;
 	    on_end_flushing_tasks();
 	  }
 #ifdef cxsomMONITOR
@@ -546,8 +548,9 @@ namespace cxsom {
 	  return {};
 	}
 
-	if(!flushing_in_progress) {
-	  flushing_in_progress = true;
+	++nb_ongoing_processes;
+	if(nb_ongoing_processes == 1) {
+	  flushing_tasks_in_progress = true;
 	  on_start_flushing_tasks();
 	}
 
@@ -602,7 +605,10 @@ namespace cxsom {
 	while(true) {
 	  if(interaction_ongoing) pending_jobs.wait(lock);
 	  else {
-	    if(auto job = get_one(); job) job();
+	    if(auto job = get_one(); job) {
+	      job();
+	      --nb_ongoing_processes;
+	    }
 	    else pending_jobs.wait(lock);
 	  }
 	}

@@ -2,6 +2,7 @@
 #include <utility> // should be included by asio
 #include <asio.hpp>
 #include <skednet.hpp>
+#include <memory>
 
 
 // #define cxsomDEBUG_PROTOCOL

@@ -17,7 +17,7 @@ dependent, they lie on a circle for example.
 First setup a root-dir directory for our variables.
 
 ~> mkdir root-dir
-~> make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 NB_THREADS=4
+~> make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
 
 You can get help by only typing
 
@@ -27,9 +27,15 @@ You can check the config
 
 ~> make cxsom-show-config
 
-Then we can launch a processor, and scan the root-dir.
+Then we can launch a processor, and scan the root-dir. As we will access to the data files (for feeding with inputs), it is safer to use the xrsw (multiple-reader, single writer) locking agent provided by skednet.
 
-~> make cxsom-launch-processor
+So let us first launch the data access supervisor.
+
+~> make skednet-launch-xrsw
+
+Then we can launch the processor, requiring data access controlled by skednet's xrsw. These commands are the skednet-launch-*-processor ones.
+
+~> make skednet-launch-processor
 ~> make cxsom-scan-vars
 
 ## Clearing all
@@ -37,6 +43,7 @@ Then we can launch a processor, and scan the root-dir.
 If you need to restart everything, you have to kill an eventual running processor and clear the content of the root-dir directory.
 
 ~> make cxsom-kill-processor
+~> make sked-kill-xrsw 
 ~> make cxsom-clear-rootdir
 
 ## Compute the data
