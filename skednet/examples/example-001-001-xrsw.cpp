@@ -15,22 +15,12 @@
 #define NB_ROUNDS 10
 #define WRITER_PROBA .2
 
-struct colormap {
-  sked::json::rgb preparer {.5, .5, .7};
-  sked::json::rgb readyr   {0., 0., 5.};
-  sked::json::rgb startr   {.5, .5, 1.};
-    
-  sked::json::rgb preparew {.7, .5, .5};
-  sked::json::rgb readyw   {.5, 0., 0.};
-  sked::json::rgb startw   {1., .5, .5};
-    
-  sked::json::rgb count  {0., .7, 0.};
-  sked::json::rgb sync   {.2, .2, .2};
-  sked::json::rgb wait   {.5, .7, .5};
-    
-  sked::json::rgb after   {.8, .8, .3};
-  sked::json::rgb done    {0., 0., 0};
-};
+// This is a thread, that performs NB_ROUND operations (with a random
+// duration). A fraction of them are writings, the other are
+// readings. Each thread connects to a xrsw scheduler, and uses scopes
+// to synchronize reading and writings.
+
+// The xrsw scheduler is a tcp/ip server that has to be started first.
 
 void process(sked::json::timeline& timeline, unsigned int id, const std::string& hostname, const std::string& port) {
   asio::ip::tcp::iostream socket;
