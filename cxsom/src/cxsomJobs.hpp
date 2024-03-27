@@ -583,7 +583,7 @@ namespace cxsom {
       }
 
       /**
-       * This interrupts the runing of new updates to that interaction can be done.
+       * This interrupts the runing of new updates so that interaction can be done.
        */
       void interaction_lock()    {interaction_ongoing = true;}
 
