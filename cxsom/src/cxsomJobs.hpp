@@ -310,6 +310,14 @@ namespace cxsom {
 	for(auto arg : updt.usual.args) *(out++) = data_center.type_of(arg);
 	type_checker(updt.usual.op, res_type, arg_types_tmp);
       }
+
+
+      bool flushing_in_progress;
+      void on_start_flushing_tasks() {
+      }
+      
+      void on_end_flushing_tasks() {
+      }
       
     public:
       
@@ -327,7 +335,8 @@ namespace cxsom {
 	  blockees(),
 	  interaction_ongoing(false),
 	  job_mutex(),
-	  pending_jobs() {}
+	  pending_jobs(),
+	  flushing_in_progress(false) {}
       Center()                         = delete;
       Center(const Center&)            = default;
       Center& operator=(const Center&) = default;
@@ -413,6 +422,10 @@ namespace cxsom {
 	logger->msg("... mutex passed.");
 #endif
 	if(tasks.empty()) {
+	  if(flushing_in_progress) {
+	    flushing_in_progress = false;
+	    on_end_flushing_tasks();
+	  }
 #ifdef cxsomMONITOR
 	  monitor->job_out_of_task(Monitor::OutOfTasksReason::NoPendingTasks);
 #endif
@@ -512,7 +525,6 @@ namespace cxsom {
 	  }
 #endif
 	}
-
 	
 	if(tasks.empty())  {
 #ifdef cxsomMONITOR
@@ -523,6 +535,11 @@ namespace cxsom {
 	  logger->pop();
 #endif
 	  return {};
+	}
+
+	if(!flushing_in_progress) {
+	  flushing_in_progress = true;
+	  on_start_flushing_tasks();
 	}
 
 #ifdef cxsomMONITOR
