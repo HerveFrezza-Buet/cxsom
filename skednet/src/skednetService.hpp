@@ -72,6 +72,9 @@ namespace sked {
 	  catch(std::exception& e) {
 	    std::cout << "Exception caught : " << e.what() << " --> " << typeid(e).name() << std::endl;
 	  }
+	  catch(...) {
+	    std::cout << "Non standard exception called." << std::endl;
+	  }
 	}
       };
 	

@@ -36,12 +36,14 @@ namespace sked {
 	
 	struct client_plug : public plug {
 	private:
-	  void interaction() noexcept(false) {
+	  void interaction() noexcept(false) try {
 	    char c;
 	    os << client_tag << std::endl;
 	    is >> c;
 	    if(c != server_tag) throw sked::net::exception::protocol_error(std::string("client_plug: bad tag received at opening."));
 	  }
+	  catch(sked::net::exception::protocol_error& e) {throw;}
+	  catch(...) {}
 	  
 	public:
 	  client_plug(char server_tag, char client_tag, std::istream& is, std::ostream& os): plug(server_tag, client_tag, is, os) {interaction();}
