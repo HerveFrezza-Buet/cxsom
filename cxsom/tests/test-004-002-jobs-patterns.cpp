@@ -23,7 +23,7 @@ int main(int, char**) {
   cxsom::jobs::TypeChecker type_checker;
   cxsom::jobs::fill(type_checker);
   
-  cxsom::jobs::Center jobs_center(rd, update_factory, type_checker, data_center);
+  cxsom::jobs::Center jobs_center(rd, update_factory, type_checker, data_center, nullptr);
 
 
   data_center.check_all();
