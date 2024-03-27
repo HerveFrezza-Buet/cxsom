@@ -20,13 +20,13 @@ int main(int argc, char* argv[]) {
   }
   
   asio::io_service        ios;
-  sked::net::main::xrsw context;
+  sked::net::xrsw::main context;
 
   std::thread listen {[&ios, &context, port = std::stoi(argv[1])](){
     asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port);
     asio::ip::tcp::acceptor acceptor(ios, endpoint);
     while(true) {
-      std::thread service {sked::net::service::xrsw(context, acceptor)};
+      std::thread service {sked::net::xrsw::service(context, acceptor)};
       service.detach();
     }
   }};

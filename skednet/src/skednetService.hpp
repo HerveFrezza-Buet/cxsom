@@ -4,6 +4,8 @@
 #include <chrono>
 #include <sked.hpp>
 
+#include <skednetProtocol.hpp>
+
 namespace sked {
   namespace net {
     namespace xrsw {
@@ -23,7 +25,7 @@ namespace sked {
     class core_service {
       std::shared_ptr<asio::ip::tcp::iostream>  p_socket;
     public:
-      core(asio::ip::tcp::acceptor& acceptor) 
+      core_service(asio::ip::tcp::acceptor& acceptor) 
 	: p_socket(new asio::ip::tcp::iostream()) {
 	acceptor.accept(*(p_socket->rdbuf())); // Blocking is here
       }
@@ -41,15 +43,26 @@ namespace sked {
 	
       public:
 
-	xrsw(main& context, asio::ip::tcp::acceptor& acceptor) : core_service(acceptor), context(context) {}
+	service(main& context, asio::ip::tcp::acceptor& acceptor) : core_service(acceptor), context(context) {}
 	  
 	void operator()() {
 	  try {
 	    socket().exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
+	    sked::net::protocol::scope::server_plug read_plug('R', 'r',  socket(), socket());
+	    sked::net::protocol::scope::server_plug write_plug('W', 'w', socket(), socket());
 	    while(true) {
-	      // socket() >> command;
-	      // socket().get(c);
-	      // socket() << command.size() << std::endl;
+	      char c;
+	      socket() >> c;
+	      if(c == 'r') {
+		auto lock = sked::xrsw::reader_scope(context.queue);
+		read_plug();
+	      }
+	      else if (c == 'w') {
+		auto lock = sked::xrsw::writer_scope(context.queue);
+		write_plug();
+	      }
+	      else
+		throw sked::net::exception::protocol_error("sked::net::xrsw::service: bad tag.");
 	    }
 	  }
 	  catch(std::ios_base::failure& e) {
