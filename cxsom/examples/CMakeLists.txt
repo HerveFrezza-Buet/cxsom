@@ -13,9 +13,9 @@ foreach(f ${usage_examples})
   
   target_include_directories(${exampleName} PUBLIC ${CMAKE_SOURCE_DIR}/src)
   target_include_directories(${exampleName} PUBLIC ${FFTCONV_INCLUDE_DIRS})   
+  target_include_directories(${exampleName} PUBLIC ${SKEDNET_INCLUDE_DIRS})   
   target_link_libraries     (${exampleName} PUBLIC -lpthread)   
-  target_link_libraries     (${exampleName} PUBLIC ${FFTCONV_LIBRARIES})  
-  #target_link_libraries     (${exampleName} PUBLIC ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries     (${exampleName} PUBLIC ${FFTCONV_LIBRARIES} ${SKEDNET_LIBRARIES})  
 
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${exampleName}
     DESTINATION bin

@@ -1,6 +1,7 @@
 
 #include <utility> // should be included by asio
 #include <asio.hpp>
+#include <skednet.hpp>
 
 
 // #define cxsomDEBUG_PROTOCOL
