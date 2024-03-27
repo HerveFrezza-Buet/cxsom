@@ -19,11 +19,14 @@
 #include <functional>
 #include <algorithm>
 #include <iomanip>
+#include <memory>
 
 #include <mutex>
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+
+#include <skednet.hpp>
 
 
 namespace cxsom {
@@ -313,16 +316,20 @@ namespace cxsom {
 
 
       bool flushing_in_progress;
+      std::shared_ptr<sked::net::scope::xrsw::write_explicit> xrsw_writer;
       void on_start_flushing_tasks() {
+	if(xrsw_writer) xrsw_writer->enter();
       }
       
       void on_end_flushing_tasks() {
+	if(xrsw_writer) xrsw_writer->leave();
       }
       
     public:
       
       template<typename RANDOM_ENGINE>
-      Center(RANDOM_ENGINE& rd, const UpdateFactory& update_factory, const TypeChecker& type_checker, data::Center& data_center)
+      Center(RANDOM_ENGINE& rd, const UpdateFactory& update_factory, const TypeChecker& type_checker, data::Center& data_center,
+	     std::shared_ptr<sked::net::scope::xrsw::write_explicit> xrsw_writer)
 	: gen(rd()),
 	  update_factory(update_factory),
 	  type_checker(type_checker),
@@ -336,7 +343,9 @@ namespace cxsom {
 	  interaction_ongoing(false),
 	  job_mutex(),
 	  pending_jobs(),
-	  flushing_in_progress(false) {}
+	  flushing_in_progress(false),
+	  xrsw_writer(xrsw_writer)
+      {}
       Center()                         = delete;
       Center(const Center&)            = default;
       Center& operator=(const Center&) = default;

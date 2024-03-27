@@ -13,6 +13,7 @@
 #include <sstream>
 #include <iomanip>
 
+#include <skednet.hpp>
 #include <cxsom-server.hpp>
 
 namespace cxsom {
@@ -242,10 +243,11 @@ namespace cxsom {
 		       const cxsom::jobs::TypeChecker& checker,
 		       const std::string& root_dir,
 		       int nb_threads,
-		       int port) {
+		       int port,
+		       std::shared_ptr<sked::net::scope::xrsw::write_explicit> xrsw_writer) {
       std::random_device rd;
       cxsom::data::Center data_center(root_dir);
-      cxsom::jobs::Center jobs_center(rd, factory, checker, data_center);
+      cxsom::jobs::Center jobs_center(rd, factory, checker, data_center, xrsw_writer);
       
       std::vector<std::thread> workers;
       for(int i = 0; i < nb_threads; ++i)

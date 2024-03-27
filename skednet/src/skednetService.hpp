@@ -2,8 +2,11 @@
 
 #include <thread>
 #include <chrono>
-#include <sked.hpp>
 
+#include <utility> // should be included by asio
+#include <asio.hpp>
+
+#include <sked.hpp>
 #include <skednetProtocol.hpp>
 
 namespace sked {
