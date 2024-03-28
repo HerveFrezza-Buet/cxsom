@@ -433,10 +433,6 @@ namespace cxsom {
 	logger->msg("... mutex passed.");
 #endif
 	if(tasks.empty()) {
-	  if(nb_ongoing_processes == 0 and flushing_tasks_in_progress) {
-	    flushing_tasks_in_progress = false;
-	    on_end_flushing_tasks();
-	  }
 #ifdef cxsomMONITOR
 	  monitor->job_out_of_task(Monitor::OutOfTasksReason::NoPendingTasks);
 #endif
@@ -545,6 +541,10 @@ namespace cxsom {
 	  logger->msg("There are really no more tasks, no jobs found.");
 	  logger->pop();
 #endif
+	  if(nb_ongoing_processes == 0 and flushing_tasks_in_progress) {
+	    flushing_tasks_in_progress = false;
+	    on_end_flushing_tasks();
+	  }
 	  return {};
 	}
 

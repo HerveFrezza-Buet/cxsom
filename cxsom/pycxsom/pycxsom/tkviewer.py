@@ -46,15 +46,12 @@ class HistorySlider:
         
         
 class HistoryFromVariableSlider(HistorySlider):
-    def __init__(self, master, title, var_path, skednet_hostname=None, skednet_port=None):
+    def __init__(self, master, title, var_path, skednet_lock=sked.nolock()):
         super().__init__(master, title, 0, 1, 0)
         self.refresh_button = tk.Button(self.label_frame, text='Refresh', command = self.on_refresh)
         self.refresh_button.pack(side=tk.LEFT, fill=tk.BOTH, padx=5)
         self.var_path = var_path
-        if skednet_hostname is None:
-            self.xrsw = sked.nolock()
-        else:
-            self.xrsw = sked.read(skednet_hostname, skednet_port)
+        self.xrsw = skednet_lock
         self.on_refresh()
 
     def on_refresh(self):
