@@ -97,7 +97,7 @@ cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port skednet-
 
 .PHONY: cxsom-clear-rootdir
 cxsom-clear-rootdir:
-	@cxsom-ask "Do you really want to clear `cat $(ROOTDIR_CONFIG_FILE)` ?" || rm -rf `cat $(SKEDNET_PORT_CONFIG_FILE)`/*
+	@cxsom-ask "Do you really want to clear `cat $(ROOTDIR_CONFIG_FILE)` ?" || rm -rf `cat $(ROOTDIR_CONFIG_FILE)`/*
 
 .PHONY: skednet-launch-xrsw
 skednet-launch-xrsw:
@@ -109,7 +109,7 @@ skednet-kill-xrsw:
 
 .PHONY: skednet-is-xrsw-running
 skednet-is-xrsw-running:
-	@ps -aux | grep 'skednet-xrsw' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "xrsw [RUNNING]" "xrsw [KILLED ]"; echo
+	@ps -aux | grep 'skednet-xrsw' | grep `cat $(SKEDNET_PORT_CONFIG_FILE)` | wc -l | cxsom-conditional-message "xrsw [RUNNING]" "xrsw [KILLED ]"; echo
 
 .PHONY: cxsom-launch-processor
 cxsom-launch-processor:
