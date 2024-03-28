@@ -35,3 +35,16 @@ class write(_locker):
 class read(_locker):
     def __init__(self, hostname, port):
         super().__init__('R', 'r', hostname, port)
+
+class nolock:
+    def __init__(self):
+        pass
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        if exc_type:
+            print(f'exc_type: {exc_type}')
+            print(f'exc_value: {exc_value}')
+            print(f'exc_traceback: {exc_traceback}')

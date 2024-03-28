@@ -23,6 +23,7 @@ cxsom-help:
 	@echo 
 	@echo "  make skednet-launch-xrsw // starts a skednet data access locker at server side..."
 	@echo "  make skednet-kill-xrsw   // ... kills it"
+	@echo "  make skednet-is-xrsw-running"
 	@echo
 	@echo "  make cxsom-launch-processor           // Usual processor"
 	@echo "  make cxsom-launch-monitored-processor // Enables monitoring (generates a monitoring.data file)."
@@ -96,7 +97,7 @@ cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port skednet-
 
 .PHONY: cxsom-clear-rootdir
 cxsom-clear-rootdir:
-	@cxsom-ask "Do you really want to clear `cat $(ROOTDIR_CONFIG_FILE)` ?" || rm -rf `cat $(ROOTDIR_CONFIG_FILE)`/*
+	@cxsom-ask "Do you really want to clear `cat $(ROOTDIR_CONFIG_FILE)` ?" || rm -rf `cat $(SKEDNET_PORT_CONFIG_FILE)`/*
 
 .PHONY: skednet-launch-xrsw
 skednet-launch-xrsw:
@@ -105,6 +106,10 @@ skednet-launch-xrsw:
 .PHONY: skednet-kill-xrsw
 skednet-kill-xrsw:
 	@killall skednet-xrsw
+
+.PHONY: skednet-is-xrsw-running
+skednet-is-xrsw-running:
+	@ps -aux | grep 'skednet-xrsw' | grep `cat $(ROOTDIR_CONFIG_FILE)` | wc -l | cxsom-conditional-message "xrsw [RUNNING]" "xrsw [KILLED ]"; echo
 
 .PHONY: cxsom-launch-processor
 cxsom-launch-processor:
