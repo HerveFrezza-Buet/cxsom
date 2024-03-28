@@ -105,7 +105,7 @@ skednet-launch-xrsw:
 
 .PHONY: skednet-kill-xrsw
 skednet-kill-xrsw:
-	@killall skednet-xrsw
+	@killall -q skednet-xrsw || echo 'No xrsw to kill'
 
 .PHONY: skednet-is-xrsw-running
 skednet-is-xrsw-running:

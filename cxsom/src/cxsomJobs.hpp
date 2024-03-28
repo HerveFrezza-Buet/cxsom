@@ -549,7 +549,7 @@ namespace cxsom {
 	}
 
 	++nb_ongoing_processes;
-	if(nb_ongoing_processes == 1) {
+	if(!flushing_tasks_in_progress && nb_ongoing_processes == 1) {
 	  flushing_tasks_in_progress = true;
 	  on_start_flushing_tasks();
 	}
