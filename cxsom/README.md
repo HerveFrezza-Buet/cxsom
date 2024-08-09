@@ -2,23 +2,8 @@
 
 cxsom is a simulator for multi-soms.
 
-## Installations 
+## Installations
 
-### Dependencies
-
-You will need to have the fftconv package installed (see https://github.com/jeremyfix/fftconv).
-
-```
-sudo apt install libfftw3-dev
-cd <somewhere you place source code>
-git clone https://github.com/jeremyfix/fftconv.git
-cd fftconv/fftconv/
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr
-sudo make install
-cd ~
-```
 
 ### The C++ materials
 
@@ -30,6 +15,7 @@ cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
 make -j
 sudo make install
+cd ..
 ```
 
 You have compiled stuff (the c++ examples and some utilities) and installed the headers.
@@ -41,6 +27,7 @@ Go into the `cxsom` directory you have git-cloned. Then type
 ```
 cd pycxsom
 python3 setup.py install --user
+cd ..
 ```
 This installs (with setup tools) the required python library, as well as some utilities (see the bin directory).
 
@@ -63,7 +50,7 @@ ls
 
 You can see that an empty directory named data, where computation will be stored.
 
-Before going further, we define an environment variable CXSOM_HOME, which is the path to git directory of cxsom on your disk (e.g. `/home/me/somewhere/cxsom`)
+Before going further, we define an environment variable CXSOM_HOME, which is the path to git directory of cxsom on your disk (e.g. `/home/me/somewhere/cxsom/cxsom`)
 ```
 export CXSOM_HOME=<the-path...>
 ```
@@ -77,7 +64,7 @@ cp $CXSOM_HOME/examples/example-004-002-cxsom-recsom-maps.cpp rules.cpp
 We can use the cxsom C++ library to compile it.
 
 ```
-g++ -o rules rules.cpp $(pkg-config --cflags --libs cxsom-rules) -std=c++17
+g++ -o rules rules.cpp $(pkg-config --cflags --libs cxsom-rules) -std=c++20
 ```
 
 We have now a command that you can try:
@@ -188,6 +175,10 @@ python3 $CXSOM_HOME/viewer-for-examples/cxsom-view-004-002.py data &
 ```
 
 Play with the interface, generate more data (you can change the sequence ABCDEFEDCB to AAAAF for example), refresh the viewers, etc...
+
+Visit the [cxsom web page](https://frezza.pages.centralesupelec.fr/cxsom-web/cxsom/index.html), as well as cxsom-builder experiments, to learn more convenient ways of using cxsom.
+
+
 
 ## Documentation
 
