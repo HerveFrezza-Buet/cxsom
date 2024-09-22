@@ -5,5 +5,5 @@ setuptools.setup(
     name = "pysked",
     version = "1.0",
     scripts = ['bin/pysked-timeline-to-pdf.py'],
-    packages = setuptools.find_packages(),
+    #packages = setuptools.find_packages(),
 )

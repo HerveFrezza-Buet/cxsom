@@ -28,7 +28,10 @@ namespace sked {
       std::unique_lock<std::mutex> lock(to_do_mutex);
       to_do.wait(lock);
     }
-    void flush() {to_do.notify_all();}
+    void flush() {
+      std::lock_guard lock(to_do_mutex);
+      to_do.notify_all();
+    }
   };
 
   template<concepts::ack_queue QUEUE>
@@ -122,6 +125,7 @@ namespace sked {
       }
 
       void done(ack_info_type) {
+	std::lock_guard lock(all_done_mutex);
 	--size;
 	all_done.notify_one();
       }

@@ -9,9 +9,9 @@ struct colormap {
   sked::json::rgb startw   {1., .5, .5};
     
   sked::json::rgb count  {0., .7, 0.};
-  sked::json::rgb sync   {.2, .2, .2};
+  sked::json::rgb sync   {.2, 1, .2};
   sked::json::rgb wait   {.5, .7, .5};
     
   sked::json::rgb after   {.8, .8, .3};
-  sked::json::rgb done    {0., 0., 0};
+  sked::json::rgb done    {.5, .5, .5};
 };

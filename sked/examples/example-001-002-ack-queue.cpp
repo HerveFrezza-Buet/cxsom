@@ -29,14 +29,14 @@ int main(int argc, char* argv[]) {
 	auto in_job = sked::job_scope(queue);
 	// auto ack_info = queue.go_ahead(); 
 	
-	timeline(i, "start job", NB_THREADS + 1 - i, cmap.startr);
-	timeline(i, "job done", 0, cmap.done);
+	timeline(i, "start job", 3 + i % 3, cmap.startr);
+	timeline(i, "job done", 1, cmap.done);
 	
 	// queue.done(ac_info);
       }
       
       timeline(i, "after work", 5, cmap.after);
-      timeline(i, "finished", 0, cmap.done);
+      timeline(i, "finished", 1, cmap.done);
     });
 
   timeline("sleeping", 3, cmap.wait);

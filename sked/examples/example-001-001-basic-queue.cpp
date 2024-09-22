@@ -22,17 +22,17 @@ int main(int argc, char* argv[]) {
       timeline(i, "starts",   i, cmap.preparer);
       timeline(i, "go ahead", 0, cmap.readyr);
       queue.go_ahead(); // blocked until the main thread flushes.
-      timeline(i, "passed", NB_THREADS + 1 - i, cmap.after);
-      timeline(i, "finished", 0, cmap.done);
+      timeline(i, "passed", 3 + i % 3, cmap.after);
+      timeline(i, "finished", 1, cmap.done);
     });
 
   timeline("sleeping", NB_THREADS + 3, cmap.wait);
-  timeline("flushing now", 0, cmap.sync);
+  timeline("flushing", 1, cmap.sync);
   queue.flush();
 
-  timeline("joining now", 0, cmap.wait);
+  timeline("joining", 1, cmap.wait);
   for(auto& t : tasks) t.join();
-  timeline("joined", 0, cmap.done);
+  timeline("joined", 1, cmap.done);
 
 
   std::cout << std::endl
