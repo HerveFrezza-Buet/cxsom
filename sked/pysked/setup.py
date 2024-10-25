@@ -4,6 +4,5 @@ import setuptools
 setuptools.setup(
     name = "pysked",
     version = "1.0",
-    scripts = ['bin/pysked-timeline-to-pdf.py'],
-    packages = setuptools.find_packages(),
+    scripts = ['bin/pysked-timeline-to-pdf.py']
 )

@@ -11,6 +11,10 @@
 
 namespace sked {
 
+  /**
+   * @short Basic wait-go queue.
+   * A "queue" is an object shared by a main thread and many secondary threads. Secondary thread can call "q.go_ahead()" on the queue, when the ask for continuing execution. The main thread can call "q.flush()" to enable all waiting secondary threads to pass their "go_ahead" instruction.
+   */
   class queue {
   protected:
     
@@ -24,11 +28,17 @@ namespace sked {
     queue& operator=(const queue&) = delete;
     queue& operator=(queue&&) = delete;
 
+    /*
+     * @short This ask for proceeding further.
+     */
     void go_ahead() {
       std::unique_lock<std::mutex> lock(to_do_mutex);
       to_do.wait(lock);
     }
-    void flush() {to_do.notify_all();}
+    void flush() {
+      std::lock_guard<std::mutex> lock(to_do_mutex);
+      to_do.notify_all();
+    }
   };
 
   template<concepts::ack_queue QUEUE>

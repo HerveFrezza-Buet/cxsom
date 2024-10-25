@@ -9,6 +9,7 @@
 #include <fstream>
 #include <vector>
 #include <tuple>
+#include <sstream>
 
 namespace sked {
 
@@ -29,30 +30,27 @@ namespace sked {
     }
 
     void message(timer& t, const std::string& tag, const std::string& msg,
-		 unsigned int duration_seconds) {
-      std::string duration = "";
-      if(duration_seconds > 0) {
-	duration += " \e[32m(";
-	duration += std::to_string(duration_seconds);
-	duration += "s)\e[0m";
-      }
+		 double duration_seconds) {
+      std::ostringstream os;
+      if(duration_seconds > 0) 
+	os << " \e[32m(" << duration_seconds << "s)\e[0m";
       std::osyncstream(std::cout) << "\e[0;90m" << t << "\e[0m : "
 				  << "\e[1;94m" << tag << "\e[0m : " 
 				  << msg
-				  << duration << std::endl;
+				  << os.str() << std::endl;
       if(duration_seconds > 0)
-	std::this_thread::sleep_for(std::chrono::seconds(duration_seconds));    
+	std::this_thread::sleep_for(std::chrono::milliseconds((unsigned int)(1000*duration_seconds)));    
     }
 
     void message(timer& t, unsigned int thrd_id, const std::string& msg,
-		 unsigned int duration_seconds) {
+		 double duration_seconds) {
       std::ostringstream os;
       os << "Thread " << std::setw(3) << thrd_id;
       message(t, os.str(), msg, duration_seconds);
     }
     
     void message(timer& t, const std::string& msg,
-		 unsigned int duration_seconds) {
+		 double duration_seconds) {
       message(t, "\e[1;95m===MAIN===", msg, duration_seconds);
     }
 		 
@@ -69,20 +67,20 @@ namespace sked {
     public:
       timeline(const std::string& filename) : file(filename), t() {}
       
-      void operator()(const std::string& tag, const std::string& msg, unsigned int duration_seconds, const rgb& color) {
+      void operator()(const std::string& tag, const std::string& msg, double duration_seconds, const rgb& color) {
 	std::osyncstream(file) << tag << ';' << t() << ';' << msg << ';' << duration_seconds << ';' << std::get<0>(color) << ' ' <<  std::get<1>(color) << ' ' << std::get<2>(color) << std::endl;
 	verbose::message(t, tag, msg, duration_seconds);
       }
       
       void operator()(unsigned int thrd_id, const std::string& msg,
-		      unsigned int duration_seconds,
+		      double duration_seconds,
 		      const rgb& color) {
 	std::osyncstream(file) << "Thread " << std::setw(3) << thrd_id << ';' << t() << ';' << msg << ';' << duration_seconds << ';' << std::get<0>(color) << ' ' <<  std::get<1>(color) << ' ' << std::get<2>(color) << std::endl;
 	verbose::message(t, thrd_id, msg, duration_seconds);
       }
     
       void operator()(const std::string& msg,
-		      unsigned int duration_seconds,
+		      double duration_seconds,
 		      const rgb& color) {
 	std::osyncstream(file) << "===MAIN===" << ';' << t() << ';' << msg << ';' << duration_seconds << ';' << std::get<0>(color) << ' ' <<  std::get<1>(color) << ' ' << std::get<2>(color) << std::endl;
 	verbose::message(t, msg, duration_seconds);

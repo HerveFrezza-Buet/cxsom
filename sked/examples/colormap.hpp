@@ -1,7 +1,7 @@
 
 struct colormap {
   sked::json::rgb preparer {.5, .5, .7};
-  sked::json::rgb readyr   {0., 0., 5.};
+  sked::json::rgb readyr   {0., 0., .5};
   sked::json::rgb startr   {.5, .5, 1.};
     
   sked::json::rgb preparew {.7, .5, .5};
