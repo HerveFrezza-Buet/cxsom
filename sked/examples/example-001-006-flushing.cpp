@@ -4,12 +4,17 @@
 #include <atomic>
 
 #define NB_THREADS 20
+#define DT .3 // small duration, such as the message is visible on the timeline.
 
 #include "colormap.hpp"
 
 int main(int argc, char* argv[]) {
   sked::double_buffered::queue queue;
+  
   sked::json::timeline timeline("timeline-001-006.tml");
+  // Usage:
+  // timeline(<thread-id>, <msg>, <duration>, <color>);
+  
   std::atomic<unsigned int> remaining {NB_THREADS};
 
   colormap cmap;
@@ -22,24 +27,25 @@ int main(int argc, char* argv[]) {
       auto job_duration     = std::uniform_int_distribution<unsigned int>(1, 5)(gen);
       
       timeline(i, "wake up",       wake_up_duration, cmap.wait);
-      timeline(i, "ready to work", 0, cmap.readyr);
+      timeline(i, "ready to work", DT, cmap.readyr);
       {
 	auto in_job = sked::job_scope(queue);
 	timeline(i, "start job ", job_duration, cmap.startr);
-	timeline(i, "job done",   0, cmap.done); 
+	timeline(i, "job done",   DT, cmap.done); 
       }
       timeline(i, "after work", 5, cmap.after);
-      timeline(i, "finished",   0, cmap.done);
+      timeline(i, "finished",   DT, cmap.finish);
       remaining--;
     }).detach();
 
   // The main thread runs the queue processing.
   while(remaining > 0) {
-    timeline(std::to_string(remaining) + " active thread(s).", 0, cmap.count);
+    timeline(std::to_string(remaining) + " active thread(s).", DT, cmap.endwait);
     while(queue.flush())
-      timeline("tasks performed", 0, cmap.sync);
-    timeline("all flushes done, waiting", 1, cmap.done);
+      timeline("tasks performed", DT, cmap.sync);
+    timeline("all flushes done, waiting", 1, cmap.finish);
   }
+  timeline("No remaing threads, we are done", 1, cmap.after);
 
 
   std::cout << std::endl
