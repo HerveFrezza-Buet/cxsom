@@ -153,6 +153,9 @@ namespace sked {
   }
 
   namespace double_buffered {
+    /**
+     * @short This hosts a front and back queue internally.
+     */
     class queue {
     private:
       std::mutex swap_mutex;
