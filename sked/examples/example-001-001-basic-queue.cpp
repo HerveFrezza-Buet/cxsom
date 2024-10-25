@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
       timeline(i, "go ahead", DT, cmap.readyr);
       queue.go_ahead(); // blocked until the main thread flushes.
       timeline(i, "passed", 1, cmap.after);
-      timeline(i, "finished", DT, cmap.done);
+      timeline(i, "finished", DT, cmap.finish);
     });
 
   timeline("sleeping", NB_THREADS + 3, cmap.wait); // We wait all secondary threads to each go_ahead.
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
   timeline("joining now", DT, cmap.wait);
   for(auto& t : tasks) t.join();
-  timeline("joined", DT, cmap.done);
+  timeline("joined", DT, cmap.finish);
 
 
   std::cout << std::endl

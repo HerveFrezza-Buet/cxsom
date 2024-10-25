@@ -2,6 +2,7 @@
 #include <vector>
 
 #define NB_THREADS 10
+#define DT .3 // small duration, such as the message is visible on the timeline.
 
 #include "colormap.hpp"
 
@@ -14,8 +15,11 @@
 // may increase the current flush duration.
 
 int main(int argc, char* argv[]) {
-  sked::ack::queue queue; // Tasks in this queue acknowledge when they are done.
+  sked::ack::queue queue;
   sked::json::timeline timeline("timeline-001-002.tml");
+  
+  // Usage:
+  // timeline(<thread-id>, <msg>, <duration>, <color>);
   
   colormap cmap;
   
@@ -24,30 +28,30 @@ int main(int argc, char* argv[]) {
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
     tasks.emplace_back([i, &timeline, &queue, &cmap]() {
       timeline(i, "starts", i, cmap.preparer);
-      timeline(i, "wait for job execution", 0, cmap.readyr);
+      timeline(i, "wait for job execution", DT, cmap.readyr);
       {
 	auto in_job = sked::job_scope(queue);
 	// auto ack_info = queue.go_ahead(); 
 	
-	timeline(i, "start job", NB_THREADS + 1 - i, cmap.startr);
-	timeline(i, "job done", 0, cmap.done);
+	timeline(i, "start job", 3, cmap.startr);
+	timeline(i, "job done", DT, cmap.done);
 	
 	// queue.done(ac_info);
       }
       
       timeline(i, "after work", 5, cmap.after);
-      timeline(i, "finished", 0, cmap.done);
+      timeline(i, "finished", DT, cmap.finish);
     });
 
   timeline("sleeping", 3, cmap.wait);
   unsigned int nb_flushes = 1;
-  timeline("start flushing", 0, cmap.wait);
+  timeline("start flushing", DT, cmap.endwait);
   while(queue.flush())
-    timeline(std::string("flush #") + std::to_string(nb_flushes++) + ".", 0, cmap.sync);
+    timeline(std::string("flush #") + std::to_string(nb_flushes++) + ".", DT, cmap.sync);
   
-  timeline("All jobs done, joining now", 0, cmap.wait);
+  timeline("All jobs done, joining now", DT, cmap.wait);
   for(auto& t : tasks) t.join();
-  timeline("joined", 0, cmap.done);
+  timeline("joined", DT, cmap.finish);
   
   std::cout << std::endl
 	    << std::endl

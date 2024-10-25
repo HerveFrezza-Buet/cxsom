@@ -63,6 +63,9 @@ namespace sked {
   auto job_scope(QUEUE& owner) {return job_scope_t<QUEUE>(owner);}
 
 
+  /**
+   * @short Wraps a queue so that secondary threads pass go_ahead one after the other.
+   */
   template<concepts::ack_queue QUEUE>
   class serial : public QUEUE {
   private:
@@ -93,6 +96,10 @@ namespace sked {
 
     struct no_info {};
 
+    /**
+     * @short These queues acknowledge when they finish their job.
+     * When a secondary thread passes the "q.go_ahead()" barrier, it performs a job and then notifies that it os done, by calling "q.done()". The go_ahead call returns an information that has to be passed to done, i.e. "info = q.go_ahead(); ....; q.done(info)". In the main thread, "q.flush()" waits for all running secondary threads to have acknowledge by "done". Some othe secondary threads my ask for "go_ahead" while flussing is in progress. The "q.flush()" call returns false when it triggers no secondary thread work.
+     */
     class queue : public sked::queue {
     private:
       std::condition_variable   all_done;
@@ -132,8 +139,9 @@ namespace sked {
       }
 
       void done(ack_info_type) {
+	std::lock_guard<std::mutex> lock(all_done_mutex);
 	--size;
-	all_done.notify_one();
+	all_done.notify_one(); // There is only only the main thread pending.
       }
     };
   }
