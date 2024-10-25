@@ -4,6 +4,7 @@
 #include <random>
 
 #define NB_THREADS 10
+#define DT .3 // small duration, such as the message is visible on the timeline.
 #define NB_ROUNDS  10
 #define NB_JOBS     2
 
@@ -18,6 +19,8 @@ int main(int argc, char* argv[]) {
   
   sked::serial<sked::double_buffered::queue> queue;
   sked::json::timeline timeline("timeline-001-005.tml");
+  // Usage:
+  // timeline(<thread-id>, <msg>, <duration>, <color>);
   
   colormap cmap;
   
@@ -29,31 +32,31 @@ int main(int argc, char* argv[]) {
       for(int job = 1; job <= NB_JOBS; ++job)  {
 	std::string job_id = std::to_string(job);
 	timeline(i, std::string("preparing job ") + job_id, 2, cmap.preparer);
-	timeline(i, std::string("ready for job ") + job_id, 0, cmap.readyr);
+	timeline(i, std::string("ready for job ") + job_id, DT, cmap.readyr);
 	{
 	  auto in_job = sked::job_scope(queue);
 	  timeline(i, std::string("start job ") + job_id, job_duration(gen), cmap.startr);
-	  timeline(i, std::string("job ") + job_id + " done", 0, cmap.done); 
+	  timeline(i, std::string("job ") + job_id + " done", DT, cmap.done); 
 	}
       }
       timeline(i, "after work", 5, cmap.after);
-      timeline(i, "finished",   0, cmap.done);
+      timeline(i, "finished",   DT, cmap.finish);
     });
 
   // We scan every 2 seconds if some job is to be executed.
   do {
     timeline("sleeping",  2, cmap.wait);
-    timeline("waking up", 0, cmap.done);
+    timeline("waking up", DT, cmap.sync);
   } while(!queue.flush());
     
   unsigned int round = 1;
   do 
-    timeline(std::string("Round ") + std::to_string(round++) + " done.", 0, cmap.sync);
+    timeline(std::string("Round ") + std::to_string(round++) + " done.", DT, cmap.sync);
   while(queue.flush());
 
-  timeline("All rounds done, joining now", 0, cmap.wait);
+  timeline("All rounds done, joining now", DT, cmap.after);
   for(auto& t : tasks) t.join();
-  timeline("joined", 0, cmap.done);
+  timeline("joined", DT, cmap.finish);
   
 
   std::cout << std::endl
