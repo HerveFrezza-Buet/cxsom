@@ -98,12 +98,12 @@ namespace sked {
 
     /**
      * @short These queues acknowledge when they finish their job.
-     * When a secondary thread passes the "q.go_ahead()" barrier, it performs a job and then notifies that it os done, by calling "q.done()". The go_ahead call returns an information that has to be passed to done, i.e. "info = q.go_ahead(); ....; q.done(info)". In the main thread, "q.flush()" waits for all running secondary threads to have acknowledge by "done". Some othe secondary threads my ask for "go_ahead" while flussing is in progress. The "q.flush()" call returns false when it triggers no secondary thread work.
+     * When a secondary thread passes the "q.go_ahead()" barrier, it performs a job and then notifies that it os done, by calling "q.done()". The go_ahead call returns an information that has to be passed to done, i.e. "info = q.go_ahead(); ....; q.done(info)". In the main thread, "q.flush()" waits for all running secondary threads to have acknowledge by "done". Some othe secondary threads my ask for "go_ahead" while flushing is in progress. The "q.flush()" call returns false when it triggers no secondary thread work.
      */
     class queue : public sked::queue {
     private:
-      std::condition_variable   all_done;
-      std::mutex                all_done_mutex;
+      std::condition_variable   check_activity;
+      std::mutex                check_activity_mutex;
       std::atomic<unsigned int> size = 0;
       
       
@@ -117,9 +117,15 @@ namespace sked {
       queue& operator=(queue&&) = delete;
       
       ack_info_type go_ahead() {
-	std::unique_lock<std::mutex> lock(to_do_mutex);
-	size++;
-	to_do.wait(lock);
+	{
+	  std::lock_guard<std::mutex> lock(check_activity_mutex);
+	  check_activity.notify_one(); // There is only only the main thread pending.
+	}
+	{
+	  std::unique_lock<std::mutex> lock(to_do_mutex);
+	  size++;
+	  to_do.wait(lock);
+	}
 	return {};
       }
 
@@ -132,16 +138,16 @@ namespace sked {
 	while(size > 0) {
 	  res = true;
 	  this->sked::queue::flush();
-	  std::unique_lock<std::mutex> lock(all_done_mutex);
-	  all_done.wait(lock);
+	  std::unique_lock<std::mutex> lock(check_activity_mutex);
+	  check_activity.wait(lock);
 	}
 	return res;
       }
 
       void done(ack_info_type) {
-	std::lock_guard<std::mutex> lock(all_done_mutex);
+	std::lock_guard<std::mutex> lock(check_activity_mutex);
 	--size;
-	all_done.notify_one(); // There is only only the main thread pending.
+	check_activity.notify_one(); // There is only only the main thread pending.
       }
     };
   }
