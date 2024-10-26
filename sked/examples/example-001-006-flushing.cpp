@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
     std::thread([i, &timeline, &queue, &remaining, &cmap]() {
       std::random_device rd;
       std::mt19937 gen(rd());
-      auto wake_up_duration = std::uniform_int_distribution<unsigned int>(5, 10)(gen);
-      auto job_duration     = std::uniform_int_distribution<unsigned int>(1, 5)(gen);
+      auto wake_up_duration = std::uniform_real_distribution<double>(5, 10)(gen);
+      auto job_duration     = std::uniform_real_distribution<double>(1, 5)(gen);
       
       timeline(i, "wake up",       wake_up_duration, cmap.wait);
       timeline(i, "ready to work", DT, cmap.readyr);

@@ -5,7 +5,10 @@
 namespace sked {
   namespace xrsw {
     /**
-     * XRSW stands for multi-readers/serial-writers.
+     * XRSW stands for multi-readers/serial-writers. A xrsw::queue
+     * handles two double-buffered queues, one for the readers, one
+     * for the writers. The one for the writer is serial, so that only
+     * one writer writes at a time.
      */
     class queue {
     public:

@@ -10,9 +10,6 @@
 #include "colormap.hpp"
 
 int main(int argc, char* argv[]) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<unsigned int> job_duration(2, 5);
   
   // Any queue with job acknowledgment can be made serial, i.e. one
   // thread works at a time.
@@ -27,7 +24,11 @@ int main(int argc, char* argv[]) {
   std::vector<std::thread> tasks;
   
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
-    tasks.emplace_back([i, &timeline, &queue, &cmap, &gen, &job_duration]() {
+    tasks.emplace_back([i, &timeline, &queue, &cmap]() {
+      std::random_device rd;
+      std::mt19937 gen(rd());
+      std::uniform_real_distribution<double> job_duration(2, 5);
+      
       timeline(i, "starts", job_duration(gen), cmap.preparer);
       timeline(i, "wait for job execution", DT, cmap.readyr);
       {

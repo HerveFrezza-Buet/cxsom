@@ -32,8 +32,10 @@ namespace sked {
     void message(timer& t, const std::string& tag, const std::string& msg,
 		 double duration_seconds) {
       std::ostringstream os;
-      if(duration_seconds > 0) 
+      if(duration_seconds > 0) {
+	os.precision(3);
 	os << " \e[32m(" << duration_seconds << "s)\e[0m";
+      }
       std::osyncstream(std::cout) << "\e[0;90m" << t << "\e[0m : "
 				  << "\e[1;94m" << tag << "\e[0m : " 
 				  << msg

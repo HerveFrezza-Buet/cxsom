@@ -13,9 +13,6 @@
 // We can make a double-buffered queue serial.
 
 int main(int argc, char* argv[]) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<unsigned int> job_duration(3, 7);
   
   sked::serial<sked::double_buffered::queue> queue;
   sked::json::timeline timeline("timeline-001-005.tml");
@@ -27,7 +24,11 @@ int main(int argc, char* argv[]) {
   std::vector<std::thread> tasks;
   
   for(unsigned int i = 1; i <= NB_THREADS; ++i)
-    tasks.emplace_back([i, &timeline, &queue, &cmap, &gen, &job_duration]() {
+    tasks.emplace_back([i, &timeline, &queue, &cmap]() {
+      std::random_device rd;
+      std::mt19937 gen(rd());
+      std::uniform_real_distribution<double> job_duration(3, 7);
+  
       timeline(i, "starts", job_duration(gen), cmap.wait);
       for(int job = 1; job <= NB_JOBS; ++job)  {
 	std::string job_id = std::to_string(job);
