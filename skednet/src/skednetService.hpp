@@ -2,6 +2,8 @@
 
 #include <thread>
 #include <chrono>
+
+#include <asio.hpp>
 #include <sked.hpp>
 
 #include <skednetProtocol.hpp>

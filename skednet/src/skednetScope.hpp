@@ -14,6 +14,8 @@ namespace sked {
 	struct write : public sked::net::protocol::scope::client_plug {
 	  write(std::istream& is, std::ostream& os): sked::net::protocol::scope::client_plug('W', 'w', is, os) {} 
 	};
+	struct write_explicit : public sked::net::protocol::scope::client_plug_explicit {
+	  write_explicit(std::istream& is, std::ostream& os): sked::net::protocol::scope::client_plug_explicit('W', 'w', is, os) {} 
       }
     }
   }

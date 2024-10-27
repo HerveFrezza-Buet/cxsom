@@ -4,7 +4,6 @@
 #include <memory>
 #include <chrono>
 
-#include <utility> // should be included by asio
 #include <asio.hpp>
 
 #include <skednet.hpp>

@@ -34,7 +34,8 @@ namespace sked {
 	  }
 	};
 	
-	struct client_plug : public plug {
+
+	struct client_plug_explicit : public plug {
 	private:
 	  void interaction() noexcept(false) try {
 	    char c;
@@ -44,12 +45,17 @@ namespace sked {
 	  }
 	  catch(sked::net::exception::protocol_error& e) {throw;}
 	  catch(...) {}
-	  
 	public:
-	  client_plug(char server_tag, char client_tag, std::istream& is, std::ostream& os): plug(server_tag, client_tag, is, os) {interaction();}
-	  ~client_plug() noexcept(false) {interaction();}
-	  
+	  client_plug_explicit(char server_tag, char client_tag, std::istream& is, std::ostream& os): plug(server_tag, client_tag, is, os) {}
+	  void enter() {interaction();}
+	  void leave() {interaction();}
 	};
+	
+	struct client_plug : private client_plug_explicit {
+	  client_plug(char server_tag, char client_tag, std::istream& is, std::ostream& os): client_plug_explicit(server_tag, client_tag, is, os) {enter();}
+	  ~client_plug() noexcept(false) {leave();}
+	};
+	  
       }
     }
   }
