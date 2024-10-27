@@ -15,6 +15,8 @@
 #define NB_ROUNDS 10
 #define WRITER_PROBA .2
 
+#define DT .3
+
 // This is a thread, that performs NB_ROUND operations (with a random
 // duration). A fraction of them are writings, the other are
 // readings. Each thread connects to a xrsw scheduler, and uses scopes
@@ -26,7 +28,7 @@ void process(sked::json::timeline& timeline, unsigned int id, const std::string&
   asio::ip::tcp::iostream socket;
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<unsigned int> job_duration(1, 3);
+  std::uniform_real_distribution<double> job_duration(1, 3);
   std::uniform_real_distribution<double> toss(0, 1);
   sked::json::rgb write_color {.8, .2, .2};
   sked::json::rgb read_color  {.2, .8, .2};
@@ -60,7 +62,9 @@ int main(int argc, char* argv[]) {
   std::string hostname {argv[1]};
   std::string port     {argv[2]};
   sked::json::timeline timeline("timeline-001-001.tml");
-  sked::json::rgb wait_color  {.6, .4, .5};
+  sked::json::rgb wait_color      {.6, .4, .5};
+  sked::json::rgb end_wait_color  {.3, .2, .25};
+  sked::json::rgb finish_color    {.5, .5, .5};
   std::vector<std::thread> threads;
 
   unsigned int thread_id = 0;
@@ -68,8 +72,9 @@ int main(int argc, char* argv[]) {
     for(unsigned int t = 0; t < NB_THREADS; ++t)
       threads.emplace_back([&timeline, id=++thread_id, hostname, port](){process(timeline, id, hostname, port);});
     timeline("Waiting for next threads", 10, wait_color);
+    timeline("Waiting for next threads", DT, end_wait_color);
   }
-  timeline("All threads are started.", 2, wait_color);
+  timeline("All threads are started.", DT, finish_color);
   for(auto& t: threads) t.join();
 
   

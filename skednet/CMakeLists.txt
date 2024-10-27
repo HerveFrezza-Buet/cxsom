@@ -13,6 +13,7 @@ SET(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}/"
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SKED sked REQUIRED)
+pkg_check_modules(ASIO asio REQUIRED)
 
 
 FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc
@@ -20,7 +21,7 @@ FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc
 Name: ${CMAKE_PROJECT_NAME}
 Description: ${PROJECT_DESCRIPTION_SUMMARY}
 Version: ${PACKAGE_VERSION}
-Requires: sked 
+Requires: sked asio
 Libs: 
 Cflags: -I${INCLUDE_INSTALL_DIR}
 "

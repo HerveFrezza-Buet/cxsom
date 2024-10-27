@@ -13,8 +13,10 @@ foreach(f ${usage_examples})
   
   target_include_directories(${exampleName} PUBLIC ${CMAKE_SOURCE_DIR}/src)
   target_include_directories(${exampleName} PUBLIC ${SKED_INCLUDE_DIRS})   
+  target_include_directories(${exampleName} PUBLIC ${ASIO_INCLUDE_DIRS})   
   target_link_libraries     (${exampleName} PUBLIC -lpthread)   
   target_link_libraries     (${exampleName} PUBLIC ${SKED_LIBRARIES})  
+  target_link_libraries     (${exampleName} PUBLIC ${ASIO_LIBRARIES})  
 
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${exampleName}
     DESTINATION bin

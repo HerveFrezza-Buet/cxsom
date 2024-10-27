@@ -16,7 +16,6 @@ namespace sked {
 	void loop(const Duration& check_period) {
 	  while(true) {
 	    while(!queue.flush()) std::this_thread::sleep_for(check_period);
-	    while(queue.flush());
 	  }
 	}
       };
