@@ -11,8 +11,10 @@
 namespace sked {
   namespace net {
     namespace xrsw {
-      class main {
-      public:
+      /**
+       * @short The data for syncrhonization at server side (a queue).
+       */
+      struct main {
 	sked::xrsw::queue queue;
 	template <typename Duration>
 	void loop(const Duration& check_period) {
@@ -22,7 +24,10 @@ namespace sked {
 	}
       };
     }
-    
+
+    /**
+     * @short This is what services have in common.
+     */
     class core_service {
       std::shared_ptr<asio::ip::tcp::iostream>  p_socket;
     public:
@@ -37,6 +42,9 @@ namespace sked {
 
     namespace xrsw {
     
+      /**
+       * @short This service handles the xrsw protocol.
+       */
       class service : public core_service {
       private:
 
