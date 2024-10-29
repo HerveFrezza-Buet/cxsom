@@ -7,6 +7,7 @@ import numpy as np
 from . import variable
 from . import typing
 from . import error
+from . import sked
 
 class HistorySlider:
     def __tickinterval(self, from_, to):
@@ -45,18 +46,20 @@ class HistorySlider:
         
         
 class HistoryFromVariableSlider(HistorySlider):
-    def __init__(self, master, title, var_path):
+    def __init__(self, master, title, var_path, skednet_lock=sked.nolock()):
         super().__init__(master, title, 0, 1, 0)
         self.refresh_button = tk.Button(self.label_frame, text='Refresh', command = self.on_refresh)
         self.refresh_button.pack(side=tk.LEFT, fill=tk.BOTH, padx=5)
         self.var_path = var_path
+        self.xrsw = skednet_lock
         self.on_refresh()
 
     def on_refresh(self):
-        with variable.Realize(self.var_path) as v:
-            r = v.time_range()
-            if r:
-                self.redefine_bounds(r[0], r[1])
+        with self.xrsw:
+            with variable.Realize(self.var_path) as v:
+                r = v.time_range()
+                if r:
+                    self.redefine_bounds(r[0], r[1])
     
 
 class View:
