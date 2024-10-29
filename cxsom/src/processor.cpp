@@ -1,4 +1,10 @@
 
+#include <utility> // should be included by asio
+#include <asio.hpp>
+#include <skednet.hpp>
+#include <memory>
+
+
 // #define cxsomDEBUG_PROTOCOL
 // #define cxsomLOG
 // #define cxsomMONITOR
@@ -23,14 +29,22 @@ cxsom::Monitor*  cxsom::monitor = nullptr;
 
 
 int main(int argc, char* argv[]) try {
-  if(argc != 4) {
-    std::cout << "Usage : " << argv[0] << " <root-dir> <nb_threads> <port>" << std::endl;
+  if(argc != 4 && argc != 6) {
+    std::cout << "Usage : " << argv[0] << " <root-dir> <nb_threads> <port> [<xrsw-hostname> <xrsw-port>]" << std::endl;
     return 0;
   }
 
   std::string root_dir =           argv[1] ;
   int nb_threads       = std::stoi(argv[2]);
   int port             = std::stoi(argv[3]);
+  
+  std::shared_ptr<sked::net::scope::xrsw::write_explicit> xrsw_writer;
+  asio::ip::tcp::iostream socket;
+  if(argc == 6) {
+    socket.exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
+    socket.connect(argv[4], argv[5]);
+    xrsw_writer = std::make_shared<sked::net::scope::xrsw::write_explicit>(socket, socket);
+  }
 
 #ifdef cxsomDEBUG_PROTOCOL
   nb_threads = 1;
@@ -48,7 +62,7 @@ int main(int argc, char* argv[]) try {
   cxsom::jobs::TypeChecker type_checker;
   cxsom::jobs::fill(type_checker);
 
-  cxsom::processor::launch(update_factory, type_checker, root_dir, nb_threads, port);
+  cxsom::processor::launch(update_factory, type_checker, root_dir, nb_threads, port, xrsw_writer);
   
   return 0;
  }

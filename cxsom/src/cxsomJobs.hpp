@@ -19,11 +19,14 @@
 #include <functional>
 #include <algorithm>
 #include <iomanip>
+#include <memory>
 
 #include <mutex>
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+
+#include <skednet.hpp>
 
 
 namespace cxsom {
@@ -56,6 +59,7 @@ namespace cxsom {
       std::atomic<bool>               interaction_ongoing;
       mutable std::mutex              job_mutex;
       mutable std::condition_variable pending_jobs;
+      std::atomic<unsigned int>       nb_ongoing_processes;
 
       std::vector<type::ref> arg_types_tmp;
       
@@ -310,11 +314,23 @@ namespace cxsom {
 	for(auto arg : updt.usual.args) *(out++) = data_center.type_of(arg);
 	type_checker(updt.usual.op, res_type, arg_types_tmp);
       }
+
+
+      std::shared_ptr<sked::net::scope::xrsw::write_explicit> xrsw_writer;
+      bool flushing_tasks_in_progress;
+      void on_start_flushing_tasks() {
+	if(xrsw_writer) xrsw_writer->enter();
+      }
+      
+      void on_end_flushing_tasks() {
+	if(xrsw_writer) xrsw_writer->leave();
+      }
       
     public:
       
       template<typename RANDOM_ENGINE>
-      Center(RANDOM_ENGINE& rd, const UpdateFactory& update_factory, const TypeChecker& type_checker, data::Center& data_center)
+      Center(RANDOM_ENGINE& rd, const UpdateFactory& update_factory, const TypeChecker& type_checker, data::Center& data_center,
+	     std::shared_ptr<sked::net::scope::xrsw::write_explicit> xrsw_writer)
 	: gen(rd()),
 	  update_factory(update_factory),
 	  type_checker(type_checker),
@@ -327,7 +343,11 @@ namespace cxsom {
 	  blockees(),
 	  interaction_ongoing(false),
 	  job_mutex(),
-	  pending_jobs() {}
+	  pending_jobs(),
+	  nb_ongoing_processes(0),
+	  xrsw_writer(xrsw_writer),
+	  flushing_tasks_in_progress(false)
+      {}
       Center()                         = delete;
       Center(const Center&)            = default;
       Center& operator=(const Center&) = default;
@@ -396,7 +416,7 @@ namespace cxsom {
       }
 
       /**
-       * Call this in mono-thread mode in order to get the next job to do.
+       * We call this in mono-thread mode (locking integrity_mutex) in order to get the next job to do.
        */
       std::function<void ()> get_one() {	
 #ifdef cxsomMONITOR
@@ -512,7 +532,6 @@ namespace cxsom {
 	  }
 #endif
 	}
-
 	
 	if(tasks.empty())  {
 #ifdef cxsomMONITOR
@@ -522,7 +541,17 @@ namespace cxsom {
 	  logger->msg("There are really no more tasks, no jobs found.");
 	  logger->pop();
 #endif
+	  if(nb_ongoing_processes == 0 and flushing_tasks_in_progress) {
+	    flushing_tasks_in_progress = false;
+	    on_end_flushing_tasks();
+	  }
 	  return {};
+	}
+
+	++nb_ongoing_processes;
+	if(!flushing_tasks_in_progress && nb_ongoing_processes == 1) {
+	  flushing_tasks_in_progress = true;
+	  on_start_flushing_tasks();
 	}
 
 #ifdef cxsomMONITOR
@@ -576,14 +605,17 @@ namespace cxsom {
 	while(true) {
 	  if(interaction_ongoing) pending_jobs.wait(lock);
 	  else {
-	    if(auto job = get_one(); job) job();
+	    if(auto job = get_one(); job) {
+	      job();
+	      --nb_ongoing_processes;
+	    }
 	    else pending_jobs.wait(lock);
 	  }
 	}
       }
 
       /**
-       * This interrupts the runing of new updates to that interaction can be done.
+       * This interrupts the runing of new updates so that interaction can be done.
        */
       void interaction_lock()    {interaction_ongoing = true;}
 
