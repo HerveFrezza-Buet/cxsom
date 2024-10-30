@@ -14,6 +14,7 @@ SET(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}/"
 #find_package(Boost REQUIRED system)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFTCONV fftconv REQUIRED)
+pkg_check_modules(SKEDNET skednet REQUIRED)
 
 
 FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-rules.pc

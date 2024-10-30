@@ -12,9 +12,9 @@ foreach(f ${usage_tests})
   set_target_properties     (${testName} PROPERTIES COMPILE_FLAGS   "${PROJECT_CFLAGS} -Wall")
   
   target_include_directories(${testName} PUBLIC ${FFTCONV_INCLUDE_DIRS})    
+  target_include_directories(${testName} PUBLIC ${SKEDNET_INCLUDE_DIRS})    
   target_include_directories(${testName} PUBLIC ${CMAKE_SOURCE_DIR}/src)
-  target_link_libraries     (${testName} PUBLIC ${FFTCONV_LIBRARIES} pthread)
-  target_link_libraries     (${testName} PUBLIC ${Boost_SYSTEM_LIBRARY}) 
+  target_link_libraries     (${testName} PUBLIC ${FFTCONV_LIBRARIES} ${SKEDNET_LIBRARIES} pthread)
   
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${testName}
     DESTINATION bin
