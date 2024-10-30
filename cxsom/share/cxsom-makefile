@@ -8,21 +8,31 @@ cxsom-help:
 	@echo
 	@echo "# at both sides"
 	@echo
-	@echo "  make cxsom-set-config ROOT_DIR=./root_dir HOSTNAME=localhost PORT=10000 NB_THREADS=4"
+	@echo "  make cxsom-set-config ROOT_DIR=./root_dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4"
 	@echo "  make cxsom-show-config"
 	@echo
-	@echo "  make cxsom-set-rootdir    ROOT_DIR=./root_dir"
-	@echo "  make cxsom-set-hostname   HOSTNAME=localhost"
-	@echo "  make cxsom-set-port       PORT=10000"
-	@echo "  make cxsom-set-nbthreads  NB_THREADS=4"
+	@echo "  make cxsom-set-rootdir      ROOT_DIR=./root_dir"
+	@echo "  make cxsom-set-hostname     HOSTNAME=localhost"
+	@echo "  make cxsom-set-port         PORT=10000"
+	@echo "  make skednet-set-port       SKEDNET_PORT=20000"
+	@echo "  make cxsom-set-nbthreads    NB_THREADS=4"
 	@echo
 	@echo "  make cxsom-clear-rootdir"
 	@echo
 	@echo "# at server side"
+	@echo 
+	@echo "  make skednet-launch-xrsw // starts a skednet data access locker at server side..."
+	@echo "  make skednet-kill-xrsw   // ... kills it"
+	@echo "  make skednet-is-xrsw-running"
 	@echo
 	@echo "  make cxsom-launch-processor           // Usual processor"
 	@echo "  make cxsom-launch-monitored-processor // Enables monitoring (generates a monitoring.data file)."
 	@echo "  make cxsom-launch-verbose-processor   // Very verbose, for developpers."
+	@echo
+	@echo "  // the following are the same as previously, but they use a skednet data access locker."
+	@echo "  make skednet-launch-processor           // Usual processor"
+	@echo "  make skednet-launch-monitored-processor // Enables monitoring (generates a monitoring.data file)."
+	@echo "  make skednet-launch-verbose-processor   // Very verbose, for developpers."
 	@echo
 	@echo "  make cxsom-is-processor-running"
 	@echo "  make cxsom-kill-processor"
@@ -40,17 +50,19 @@ cxsom-help:
 	@echo
 	@echo
 
-ROOTDIR_CONFIG_FILE   = .cxsom-rootdir-config
-HOSTNAME_CONFIG_FILE  = .cxsom-hostname-config
-PORT_CONFIG_FILE      = .cxsom-port-config
-NBTHREADS_CONFIG_FILE = .cxsom-nbthreads-config
+ROOTDIR_CONFIG_FILE      = .cxsom-rootdir-config
+HOSTNAME_CONFIG_FILE     = .cxsom-hostname-config
+PORT_CONFIG_FILE         = .cxsom-port-config
+SKEDNET_PORT_CONFIG_FILE = .skednet-port-config
+NBTHREADS_CONFIG_FILE    = .cxsom-nbthreads-config
 
 .PHONY: cxsom-show-config
 cxsom-show-config:
 	@echo
 	@echo "nb_threads        =" `cat $(NBTHREADS_CONFIG_FILE)`
-	@echo "port              =" `cat $(PORT_CONFIG_FILE)`
 	@echo "server hostname   =" `cat $(HOSTNAME_CONFIG_FILE)`
+	@echo "port              =" `cat $(PORT_CONFIG_FILE)`
+	@echo "skednet port      =" `cat $(SKEDNET_PORT_CONFIG_FILE)`
 	@echo "variables rootdir =" `cat $(ROOTDIR_CONFIG_FILE)`
 	@echo
 
@@ -70,17 +82,34 @@ cxsom-set-port:
 	@rm -f $(PORT_CONFIG_FILE)
 	@echo $(PORT) > $(PORT_CONFIG_FILE)
 
+.PHONY: skednet-set-port
+skednet-set-port:
+	@rm -f $(SKEDNET_PORT_CONFIG_FILE)
+	@echo $(SKEDNET_PORT) > $(SKEDNET_PORT_CONFIG_FILE)
+
 .PHONY: cxsom-set-nbthreads
 cxsom-set-nbthreads:
 	@rm -f $(NBTHREADS_CONFIG_FILE)
 	@echo $(NB_THREADS) > $(NBTHREADS_CONFIG_FILE)
 
 .PHONY: cxsom-set-config
-cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port cxsom-set-nbthreads
+cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port skednet-set-port cxsom-set-nbthreads
 
 .PHONY: cxsom-clear-rootdir
 cxsom-clear-rootdir:
 	@cxsom-ask "Do you really want to clear `cat $(ROOTDIR_CONFIG_FILE)` ?" || rm -rf `cat $(ROOTDIR_CONFIG_FILE)`/*
+
+.PHONY: skednet-launch-xrsw
+skednet-launch-xrsw:
+	@skednet-xrsw `cat $(SKEDNET_PORT_CONFIG_FILE)`&
+
+.PHONY: skednet-kill-xrsw
+skednet-kill-xrsw:
+	@killall -q skednet-xrsw || echo 'No xrsw to kill'
+
+.PHONY: skednet-is-xrsw-running
+skednet-is-xrsw-running:
+	@ps -aux | grep 'skednet-xrsw' | grep `cat $(SKEDNET_PORT_CONFIG_FILE)` | wc -l | cxsom-conditional-message "xrsw [RUNNING]" "xrsw [KILLED ]"; echo
 
 .PHONY: cxsom-launch-processor
 cxsom-launch-processor:
@@ -93,6 +122,18 @@ cxsom-launch-verbose-processor:
 .PHONY: cxsom-launch-monitored-processor
 cxsom-launch-monitored-processor:
 	@cxsom-monitored-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)`&
+
+.PHONY: skednet-launch-processor
+skednet-launch-processor:
+	@cxsom-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)` localhost `cat $(SKEDNET_PORT_CONFIG_FILE)`&
+
+.PHONY: skednet-launch-verbose-processor
+skednet-launch-verbose-processor:
+	@cxsom-verbose-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)` localhost `cat $(SKEDNET_PORT_CONFIG_FILE)`&
+
+.PHONY: skednet-launch-monitored-processor
+skednet-launch-monitored-processor:
+	@cxsom-monitored-processor `cat $(ROOTDIR_CONFIG_FILE)` `cat $(NBTHREADS_CONFIG_FILE)` `cat $(PORT_CONFIG_FILE)` localhost `cat $(SKEDNET_PORT_CONFIG_FILE)`&
 
 .PHONY: cxsom-is-processor-running
 cxsom-is-processor-running:
