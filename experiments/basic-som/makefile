@@ -33,7 +33,7 @@ som: som.cpp
 
 
 .PHONY: som-figs
-som-figs:
+som-figs: som
 	@./som graph som 
 	@dot -Tpdf som-inits.dot -o som-inits.pdf
 	@dot -Tpdf som-updates.dot -o som-updates.pdf
@@ -62,8 +62,8 @@ feed-triangle:
 
 .PHONY: view-last-weights
 view-last-weights:
-	@python3 view.py root-dir/ wgt
+	@python3 view.py root-dir/ wgt &
 
 .PHONY: view-weights-history
 view-weights-history:    
-	@python3 view.py root-dir/ save
+	@python3 view.py root-dir/ save &

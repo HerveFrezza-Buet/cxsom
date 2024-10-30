@@ -28,10 +28,10 @@ int main(int argc, char* argv[]) {
   kwd::parameters p_main, p_match, p_learn, p_external, p_contextual, p_global;
   p_main       | kwd::use("epsilon", 0), kwd::use("walltime", WALLTIME);
   p_match      | p_main, kwd::use("sigma", .1);
-  p_learn      | p_main, kwd::use("alpha", .1), kwd::use("r", .15);
+  p_learn      | p_main, kwd::use("alpha", .1), kwd::use("r", .2);
   p_external   | p_main;
   p_contextual | p_main;
-  p_global     | p_main, kwd::use("random-bmu", 1);
+  p_global     | p_main, kwd::use("random-bmu", 0);
 
   
   auto archi = cxsom::builder::architecture();
@@ -62,6 +62,8 @@ int main(int argc, char* argv[]) {
   map_settings.internals_file_size = FORGET; // This is the history length of internal computation (activities, relaxing BMU...)
   map_settings.weights_file_size   = TRACE;  // This is the history length of weights.
   map_settings.kept_opened         = OPENED;
+  map_settings.argmax              = fx::argmax;
+  map_settings.toward_argmax       = fx::toward_argmax;
   map_settings                     = {p_external, p_contextual, p_global};
 
   // There are many ways to declare external inputs, this one is the
