@@ -7,6 +7,8 @@
 #define FORGET       0
 #define WALLTIME    -1 // Rules can be applied forever
 
+#define SAVE_PERIOD 500
+
 #define INPUT_BUF_SIZE 20000
 // We feed inputs by bunches of 5000 values (see feed.py). We take a
 // large buffer size for storing them, in case of refill while the
@@ -46,7 +48,7 @@ int main(int argc, char* argv[]) {
 					"Array=2",                      // The type.
 					CACHE, INPUT_BUF_SIZE, OPENED); // Same as in cxsom.
 
-  // Here, we decide that this piece of codes is where the input variable has to be defined.
+  // Here, we perform the cxsom definition of the variable.
   input->definition();
   
   // Architectures are made of maps. Here, we create a map
@@ -65,9 +67,9 @@ int main(int argc, char* argv[]) {
   // There are many ways to declare external inputs, this one is the
   // simplest, but other ones enable to customize the computation. See
   // the documentation.
-  map->external(input,
-		fx::match_gaussian, p_match,
-		fx::learn_triangle, p_learn); 
+  auto layer = map->external(input,
+			     fx::match_gaussian, p_match,
+			     fx::learn_triangle, p_learn); 
   
   // Here, the architecture is made of a single map.
   archi << map;
@@ -81,6 +83,22 @@ int main(int argc, char* argv[]) {
   // be implement with the general updating rule. Let us specify it as
   // setting all the variables randomly.
   map->internals_random_at(0);
+
+  // It can be nice to save weights every SAVE_PERIOD steps (we have
+  // already bufferd the past TRACE weight values).
+
+  // Let us first retrieve the variable containing the weights... from
+  // the layer whre they are stored.
+  auto weights = layer->_W();
+  
+  auto wgt_save = cxsom::builder::variable("save",                 // We add a timeline "save".
+					   weights->varname,       // We use the same name.
+					   weights->type,          // We use the same type.
+					   CACHE, TRACE, OPENED);  // Same as in cxsom.
+  wgt_save->definition(); // We actually cxsom-define the variable now.
+
+  // Then, we add the rule for saving every SAVE_PERIOD time steps.
+  wgt_save->var() << fx::copy(kwd::times(weights->var(), SAVE_PERIOD)) | p_main;             
   
   
   // We describe the architecture in a dot file.

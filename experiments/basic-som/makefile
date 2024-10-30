@@ -8,9 +8,14 @@ help:
 	@echo "make som-figs                                      <-- generate figures for main rules"
 	@echo "make send-rules                                    <-- send rules to the processor"
 	@echo
-	@echo "make feed-square                                   <-- we add new inputs taken in a square"
-	@echo "make feed-crown                                    <-- we add new inputs taken in a crown"
-	@echo "make feed-triangle                                 <-- we add new inputs taken in a triangle"
+	@echo "make feed-square                                   <-- add new inputs taken in a square"
+	@echo "make feed-crown                                    <-- add new inputs taken in a crown"
+	@echo "make feed-triangle                                 <-- add new inputs taken in a triangle"
+	@echo
+	@echo "make view-last-weights                             <-- shows the last weights (from wgt)"
+	@echo "make view-weights-history                          <-- shows the weights      (from save)"
+	@echo
+	@echo
 
 
 
@@ -54,3 +59,11 @@ feed-crown:
 .PHONY: feed-triangle
 feed-triangle:
 	@python3 feed.py triangle `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` 
+
+.PHONY: view-last-weights
+view-last-weights:
+	@python3 view.py root-dir/ wgt
+
+.PHONY: view-weights-history
+view-weights-history:    
+	@python3 view.py root-dir/ save
