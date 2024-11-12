@@ -32,9 +32,9 @@ def color_of(wgt):
 class SeqView(cx.tkviewer.At):
     def __init__(self, master, figsize=(5, 5), dpi=100):
         super().__init__(master, "Learnt sequence", figsize, dpi)
-        self.We_path  = cx.variable.path_from(root_dir, 'wgt', 'We')
-        self.Wc_path  = cx.variable.path_from(root_dir, 'wgt', 'Wc')
-        self.bmu_path = cx.variable.path_from(root_dir, 'out', 'bmu')
+        self.We_path  = cx.variable.path_from(root_dir, 'wgt', 'recSOM/We-0')
+        self.Wc_path  = cx.variable.path_from(root_dir, 'wgt', 'recSOM/We-1')
+        self.bmu_path = cx.variable.path_from(root_dir, 'out', 'recSOM/BMU')
         with cx.variable.Realize(self.We_path) as We:
             self.map_size = We.datatype.shape()[0]
         
@@ -71,7 +71,7 @@ root.protocol('WM_DELETE_WINDOW', lambda : sys.exit(0))
 seq = SeqView(root)
 slider = cx.tkviewer.HistoryFromVariableSlider(root,
                                                'time instants',
-                                               cx.variable.path_from(root_dir, 'wgt', 'We'))
+                                               cx.variable.path_from(root_dir, 'wgt', 'recSOM/We-0'))
 slider.widget().pack(side=tk.TOP, fill=tk.BOTH)
 seq.widget().pack(side=tk.LEFT, fill=tk.BOTH)
 seq.set_history_slider(slider)

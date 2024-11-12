@@ -45,7 +45,8 @@ int main(int argc, char* argv[]) {
   map_settings.map_size            = MAP_SIZE;
   map_settings.cache_size          = CACHE;
   map_settings.internals_file_size = FORGET;
-  map_settings.weights_file_size   = TRACE;  
+  map_settings.weights_file_size   = TRACE;
+  map_settings.bmu_file_size       = TRACE; // We need the history of the map outputs here.
   map_settings.kept_opened         = OPENED; 
   map_settings.argmax              = fx::argmax;
   map_settings.external_merge      = fx::average; // This is the default.

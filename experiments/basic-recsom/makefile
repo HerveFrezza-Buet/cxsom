@@ -8,8 +8,8 @@ help:
 	@echo "make recsom-figs                                   <-- generate figures for main rules"
 	@echo "make send-rules                                    <-- send rules to the processor"
 	@echo
-	@€cho "make feed SEQ=ABCDEF                               <-- feeds with a sequence."
-	@€cho "make show-weights                                  <-- displays weights evolution."
+	@echo "make feed SEQ=ABCDEF                               <-- feeds with a sequence."
+	@ewcho "make show-weights                                  <-- displays weights evolution."
 	@echo
 
 
@@ -49,4 +49,4 @@ feed:
 
 .PHONY: show-weights
 show-weights:
-	@python3 view.py `cat .cxsom-rootdir-config` 
+	@python3 view.py `cat .cxsom-rootdir-config` &

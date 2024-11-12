@@ -45,6 +45,13 @@ Try the following
 
 ```
 make feed SEQ=ABCDEFEDCB
+make show_weights
+make feed SEQ=ABCDEFEDCB
+make feed SEQ=ABCDEFEDCB
+make feed SEQ=ABCDEFEDCB
+make feed SEQ=AAACCCFFF
+make feed SEQ=AAACCCFFF
+make feed SEQ=AAACCCFFF
 ```
 
 
