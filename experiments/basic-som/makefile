@@ -62,8 +62,8 @@ feed-triangle:
 
 .PHONY: view-last-weights
 view-last-weights:
-	@python3 view.py root-dir/ wgt &
+	@python3 view.py `cat .cxsom-rootdir-config` wgt &
 
 .PHONY: view-weights-history
 view-weights-history:    
-	@python3 view.py root-dir/ save &
+	@python3 view.py `cat .cxsom-rootdir-config` save &
