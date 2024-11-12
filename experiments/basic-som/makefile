@@ -19,7 +19,7 @@ help:
 
 
 
-# Adapt this path if needed.
+# Adapt this path if needed. This adds pre-defined cxsom targets to your makefile.
 include /usr/share/cxsom/cxsom-makefile
 
 

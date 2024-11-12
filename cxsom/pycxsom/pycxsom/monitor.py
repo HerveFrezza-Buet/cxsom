@@ -164,4 +164,18 @@ class Monitor:
         data = line[2:]
         res[name] = [converter(d) for d in data[:nb]]
         return data[nb:]
+
+    def help(self):
+        print()
+        print()
+        print()
+        print('m = Monitor()   <-- creates a monitor m')
+        print('len(m)          <-- returns the number of checkpoints in monitor.data')
+        print('m.position()    <-- returns the current checkpoint')
+        print('m.goto(i)       <-- go to checkpoint #i')
+        print('m.goto()        <-- go to the first checkpoint')
+        print('m.next()        <-- go to the next checkpoint and display it.')
+        print('m += nb         <-- jump to nb checkpoints in the future.')
+        print('m -= nb         <-- jump to nb checkpoints in the past.')
+        print()
     

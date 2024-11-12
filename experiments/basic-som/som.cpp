@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   input->definition();
   
   // Architectures are made of maps. Here, we create a map
-  // description, that could be used in several architectures.
+  // description (that could be used in several architectures).
   auto map = cxsom::builder::map::make_2D("SOM");
 
   auto map_settings = cxsom::builder::map::make_settings();
@@ -61,9 +61,8 @@ int main(int argc, char* argv[]) {
   map_settings.cache_size          = CACHE;
   map_settings.internals_file_size = FORGET; // This is the history length of internal computation (activities, relaxing BMU...)
   map_settings.weights_file_size   = TRACE;  // This is the history length of weights.
-  map_settings.kept_opened         = OPENED;
+  map_settings.kept_opened         = OPENED; // We keep variable files opened during the computation.
   map_settings.argmax              = fx::argmax;
-  map_settings.toward_argmax       = fx::toward_argmax;
   map_settings                     = {p_external, p_contextual, p_global};
 
   // There are many ways to declare external inputs, this one is the
@@ -82,7 +81,7 @@ int main(int argc, char* argv[]) {
   archi->realize();
 
   // Updates of weights reads weights at t-1... so timestep 0 cannot
-  // be implement with the general updating rule. Let us specify it as
+  // be implemente with the general updating rule. Let us specify it as
   // setting all the variables randomly.
   map->internals_random_at(0);
 
@@ -90,9 +89,10 @@ int main(int argc, char* argv[]) {
   // already bufferd the past TRACE weight values).
 
   // Let us first retrieve the variable containing the weights... from
-  // the layer whre they are stored.
+  // the layer where they are stored.
   auto weights = layer->_W();
-  
+
+  // We declare a new variable for periodical weight save.
   auto wgt_save = cxsom::builder::variable("save",                 // We add a timeline "save".
 					   weights->varname,       // We use the same name.
 					   weights->type,          // We use the same type.
