@@ -9,7 +9,8 @@ help:
 	@echo "make send-rules                                    <-- send rules to the processor"
 	@echo
 	@echo "make feed SEQ=ABCDEF                               <-- feeds with a sequence."
-	@ewcho "make show-weights                                  <-- displays weights evolution."
+	@echo "make show-weight-sequence                          <-- displays weights evolution (sequential view)."
+	@echo "make show-weight-history                           <-- displays weights evolution (global view)."
 	@echo
 
 
@@ -47,6 +48,10 @@ send-rules: recsom
 feed:
 	@python3 feed.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` ${SEQ} 50
 
-.PHONY: show-weights
-show-weights:
+.PHONY: show-weights-sequence
+show-weights-sequence:
 	@python3 view.py `cat .cxsom-rootdir-config` &
+
+.PHONY: show-weights-history
+show-weights-history:
+	@python3 history.py `cat .cxsom-rootdir-config` &

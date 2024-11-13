@@ -2,7 +2,7 @@ import sys
 import pycxsom as cx
 import numpy as np
 import tkinter as tk
-import matplotlib as plt
+import matplotlib as mpl
 
 HISTORY_SIZE   = 50
 ANGLE_ESPSILON = 5
@@ -53,7 +53,7 @@ class SeqView(cx.tkviewer.At):
         ax.set_ylim(-1.3, 1.3)
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.add_patch(plt.patches.Arc((0., 0.), 2., 2., theta1=degree_of(0), theta2=degree_of(1), color=(.8,.8,.9), zorder=0))
+        ax.add_patch(mpl.patches.Arc((0., 0.), 2., 2., theta1=degree_of(0), theta2=degree_of(1), color=(.8,.8,.9), zorder=0))
         X = np.cos(data[..., 2])
         Y = np.sin(data[..., 2])
         ax.scatter(X, Y, s=200, zorder=2, c=np.array([color_of(w) for w in data[..., 0]]), edgecolor='black')
@@ -61,7 +61,7 @@ class SeqView(cx.tkviewer.At):
         XX = np.cos(data[..., 1])
         YY = np.sin(data[..., 1])
         
-        ax.add_collection(plt.collections.LineCollection(np.vstack((np.vstack((X,Y)), np.vstack((XX,YY)))).T.reshape(len(data),2,2),
+        ax.add_collection(mpl.collections.LineCollection(np.vstack((np.vstack((X,Y)), np.vstack((XX,YY)))).T.reshape(len(data),2,2),
                                                          colors=(.5, 0, 0), linewidths=1, zorder=1))
         
 

@@ -38,20 +38,21 @@ make send-rules
 ```
 # Experimentation
 
-Experimentation is based on `feed.py` for feeding the inputs, and
-`view.py` for showing the weights. Read them both.
+Experimentation is based on `feed.py` for feeding the inputs, `view.py` and
+`history.py` for showing the weights. Read them both.
 
 Try the following
 
 ```
 make feed SEQ=ABCDEFEDCB
-make show_weights
+make show_weights-sequence
 make feed SEQ=ABCDEFEDCB
 make feed SEQ=ABCDEFEDCB
 make feed SEQ=ABCDEFEDCB
 make feed SEQ=AAACCCFFF
 make feed SEQ=AAACCCFFF
 make feed SEQ=AAACCCFFF
+make show_weights-history
 ```
 
 
