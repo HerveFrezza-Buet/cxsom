@@ -81,6 +81,7 @@ auto make_architecture(bool define_inputs, unsigned int trace) {
   return archi;
 }
 
+// We implement these 4 modes.
 enum class Mode : char {Main, Relax, Frozen, Test};
 
 int main(int argc, char* argv[]) {
@@ -107,6 +108,8 @@ int main(int argc, char* argv[]) {
     c.notify_user_argv_error(); 
     return 0;
   }
+
+  // We parse extra cxsom arguments (after the -- separator).
 
   if(c.user_argv[0] == "main") {
     if(c.user_argv.size() != 2) {

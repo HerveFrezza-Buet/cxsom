@@ -27,16 +27,6 @@ mkdir root-dir
 make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
 ```
 
-## Describing the computation
-
-The computation is described in the xsom.cpp file. Have a look at it.
-
-We have to compile it, and use it to check the rules (from graph outputs).
-
-```
-make xsom
-make xsom-figs
-```
 
 ## Running
 
@@ -45,6 +35,27 @@ First, start a variable viewer, and then launch the example.
 ```
 make cxsom-scan-vars
 make cxsom-launch-processor 
-make send-rules 
 ```
-### Experimentation
+
+## Experimentation
+
+### The main mode
+
+First, let us display the rules...
+
+```
+make main-figs
+```
+
+... and send them.
+
+```
+make send-main-rules TRACE=2500
+```
+
+Then we can feed the inputs (let us use a banana shape).
+
+```
+make feed-main SHAPE=banana
+```
+

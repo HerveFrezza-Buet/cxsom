@@ -3,10 +3,14 @@ help:
 	@echo "Read the README.md file for instructions."
 	@echo
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations"
-	@echo
 	@echo "make clean                                         <-- removes useless generated files"
-	@echo "make xsom-figs                                     <-- generate figures for main rules"
-	@echo "make send-rules                                    <-- send rules to the processor"
+	@echo
+	@echo "Main mode"
+	@echo "---------"
+	@echo
+	@echo "make main-figs                                     <-- generate figures for main rules"
+	@echo "make send-main-rules TRACE=2500                    <-- send the rules (defining the trace size)."
+	@echo "make feed-main SHAPE=banana                        <-- feed inputs."
 	@echo
 	@echo
 
@@ -25,18 +29,22 @@ xsom: xsom.cpp
 	g++ -o xsom `pkg-config --cflags cxsom-builder` xsom.cpp `pkg-config --libs cxsom-builder`
 
 
-.PHONY: xsom-figs
-xsom-figs: xsom
-	@./xsom graph xsom 
-	@dot -Tpdf xsom-inits.dot -o xsom-inits.pdf
-	@dot -Tpdf xsom-updates.dot -o xsom-updates.pdf
-	@dot -Tpdf xsom-archi.dot -o xsom-archi.pdf
-	@rm xsom-inits.dot xsom-updates.dot xsom-archi.dot
+.PHONY: main-figs
+main-figs: xsom
+	@./xsom graph main -- main 0
+	@dot -Tpdf main-inits.dot -o main-inits.pdf
+	@dot -Tpdf main-updates.dot -o main-updates.pdf
+	@dot -Tpdf archi.dot -o archi.pdf
+	@rm main-inits.dot main-updates.dot archi.dot
 	@echo
 	@echo
-	@echo "xsom-inits.pdf, xsom-updates.pdf and xsom-archi.pdf have been generated."
+	@echo "main-inits.pdf, main-updates.pdf and archi.pdf have been generated."
 	@echo
 
-.PHONY: send-rules
-send-rules: xsom
-	@./xsom send `cat .cxsom-hostname-config` `cat .cxsom-port-config`
+.PHONY: send-main-rules
+send-main-rules:
+	@./xsom send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- main $(TRACE)
+
+.PHONY: feed-main
+feed-main:
+	@python3 feed-main.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` ${SHAPE}
