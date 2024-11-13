@@ -6,3 +6,5 @@ Here is a suggestion of the order in which you can try experiments, but every ex
 
 - basic-som
 - basic-recsom
+- basic-xsom
+

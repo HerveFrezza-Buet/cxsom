@@ -7,6 +7,20 @@ customized a makefile for that purpose, read it.
 We recommend to do the 'basic-som' experiment before, since things
 presented there are not provided here with the same amount of details.
 
+We provide sequences of scalar inputs. The scalar input values are
+coded as A=0, B=.2, C=.4, D=.6, E=.8 and F=1.  So we can feed with,
+for example ABCDEFABCDEFABCDE..., cycling on the ABCDEF
+pattern. Scalars will also be represented as grayscale values, black
+for 0, white for 1.
+
+A basic recurrent som is a SOM fed with a scalar input and the BMU
+position in the map at previous timestep. Once organized, a position
+in the map reflects the rank in the sequence, even if the scalar value
+us ambiguous. For example, cycling on AAAAAFFFFF will visit 10 BMUs,
+while only 2 scalar values (A=0 and F=1) are presented.
+
+This is show by the demos.
+
 ## Setup the demo
 
 First setup a root-dir directory for our variables.
@@ -36,7 +50,7 @@ make cxsom-scan-vars
 make cxsom-launch-processor 
 make send-rules 
 ```
-# Experimentation
+## Experimentation
 
 Experimentation is based on `feed.py` for feeding the inputs, `view.py` and
 `history.py` for showing the weights. Read them both.
@@ -52,6 +66,11 @@ make feed SEQ=ABCDEFEDCB
 make feed SEQ=AAACCCFFF
 make feed SEQ=AAACCCFFF
 make feed SEQ=AAACCCFFF
+make feed SEQ=AAACCCFFF
+make feed SEQ=AAAAAF
+make feed SEQ=AAAAAF
+make feed SEQ=AAAAAF
+make feed SEQ=AAAAAF
 make show_weights-history
 ```
 
