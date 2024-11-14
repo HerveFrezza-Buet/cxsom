@@ -21,6 +21,25 @@ help:
 	@echo "make feed-relax-inputs TIMESTEP=100 U=.5 SHAPE=banana XBMU=.5 YBMU=.5"	
 	@echo "make view-relaxation   TIMESTEP=100"
 	@echo "make clear-relaxation                             <-- removes all rlx timelines from rootdir."
+	@echo
+	@echo "Frozen mode"
+	@echo "-----------"
+	@echo
+	@echo "make frozen-figs"
+	@echo "make declare-frozen-inputs"       
+	@echo "make send-frozen-rules TIMESTEP=100"
+	@echo "make feed-frozen-inputs SHAPE=banana"
+	@echo "make view-frozen-inputs"
+	@echo "make view-frozen TIMESTEP=<time> [FRAME=<id>]     <-- this shows the analysis."
+	@echo "make clear-frozen"
+	@echo "make clear-frozen-inputs"
+	@echo
+	@echo "Making a movie"
+	@echo "--------------"
+	@echo
+	@echo "make frames EVERY=50 NEXT_FRAME=0                 <-- compute the movie frames from frozen tests, 1 frame each EVERY step, (re)starting at NEXT_FRAME"
+	@echo "make movie                                        <-- makes a movie from the frames."
+	@echo
 
 
 
@@ -90,3 +109,55 @@ view-relaxation:
 .PHONY: clear-relaxation
 clear-relaxation:
 	@rm -rf `cat .cxsom-rootdir-config`/zrlx-*
+
+FROZEN_PREFIX = zfrz
+TEST_PREFIX   = ztest
+
+.PHONY: frozen-figs
+frozen-figs:
+	@./xsom graph frozen -- frozen SHARED LOCAL 1234
+	@dot -Tpdf frozen-inits.dot -o frozen-inits.pdf
+	@dot -Tpdf frozen-updates.dot -o frozen-updates.pdf
+	@rm frozen-inits.dot frozen-updates.dot 
+	@echo
+	@echo
+	@echo "frozen-inits.pdf and frozen-updates.pdf have been generated."
+	@echo
+
+.PHONY: declare-frozen-inputs
+declare-frozen-inputs:
+	@./xsom send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- test $(TEST_PREFIX)
+
+
+.PHONY: send-frozen-rules
+send-frozen-rules:
+	@./xsom send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- frozen $(TEST_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP}
+
+.PHONY: feed-frozen-inputs
+feed-frozen-inputs:
+	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(TEST_PREFIX) $(SHAPE)
+
+.PHONY: view-frozen-inputs
+view-frozen-inputs:
+	@python3 view-frozen-inputs.py `cat .cxsom-rootdir-config` $(TEST_PREFIX)
+
+.PHONY: view-frozen
+view-frozen:
+	@python3 view-frozen.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP} ${FRAME}
+
+.PHONY: clear-frozen-inputs
+clear-frozen-inputs:
+	@rm -rf `cat .cxsom-rootdir-config`/$(TEST_PREFIX)-in/*
+
+.PHONY: clear-frozen
+clear-frozen:
+	@rm -rf `cat .cxsom-rootdir-config`/$(FROZEN_PREFIX)-*
+
+./PHONY: frames
+frames:
+	@python3 make-frames.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY) $(NEXT_FRAME)
+
+./PHONY: movie
+movie:
+	@rm -f movie-expe-003-001.ogg
+	@ffmpeg -i frame-%06d.png -b:v 2M movie-expe-003-001.ogg

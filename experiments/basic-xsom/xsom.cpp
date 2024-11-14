@@ -5,8 +5,8 @@
   different modes:
   - main   : This is the usual mode.
   - relax  : This generates rules that enable to expand the relaxation process on successive timesteps.
-  - test   : 
-  - frozen : 
+  - frozen : This is the mode without learning.
+  - test   : This just defines external variable (architecture is not used)
 
   Having these 4 modes is used here as an illustration, the main mode does the usual job.
 */
@@ -23,7 +23,7 @@
 #define OPEN_AS_NEEDED false
 #define FORGET             0
 #define FOREVER           -1 // Infinite walltime
-#define DEADLINE         100
+#define DEADLINE         100 // The maximal number of relaxation steps allowed.
 
 // This is used for frozen or test mode. Partial recording puts some
 // internal variables with a 0-sized file.
@@ -77,7 +77,10 @@ auto make_architecture(bool define_inputs, unsigned int trace) {
 
   archi << Xmap << Ymap;
   *archi = map_settings;
-  
+
+  // This tells to att a relaxation counter, for counting at each
+  // timestep how many relaxations have been performed to reach
+  // stability.
   archi->relax_count = "Cvg"; 
   return archi;
 }

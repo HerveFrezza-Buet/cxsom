@@ -93,13 +93,19 @@ First, let us display the rules...
 make relax-figs
 ```
 
-... and send them, for detailing the relaxation that occurrs at timestep 100. This will rely on the previously saved weights, and here the ones at timestep 100.
+... and send them, for detailing the relaxation that occurrs at
+timestep 100. This will rely on the previously saved weights, and here
+the ones at timestep 100.
 
 ```
 make send-relax-rules TIMESTEP=100
 ```
 
-We can start relaxation by feeding the variable which are note computed by relaxation. We use the weights at timestep 100, the initial X/BMU and Y/BMU both initialized at .5 (for example), and X Y inputs initialized with values corresponding to U=.5 in the banana shape.
+We can start relaxation by feeding the variable which are note
+computed by relaxation. We use the weights at timestep 100, the
+initial X/BMU and Y/BMU both initialized at .5 (for example), and X Y
+inputs initialized with values corresponding to U=.5 in the banana
+shape.
 
 ```
 make feed-relax-inputs TIMESTEP=100 U=.5 SHAPE=banana XBMU=.5 YBMU=.5
@@ -111,9 +117,84 @@ The relaxation story has been played for timestep 100, let us view it.
 make view-relaxation TIMESTEP=100
 ```
 
-You can try any other timestep (from 0 tà 2499). When you are done, you can clean everything.
+You can try any other timestep (from 0 tà 2499). When you are done,
+you can clean everything.
 
 ```
 make cxsom-clear-processor
 make clear-relaxation
+```
+
+### The frozen mode
+
+This mode is used to analyze the architecture at a given timestep. We
+freeze the learning, initialize the weight of the desierd timestep,
+and run the architecture with inputs. Only relaxation occurs in this
+case, at each timestep. This can be usefull to compute statistical
+reults (i.e. which BMUs are visited, etc...).
+
+The architecture is able to provide rules for this "learning frozen"
+use. We prefix the timelines by zfrz, as we did previously with zrlx
+for relaxation.
+
+```
+make cxsom-clear-processor
+make frozen-figs
+make declare-frozen-inputs
+make feed-frozen-inputs SHAPE=banana
+make view-frozen-inputs
+```
+
+Now, we can make a frozen test at some specific timestep.
+Let us send the corresponding rules to the processor, for timestep 2499
+
+
+```
+make send-frozen-rules TIMESTEP=2499
+make cxsom-ping-processor
+```
+
+Now, the statistics for timestep step 2499 have been computed in
+timelines zfrz-00002499-*, let us visualize it (it may be weird, since we
+fed with a circle while we have learnt from a banana).
+
+```
+make view-frozen TIMESTEP=2499
+```
+
+A `snap-*.pdf` file has been generated. 
+
+And then 
+
+```
+make cxsom-clear-processor
+make clear-frozen
+```
+If you do not intend to make a movie, you can also
+
+```
+make clear-frozen-inputs 
+```
+
+
+
+## Making a movie
+
+You can close the variable scanning windows, since it reads the files periodically.
+
+```
+make frames EVERY=5 NEXT_FRAME=0
+```
+
+If the process get stalled, you can restart it from the next frame you
+want. Let say that you need to restart from frame 123.
+
+```
+make frames EVERY=5 NEXT_FRAME=123
+```
+
+When you are done, you can make the movie and clear the frames.
+```
+make movie
+rm frame-*.png
 ```
