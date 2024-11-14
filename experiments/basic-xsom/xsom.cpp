@@ -8,6 +8,7 @@
   - test   : 
   - frozen : 
 
+  Having these 4 modes is used here as an illustration, the main mode does the usual job.
 */
 
 #include <cxsom-builder.hpp>
