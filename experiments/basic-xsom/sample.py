@@ -16,12 +16,22 @@ banana_l3    = banana_l2 + banana_L3
 banana_l4    = banana_l3 + banana_L4
 banana_l5    = banana_l4 + banana_L5
 
+racket_r = .25
+racket_l1 = .5 + 0.2928932188134524 * racket_r # 0.29289 is (1 - sqrt(2)/2)
+racket_l2 = 2*np.pi*racket_r
+racket_l1_ratio = racket_l1 / (racket_l1 + racket_l2)
+
 
 def get(U, mode):
     if mode == 'circle':
         t = 2 * np.pi * U
         return (.5 * (1 + np.cos(t)),
                 .5 * (1 + np.sin(t)))
+    if mode == 'racquet':
+        if U < racket_l1_ratio:
+            pass
+        else:
+            
     if mode == 'banana':
         if U <= .5 :
             y_coef = 1
