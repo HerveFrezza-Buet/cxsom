@@ -32,6 +32,7 @@ cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
 make -j
 sudo make install
+
 ```
 
 You have compiled stuff (the c++ examples and some utilities) and installed the headers.
