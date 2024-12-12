@@ -15,6 +15,8 @@
 #include <functional>
 #include <map>
 #include <tuple>
+#include <limits>
+
 #include <cxsomData.hpp>
 #include <cxsomUpdate.hpp>
 #include <cxsomJobRule.hpp>
@@ -209,6 +211,46 @@ namespace cxsom {
 	data.read(std::data(buffer));
 	return true;
       }
+    };
+    
+
+    ////////////
+    //        //
+    // MinMax //
+    //        //
+    ////////////
+
+    template<bool IS_MIN>
+    class MinMax : public Base {
+    private:
+      double epsilon = 0;
+      type::ref type = nullptr;
+
+      double value_out;
+
+      static std::string opname() {
+	if constexpr(IS_MIN) return "min";
+	else                 return "max";
+      }
+      
+      static double init() {
+	if constexpr(IS_MIN) return std::numeric_limits<double>::max();
+	else                 return std::numeric_limits<double>::lowest();
+      }
+      
+    public:
+      MinMax(cxsom::data::Center& center,
+	     const cxsom::update::arg& res,
+	     const std::vector<cxsom::update::arg>& args,
+	     const std::map<std::string, std::string>& params)
+	: cxsom::jobs::Base(center, res, opname(), args),
+	  value_out(init()) {
+	
+	if(auto it = params.find("epsilon"); it != params.end()) epsilon = std::stod(it->second);
+	type = std::get<1>(res);
+	
+      }
+	
     };
     
 
@@ -1943,6 +1985,30 @@ namespace cxsom {
 	ostr << "Checking types for Copy : Exactly one argument is expected (got " << args.size() << ").";
       throw error::bad_typing(ostr.str());
     }
+
+    template<bool IS_MIN>
+    inline void check_types_min_max(type::ref res, const std::vector<type::ref>& args) {
+      std::ostringstream ostr;
+      if(!res->is_Scalar()) {
+	ostr << "Checking types for ";
+	if constexpr(IS_MIN) ostr << "Min";
+	else                 ostr << "Max";
+	ostr << ": Result value has type " << res->name() << ", Scalar is required.";
+      }
+      else {
+	unsigned int i = 0;
+	for(auto it = args.begin(); it != args.end() && (*it)->is_Scalar(); ++it, ++i);
+	if(it == args.end)
+	  return;
+	
+	ostr << "Checking types for ";
+	if constexpr(IS_MIN) ostr << "Min";
+	else                 ostr << "Max";
+	ostr << ": arg #" << i+1 << " value has type " << (*it)->name() << ", Scalar is required.";
+      }
+      
+      throw error::bad_typing(ostr.str());
+    }
     
     inline void check_types_average(type::ref res, const std::vector<type::ref>& args) {
       for(auto it = args.begin(); it != args.end(); ++it)
@@ -2239,6 +2305,8 @@ namespace cxsom {
 
     inline void fill(TypeChecker& type_checker) {
       type_checker += {"copy"              , check_types_copy              };
+      type_checker += {"min"               , check_types_min_max<true>     };
+      type_checker += {"max"               , check_types_min_max<false>    };
       type_checker += {"average"           , check_types_average           };
       type_checker += {"random"            , check_types_random            };
       type_checker += {"converge"          , check_types_converge          };
