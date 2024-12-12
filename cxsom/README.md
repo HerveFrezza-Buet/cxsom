@@ -9,7 +9,7 @@ cxsom is a simulator for multi-soms.
 You will need to have the fftconv package installed (see https://github.com/jeremyfix/fftconv).
 
 ```
-sudo apt install libfftw3-dev
+sudo apt install libfftw3-dev libasio-dev 
 cd <somewhere you place source code>
 git clone https://github.com/jeremyfix/fftconv.git
 cd fftconv/fftconv/
@@ -22,7 +22,9 @@ cd ~
 
 ### The C++ materials
 
-Go into the `cxsom` directory you have git-cloned. Then type
+You have to install sked, skednet and cxsom. For each one (let us name it xxx)
+
+Go into the `xxx` directory you have git-cloned. Then type
 
 ```
 mkdir build
@@ -30,7 +32,9 @@ cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
 make -j
 sudo make install
+
 ```
+
 
 You have compiled stuff (the c++ examples and some utilities) and installed the headers.
 
