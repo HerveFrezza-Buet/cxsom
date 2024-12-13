@@ -437,16 +437,25 @@ namespace cxsom {
       
       std::mt19937 gen;
       
+    protected:
+      
+      Random(data::Center& center,
+	     const update::arg& res,
+	     const std::string& name,
+	     const std::vector<update::arg>& args,
+	     const std::map<std::string, std::string>&,
+	     std::mt19937::result_type seed)
+	: Base(center, res, name, args), gen(seed) {}
+      
     public:
 
       Random(data::Center& center,
 	     const update::arg& res,
 	     const std::vector<update::arg>& args,
-	     const std::map<std::string, std::string>&,
+	     const std::map<std::string, std::string>& params,
 	     std::mt19937::result_type seed)
-	: Base(center, res, "random", args), gen(seed) {}
+	: Random(center, res, "random", args, params, seed)  {}
       
-    protected:
       
   
       virtual bool on_write_result(data::Base& data) override {
@@ -463,6 +472,27 @@ namespace cxsom {
 	  for(auto& elem : static_cast<data::Map&>(data).content) elem = u(gen);
 	return true;
       }
+    };
+
+    ////////////////
+    //            //
+    // RandomWhen //
+    //            //
+    ////////////////
+    
+    class RandomWhen : public Random {
+    private:
+      
+      std::mt19937 gen;
+      
+    public:
+
+      RandomWhen(data::Center& center,
+	     const update::arg& res,
+	     const std::vector<update::arg>& args,
+	     const std::map<std::string, std::string>& params,
+	     std::mt19937::result_type seed)
+	: Random(center, res, "random-when", args, params, seed) {}
     };
 
     
@@ -1994,6 +2024,7 @@ namespace cxsom {
       factory += {"max"               , make_update_deterministic<MinMax<false>>};
       factory += {"average"           , make_update_deterministic<Average>      };
       factory += {"random"            , make_update_random<Random>              };
+      factory += {"random-when"       , make_update_random<RandomWhen>          };
       factory += {"converge"          , make_update_deterministic<Converge>     };
       factory += {"clear"             , make_update_deterministic<Clear>        };
       factory += {"merge"             , make_update_deterministic<Merge>        };
@@ -2078,6 +2109,15 @@ namespace cxsom {
 	return;
       else
 	ostr << "Checking types for Random : No argument expected (got " << args.size() << ").";
+      throw error::bad_typing(ostr.str());
+    }
+
+    inline void check_types_random_when(type::ref, const std::vector<type::ref>& args) {
+      std::ostringstream ostr;
+      if(args.size() != 0)
+	return;
+      else
+	ostr << "Checking types for RandomWhen : At least one argument expected.";
       throw error::bad_typing(ostr.str());
     }
     
@@ -2361,6 +2401,7 @@ namespace cxsom {
       type_checker += {"max"               , check_types_min_max<false>    };
       type_checker += {"average"           , check_types_average           };
       type_checker += {"random"            , check_types_random            };
+      type_checker += {"random-when"       , check_types_random_when       };
       type_checker += {"converge"          , check_types_converge          };
       type_checker += {"clear"             , check_types_clear             };
       type_checker += {"merge"             , check_types_merge             };

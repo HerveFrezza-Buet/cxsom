@@ -8,6 +8,7 @@ help:
 	@echo "make minmax-figs                                   <-- generate figures for main rules"
 	@echo "make send-rules                                    <-- send rules to the processor"
 	@echo
+	@echo "make episode SIZE=1                                <-- performs SIZE interactions"
 	@echo
 
 
@@ -39,3 +40,7 @@ minmax-figs: minmax
 .PHONY: send-rules
 send-rules: minmax
 	@./minmax send `cat .cxsom-hostname-config` `cat .cxsom-port-config`
+
+.PHONY: episode
+episode:
+	@python3 run-episode.py `cat .cxsom-rootdir-config` $(SIZE) `cat .cxsom-hostname-config` `cat .cxsom-port-config` `cat .skednet-port-config`

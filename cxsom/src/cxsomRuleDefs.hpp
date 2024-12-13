@@ -397,6 +397,12 @@ namespace cxsom {
       
       inline update clear() {return {"clear", {}};}
       inline update random() {return {"random", {}};}
+      inline update random_when(const std::vector<kwd::data>& r) {
+	std::vector<kwd::data> args;
+	for(auto& d : r)
+	  args.push_back((*ctx)(d));
+	return {"random-when", args};
+      }
       
       inline update copy(const kwd::data& v) {return {"copy", {(*ctx)(v)}};}
       inline update merge(const kwd::data& v1, const kwd::data& v2) {return {"merge", {(*ctx)(v1), (*ctx)(v2)}};}

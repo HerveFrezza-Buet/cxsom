@@ -24,6 +24,19 @@ int main(int argc, char* argv[]) {
 
     // A(t) = uniform(0, 1)
   }
+  
+  {
+    timeline t("random-when");
+
+    kwd::type("A", "Map1D<Scalar>=500", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("B", "Scalar",            CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    "A" << fx::random_when({"B"})                                                           | kwd::use("walltime", 10);
+    // "A" << fx::random_when({"B", "C", ...})   is ok as well.
+
+    // A(t) = uniform(0, 1) when B is ready... It is recommended to
+    // choose "B" in another timeline, for actually trigger random
+    // computation when B is computd.
+  }
 
   {
     timeline t("clear");

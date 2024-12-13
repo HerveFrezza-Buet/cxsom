@@ -26,40 +26,40 @@ int main(int argc, char* argv[]) {
   context c(argc, argv);
   
   {
-    timeline t("args");
-    kwd::type("usr", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
-    kwd::type("A", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
-    kwd::type("B", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
-    kwd::type("C", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
-    
-    "A" << fx::random() |  kwd::use("walltime", WALLTIME);
-    "B" << fx::random() |  kwd::use("walltime", WALLTIME);
-    "C" << fx::random() |  kwd::use("walltime", WALLTIME);
-
-    // Rules for A, B and C can be applied forever immediately, since
-    // walltime it -1 and no arguments are needed for the
-    // computation. Nevertheless, as we are in a timeline where usr
-    // needs a user input, a timestep in that timeline cannot be
-    // completed if usr value is not provided.
+    timeline t("in");
+    kwd::type("X", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
   }
   
   {
-    timeline t("results");
+    timeline t("internals");
+    kwd::type("A", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("B", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("C", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+
+    // We set internals to a random value when the user input is ready.
+    "A" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
+    "B" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
+    "C" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
+
+  }
+  
+  {
+    timeline t("out");
     kwd::type("min", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     kwd::type("max", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     
     "min" << fx::min({
-	kwd::var("args", "usr"),
-	kwd::var("args", "A"  ),
-	kwd::var("args", "B"  ),
-	kwd::var("args", "C"  )
+	kwd::var("in",        "X"),
+	kwd::var("internals", "A"),
+	kwd::var("internals", "B"),
+	kwd::var("internals", "C")
       })                               |  kwd::use("walltime", WALLTIME);
     
     "max" << fx::max({
-	kwd::var("args", "usr"),
-	kwd::var("args", "A"  ),
-	kwd::var("args", "B"  ),
-	kwd::var("args", "C"  )
+	kwd::var("in", "X"),
+	kwd::var("internals", "A"),
+	kwd::var("internals", "B"),
+	kwd::var("internals", "C")
       })                               |  kwd::use("walltime", WALLTIME);
   }
   

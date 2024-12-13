@@ -29,8 +29,18 @@ make minmax-figs
 
 ## Launching the simulation
 
+We need first a skednet xrsw synchronizer. The name 'xrsw' means "multiple readers, single writer".
+
 ```
-make cxsom-launch-processor
+make skednet-launch-xrsw
+make skednet-is-xrsw-running
+```
+
+Then we have to run a processor that uses the wrsw locker.
+
+```
+make skednet-launch-processor
+<make cxsom-is-processor-running
 make cxsom-scan-vars
 ```
 
