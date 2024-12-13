@@ -40,7 +40,7 @@ Then we have to run a processor that uses the wrsw locker.
 
 ```
 make skednet-launch-processor
-<make cxsom-is-processor-running
+make cxsom-is-processor-running
 make cxsom-scan-vars
 ```
 
@@ -48,4 +48,19 @@ and then
 
 ```
 make send-rules
+```
+
+## Running episodes
+
+Repeat the following
+
+```
+make episode SIZE=50
+```
+
+## When you are done
+
+```
+make cxsom-kill-processor
+make skednet-kill-xrsw
 ```

@@ -35,11 +35,15 @@ int main(int argc, char* argv[]) {
     kwd::type("A", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     kwd::type("B", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     kwd::type("C", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("D", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("E", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
 
     // We set internals to a random value when the user input is ready.
     "A" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
     "B" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
     "C" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
+    "D" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
+    "E" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
 
   }
   
@@ -52,14 +56,18 @@ int main(int argc, char* argv[]) {
 	kwd::var("in",        "X"),
 	kwd::var("internals", "A"),
 	kwd::var("internals", "B"),
-	kwd::var("internals", "C")
+	kwd::var("internals", "C"),
+	kwd::var("internals", "D"),
+	kwd::var("internals", "E")
       })                               |  kwd::use("walltime", WALLTIME);
     
     "max" << fx::max({
 	kwd::var("in", "X"),
 	kwd::var("internals", "A"),
 	kwd::var("internals", "B"),
-	kwd::var("internals", "C")
+	kwd::var("internals", "C"),
+	kwd::var("internals", "D"),
+	kwd::var("internals", "E")
       })                               |  kwd::use("walltime", WALLTIME);
   }
   

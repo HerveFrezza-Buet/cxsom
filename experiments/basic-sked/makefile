@@ -44,3 +44,4 @@ send-rules: minmax
 .PHONY: episode
 episode:
 	@python3 run-episode.py `cat .cxsom-rootdir-config` $(SIZE) `cat .cxsom-hostname-config` `cat .cxsom-port-config` `cat .skednet-port-config`
+	@evince episode.pdf

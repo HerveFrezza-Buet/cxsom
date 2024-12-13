@@ -296,6 +296,19 @@ class Realize:
     def sync_init(self):
         self.update()
         self.sync0 = self.time_range()
+
+    def try_wait_next(self, sleep_duration=.1):
+        self.update()
+        dd = self.time_range()
+        if dd == self.sync0:
+            time.sleep(sleep_duration)
+            self.update()
+            dd = self.time_range()
+            if dd == self.sync0:
+                return False
+        self.sync0 = dd
+        return True
+        
         
     def wait_next(self, sleep_duration=.1):
         dd = self.sync0
