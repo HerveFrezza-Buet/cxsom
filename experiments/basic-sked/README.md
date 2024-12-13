@@ -19,3 +19,23 @@ First setup a root-dir directory for our variables.
 mkdir root-dir
 make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
 ```
+
+## Describing the computation
+
+```
+make minmax-figs
+```
+
+
+## Launching the simulation
+
+```
+make cxsom-launch-processor
+make cxsom-scan-vars
+```
+
+and then
+
+```
+make send-rules
+```

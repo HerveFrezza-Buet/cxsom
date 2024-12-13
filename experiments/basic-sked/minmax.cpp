@@ -23,7 +23,8 @@ context* cxsom::rules::ctx = nullptr;
 
  
 int main(int argc, char* argv[]) {
-   
+  context c(argc, argv);
+  
   {
     timeline t("args");
     kwd::type("usr", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
@@ -31,9 +32,9 @@ int main(int argc, char* argv[]) {
     kwd::type("B", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     kwd::type("C", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     
-    "A" << fx::random() |  kwd::use("walltime", WALLLTIME);
-    "B" << fx::random() |  kwd::use("walltime", WALLLTIME);
-    "C" << fx::random() |  kwd::use("walltime", WALLLTIME);
+    "A" << fx::random() |  kwd::use("walltime", WALLTIME);
+    "B" << fx::random() |  kwd::use("walltime", WALLTIME);
+    "C" << fx::random() |  kwd::use("walltime", WALLTIME);
 
     // Rules for A, B and C can be applied forever immediately, since
     // walltime it -1 and no arguments are needed for the
@@ -47,8 +48,19 @@ int main(int argc, char* argv[]) {
     kwd::type("min", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     kwd::type("max", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     
-    "min" << fx::min({"A", "B", "C"}) |  kwd::use("walltime", WALLLTIME);
-    "max" << fx::max({"A", "B", "C"}) |  kwd::use("walltime", WALLLTIME);
+    "min" << fx::min({
+	kwd::var("args", "usr"),
+	kwd::var("args", "A"  ),
+	kwd::var("args", "B"  ),
+	kwd::var("args", "C"  )
+      })                               |  kwd::use("walltime", WALLTIME);
+    
+    "max" << fx::max({
+	kwd::var("args", "usr"),
+	kwd::var("args", "A"  ),
+	kwd::var("args", "B"  ),
+	kwd::var("args", "C"  )
+      })                               |  kwd::use("walltime", WALLTIME);
   }
   
  
