@@ -227,6 +227,8 @@ namespace cxsom {
       type::ref type = nullptr;
 
       double value_out;
+      double value_in;
+      
 
       static std::string opname() {
 	if constexpr(IS_MIN) return "min";
@@ -237,6 +239,11 @@ namespace cxsom {
 	if constexpr(IS_MIN) return std::numeric_limits<double>::max();
 	else                 return std::numeric_limits<double>::lowest();
       }
+
+      static void update(double& res, double value) {
+	if constexpr(IS_MIN) res = std::min(res, value);
+	else                 res = std::max(res, value);
+      }
       
     public:
       MinMax(cxsom::data::Center& center,
@@ -244,13 +251,49 @@ namespace cxsom {
 	     const std::vector<cxsom::update::arg>& args,
 	     const std::map<std::string, std::string>& params)
 	: cxsom::jobs::Base(center, res, opname(), args),
-	  value_out(init()) {
+	  value_out(init()), value_in(init()) {
 	
 	if(auto it = params.find("epsilon"); it != params.end()) epsilon = std::stod(it->second);
 	type = std::get<1>(res);
 	
       }
+      
+    protected:
 	
+      virtual void on_computation_start() override {
+	value_out = init();
+	value_in  = init();
+      }
+      
+      virtual void on_read_out_arg(const cxsom::symbol::Instance&, 
+				   unsigned int,                 
+				   const cxsom::data::Base& arg_data) override {
+	update(value_out, static_cast<const cxsom::data::Scalar&>(arg_data).value);
+      }
+      
+      virtual void on_read_out_arg_aborted() override {
+	value_out = init();
+      }
+      
+      virtual void on_read_in_arg(const cxsom::symbol::Instance&,  
+				  unsigned int,                    
+				  const cxsom::data::Base& arg_data) override { 
+	update(value_in, static_cast<const cxsom::data::Scalar&>(arg_data).value);
+      }
+      
+      virtual bool on_write_result(cxsom::data::Base& result_data) override {
+	double in_args_min = value_in;
+	double proposed_result = in_args_min;
+	
+	value_in = init(); // For an eventual next in_args reading.
+	update(proposed_result, value_out);
+
+	double& res = static_cast<cxsom::data::Scalar&>(result_data).value;
+	bool updated = std::fabs(res - proposed_result) > epsilon;
+	res = proposed_result;
+
+	return updated;
+      }
     };
     
 
@@ -1947,6 +1990,8 @@ namespace cxsom {
 
     void fill(UpdateFactory& factory) {
       factory += {"copy"              , make_update_deterministic<Copy>         };
+      factory += {"min"               , make_update_deterministic<MinMax<true>> };
+      factory += {"max"               , make_update_deterministic<MinMax<false>>};
       factory += {"average"           , make_update_deterministic<Average>      };
       factory += {"random"            , make_update_random<Random>              };
       factory += {"converge"          , make_update_deterministic<Converge>     };
@@ -1995,10 +2040,17 @@ namespace cxsom {
 	else                 ostr << "Max";
 	ostr << ": Result value has type " << res->name() << ", Scalar is required.";
       }
+      else if(args.size() == 0) {
+	ostr << "Checking types for ";
+	if constexpr(IS_MIN) ostr << "Min";
+	else                 ostr << "Max";
+	ostr << ": At least one argument is needed.";
+      }
       else {
 	unsigned int i = 0;
-	for(auto it = args.begin(); it != args.end() && (*it)->is_Scalar(); ++it, ++i);
-	if(it == args.end)
+	auto it = args.begin();
+	for(; it != args.end() && (*it)->is_Scalar(); ++it, ++i);
+	if(it == args.end())
 	  return;
 	
 	ostr << "Checking types for ";

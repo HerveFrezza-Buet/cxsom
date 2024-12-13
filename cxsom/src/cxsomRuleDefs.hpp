@@ -372,6 +372,21 @@ namespace cxsom {
 	  args.push_back((*ctx)(d));
 	return {"converge", args};
       }
+      
+      inline update min(const std::vector<kwd::data>& r) {
+	std::vector<kwd::data> args;
+	for(auto& d : r)
+	  args.push_back((*ctx)(d));
+	return {"min", args};
+      }
+      
+      inline update max(const std::vector<kwd::data>& r) {
+	std::vector<kwd::data> args;
+	for(auto& d : r)
+	  args.push_back((*ctx)(d));
+	return {"max", args};
+      }
+      
       inline update average(const std::vector<kwd::data>& r) {
 	std::vector<kwd::data> args;
 	for(auto& d : r)

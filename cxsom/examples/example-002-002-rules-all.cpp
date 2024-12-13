@@ -47,6 +47,23 @@ int main(int argc, char* argv[]) {
   }
   
   {
+    timeline t("min-max");
+    
+    kwd::type("A",   "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("B",   "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("C",   "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("min", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    kwd::type("max", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
+    
+    "A" << fx::random()               | kwd::use("walltime", 1000);
+    "B" << fx::random()               | kwd::use("walltime", 1000);
+    "C" << fx::random()               | kwd::use("walltime", 1000);
+
+    "min" << fx::min({"A", "B", "C"}) | kwd::use("walltime", 1000);
+    "max" << fx::max({"A", "B", "C"}) | kwd::use("walltime", 1000);
+  }
+  
+  {
     timeline t("average");
     kwd::type("A", "Map1D<Scalar>=100", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
     unsigned int nb = 10;
@@ -217,9 +234,9 @@ int main(int argc, char* argv[]) {
       kwd::type("Aout",  "Pos1D", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       kwd::type("Bin",   "Pos1D", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
       kwd::type("Bout",  "Pos1D", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
-      "ABin" << fx::pair("Aout", "Bout");
-      "Ain"  << fx::first("ABout");
-      "Bin"  << fx::second("ABout");
+      "ABin" << fx::pair("Aout", "Bout") | kwd::use("walltime", 1000);
+      "Ain"  << fx::first("ABout")       | kwd::use("walltime", 1000);
+      "Bin"  << fx::second("ABout")      | kwd::use("walltime", 1000);
     }
   }
   
