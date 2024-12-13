@@ -68,8 +68,8 @@ namespace test {
     
     Base(const fs::path& root_dir,
 	 const std::string& name, const std::string& op_name,
-	 const std::string& res,
-	 const std::vector<std::string>& args)
+	 const std::string& res,               // This is only used for displaying the result type.
+	 const std::vector<std::string>& args) // This is only used for displaying the args types.
       : root_dir(root_dir), name(name), op_name(op_name), res(res), args(args) {}
 
     operator std::string () const {
@@ -255,6 +255,84 @@ namespace test {
     }
   };
 
+  // ##########
+  // #        # 
+  // # MinMax # 
+  // #        # 
+  // ##########
+  
+  class MinMax : public Base {
+  protected:
+  
+  public:
+
+    MinMax(const fs::path& root_dir,
+	    const std::string& name,
+	    const std::string& res) : Base(root_dir, name, "min-max", res, {res, res, res}) {}
+
+    virtual void make_args() const override {}
+  
+    virtual void send_computation() const override {
+      {
+	timeline t(name + "_args");
+	kwd::type("x", args[0], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("x", 0) << fx::random();
+	kwd::type("y", args[1], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("y", 0) << fx::random();
+	kwd::type("z", args[2], CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("z", 0) << fx::random();
+      }
+
+      {
+	timeline t(name);
+	kwd::type("min", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("min", 0) << fx::min({kwd::at(kwd::var(name + "_args", "x"), 0),
+	                              kwd::at(kwd::var(name + "_args", "y"), 0),
+	                              kwd::at(kwd::var(name + "_args", "z"), 0)});
+	kwd::type("max", res, CACHE_SIZE, FILE_SIZE, KEPT_OPENED);
+	kwd::at("max", 0) << fx::max({kwd::at(kwd::var(name + "_args", "x"), 0),
+	                              kwd::at(kwd::var(name + "_args", "y"), 0),
+	                              kwd::at(kwd::var(name + "_args", "z"), 0)});
+      }
+    }
+  
+    virtual bool test_result() const override {
+      bool error_status = false;
+
+      try {
+	cxsom::data::Variable min(root_dir, {name, "min"}, nullptr, std::nullopt, std::nullopt, true);
+	cxsom::data::Variable max(root_dir, {name, "max"}, nullptr, std::nullopt, std::nullopt, true);
+	cxsom::data::Variable x(root_dir, {name + "_args", "x"}, nullptr, std::nullopt, std::nullopt, true);
+	cxsom::data::Variable y(root_dir, {name + "_args", "y"}, nullptr, std::nullopt, std::nullopt, true);
+	cxsom::data::Variable z(root_dir, {name + "_args", "z"}, nullptr, std::nullopt, std::nullopt, true);
+	double x_value, y_value, z_value;
+
+	x[0]->get([&x_value](auto, auto, auto& data) {x_value = static_cast<const cxsom::data::Scalar&>(data).value;});
+	y[0]->get([&y_value](auto, auto, auto& data) {y_value = static_cast<const cxsom::data::Scalar&>(data).value;});
+	z[0]->get([&z_value](auto, auto, auto& data) {z_value = static_cast<const cxsom::data::Scalar&>(data).value;});
+	
+	min[0]->get([&error_status, x_value, y_value, z_value, this](auto status, auto, auto& data) {
+	  if(status != cxsom::data::Availability::Ready) {error_status = true; return;}
+	  if(data.type->name() != this->res)             {error_status = true; return;}
+	  error_status = static_cast<const cxsom::data::Scalar&>(data).value != std::min({x_value, y_value, z_value});
+	});
+	
+	max[0]->get([&error_status, x_value, y_value, z_value, this](auto status, auto, auto& data) {
+	  if(status != cxsom::data::Availability::Ready) {error_status = true; return;}
+	  if(data.type->name() != this->res)             {error_status = true; return;}
+	  error_status = static_cast<const cxsom::data::Scalar&>(data).value != std::max({x_value, y_value, z_value});
+	});
+      
+      } catch(std::exception& e) {
+	std::cout << "Exception : " << e.what() << std::endl;
+	error_status = true;
+      }
+      
+      return error_status;
+    }
+  };
+
+
   // ###########
   // #         # 
   // # Average # 
@@ -361,8 +439,6 @@ namespace test {
       return error_status;
     }
   };
-
-
 
   // #########
   // #       # 
@@ -2352,6 +2428,8 @@ namespace test {
       *(out++) = new Copy(root_dir, "copy_Map2D_Pos1D",  "Map2D<Pos1D>=10"   );
       *(out++) = new Copy(root_dir, "copy_Map2D_Pos2D",  "Map2D<Pos2D>=10"   );
       *(out++) = new Copy(root_dir, "copy_Map2D_Array",  "Map2D<Array=10>=10");
+      
+      *(out++) = new MinMax(root_dir, "MinMax_Scalar", "Scalar");
       
       *(out++) = new Average(root_dir, "average_Map1D_Scalar", "Map1D<Scalar>=10");
       *(out++) = new Average(root_dir, "average_Map2D_Scalar", "Map2D<Scalar>=10");
