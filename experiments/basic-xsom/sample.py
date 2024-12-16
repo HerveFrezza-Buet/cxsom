@@ -20,7 +20,7 @@ racket_r = .25
 racket_l1 = 3.2426 * racket_r # r*(3*sqrt(2) - 1)
 racket_l2 = 2*np.pi*racket_r
 racket_l1_ratio = racket_l1 / (racket_l1 + racket_l2)
-racket_u1_coef = racket_l1 / racket_l1_ratio
+racket_u1_coef = 0.7071 * racket_l1 / racket_l1_ratio
 racket_u2_coef = 2*np.pi / (1 - racket_l1_ratio)
 racket_u2_theta_offset = - 3*np.pi/8
 racket_u2_x_offset = 3*racket_r
@@ -33,10 +33,10 @@ def get(U, mode):
     
     if mode == 'racket':
         if U < racket_l1_ratio:
-            l = U * racket_l1 / racket_l1_ratio
+            l = U * racket_u1_coef
             return (l, l)
         else:
-            t = (U - racket_l1) * racket_u2_coef + racket_u2_theta_offset 
+            t = (U - racket_l1_ratio) * racket_u2_coef + racket_u2_theta_offset
             return (racket_u2_x_offset + racket_r*np.cos(t), racket_u2_x_offset + racket_r*np.sin(t))
             
     if mode == 'banana':
