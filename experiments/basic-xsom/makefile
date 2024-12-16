@@ -5,6 +5,13 @@ help:
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations"
 	@echo "make clean                                         <-- removes useless generated files"
 	@echo
+	@echo "Inputs"
+	@echo "------"
+	@echo
+	@echo "make show-shape SHAPE=circle                       <-- shows input shape."
+	@echo "make show-shape SHAPE=banana                       <-- shows input shape."
+	@echo "make show-shape SHAPE=racket                       <-- shows input shape."
+	@echo
 	@echo "Main mode"
 	@echo "---------"
 	@echo
@@ -55,6 +62,9 @@ clean:
 xsom: xsom.cpp
 	g++ -o xsom `pkg-config --cflags cxsom-builder` xsom.cpp `pkg-config --libs cxsom-builder`
 
+.PHONY: show-shape
+show-shape:
+	@python show-input-shape.py ${SHAPE}
 
 .PHONY: main-figs
 main-figs: xsom
@@ -69,7 +79,7 @@ main-figs: xsom
 	@echo
 
 .PHONY: send-main-rules
-send-main-rules:
+send-main-rules: xsom
 	@./xsom send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- main $(TRACE)
 
 .PHONY: feed-main

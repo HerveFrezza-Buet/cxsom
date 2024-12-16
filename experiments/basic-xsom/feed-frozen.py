@@ -30,7 +30,7 @@ with cx.variable.Realize(x_var_path) as X:
                 if tmax >= U.file_size:
                     nb_to_write = 0
                 else:
-                    nb_to_write = U.file_size - tmax
+                    nb_to_write = U.file_size - 1 - tmax
             else:
                 nb_to_write = U.file_size
             if nb_to_write > 0:

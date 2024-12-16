@@ -13,7 +13,7 @@ context* cxsom::rules::ctx = nullptr;
  
 // This example introduces the simulation rule definitions.
  
-#define WALLTIME       -1 // This ends the pattern expansion. -1 means "never ending expansion".
+#define FOREVER        -1 // This ends the pattern expansion. -1 means "never ending expansion".
 #define CACHE_SIZE      2 // This is the cache size at simulator/processor side
 #define BUF_SIZE     1000 // This is the file circular buffer size.
 #define KEPT_OPENED  true // Keeping the file opened saves time but
@@ -39,11 +39,11 @@ int main(int argc, char* argv[]) {
     kwd::type("E", "Scalar", CACHE_SIZE, BUF_SIZE, KEPT_OPENED);
 
     // We set internals to a random value when the user input is ready.
-    "A" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
-    "B" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
-    "C" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
-    "D" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
-    "E" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", WALLTIME);
+    "A" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", FOREVER);
+    "B" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", FOREVER);
+    "C" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", FOREVER);
+    "D" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", FOREVER);
+    "E" << fx::random_when({kwd::var("in", "X")}) |  kwd::use("walltime", FOREVER);
 
   }
   
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 	kwd::var("internals", "C"),
 	kwd::var("internals", "D"),
 	kwd::var("internals", "E")
-      })                               |  kwd::use("walltime", WALLTIME);
+      })                               |  kwd::use("walltime", FOREVER);
     
     "max" << fx::max({
 	kwd::var("in", "X"),
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 	kwd::var("internals", "C"),
 	kwd::var("internals", "D"),
 	kwd::var("internals", "E")
-      })                               |  kwd::use("walltime", WALLTIME);
+      })                               |  kwd::use("walltime", FOREVER);
   }
   
  

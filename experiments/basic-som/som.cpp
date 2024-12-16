@@ -5,7 +5,7 @@
 #define TRACE    10000
 #define OPENED    true
 #define FORGET       0
-#define WALLTIME    -1 // Rules can be applied forever
+#define FOREVER     -1 // Rules can be applied forever
 
 #define SAVE_PERIOD 500
 
@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 
   // Let us gather all parameter definitions here.
   kwd::parameters p_main, p_match, p_learn, p_external, p_contextual, p_global;
-  p_main       | kwd::use("epsilon", 0), kwd::use("walltime", WALLTIME);
+  p_main       | kwd::use("epsilon", 0), kwd::use("walltime", FOREVER);
   p_match      | p_main, kwd::use("sigma", .1);
   p_learn      | p_main, kwd::use("alpha", .1), kwd::use("r", .2);
   p_external   | p_main;

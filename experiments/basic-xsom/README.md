@@ -18,6 +18,20 @@ many identical inputs for the same u in each map.
 
 This is show by the demos.
 
+## Understand inputs
+
+Inputs are 2D curves (i.e M(u) = (x(u), y(u))). You can choose one in
+the following (the examples are given for the banana curve). Let us
+display them before starting.
+
+```
+make show-shape SHAPE=circle
+make show-shape SHAPE=banana
+make show-shape SHAPE=racket
+```
+
+
+
 ## Setup the demo
 
 First setup a root-dir directory for our variables.
@@ -52,8 +66,9 @@ make main-figs
 ```
 make send-main-rules TRACE=2500
 ```
+Here, the TRACE value is the history size. In this experiment, feeding with inputs beyond this history window is not expected.
 
-Then we can feed the inputs (let us use a banana shape).
+Then we can feed the inputs (let us use a banana shape). You can try other shapes, available ones are 'circle', 'racket' and 'banana'.
 
 ```
 make feed-main SHAPE=banana
@@ -117,7 +132,7 @@ The relaxation story has been played for timestep 100, let us view it.
 make view-relaxation TIMESTEP=100
 ```
 
-You can try any other timestep (from 0 tà 2499). When you are done,
+You can try any other timestep (from 0 to 2499). When you are done,
 you can clean everything.
 
 ```
@@ -180,7 +195,7 @@ make clear-frozen-inputs
 
 ## Making a movie
 
-You can close the variable scanning windows, since it reads the files periodically.
+You can close the variable scanning windows, since it reads the files periodically. Frozen input settings still need to be there (see previous section).
 
 ```
 make frames EVERY=5 NEXT_FRAME=0
