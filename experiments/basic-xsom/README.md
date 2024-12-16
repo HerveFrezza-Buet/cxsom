@@ -197,6 +197,22 @@ make clear-frozen-inputs
 
 You can close the variable scanning windows, since it reads the files periodically. Frozen input settings still need to be there (see previous section).
 
+If you are restarting from scratch, do the following to be abloe to
+generate a movie. Otherwise, skip these commands.
+
+```
+make cxsom-clear-rootdir
+make cxsom-kill-processor
+make cxsom-launch-processor 
+make send-main-rules TRACE=2500
+make feed-main SHAPE=racket
+make view-weights
+make declare-frozen-inputs
+make feed-frozen-inputs SHAPE=racket
+
+```
+
+
 ```
 make frames EVERY=5 NEXT_FRAME=0
 ```
