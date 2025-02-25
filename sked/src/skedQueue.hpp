@@ -36,7 +36,6 @@ namespace sked {
       to_do.wait(lock);
     }
     void flush() {
-      std::lock_guard<std::mutex> lock(to_do_mutex);
       to_do.notify_all();
     }
   };
@@ -98,12 +97,12 @@ namespace sked {
 
     /**
      * @short These queues acknowledge when they finish their job.
-     * When a secondary thread passes the "q.go_ahead()" barrier, it performs a job and then notifies that it os done, by calling "q.done()". The go_ahead call returns an information that has to be passed to done, i.e. "info = q.go_ahead(); ....; q.done(info)". In the main thread, "q.flush()" waits for all running secondary threads to have acknowledge by "done". Some othe secondary threads my ask for "go_ahead" while flushing is in progress. The "q.flush()" call returns false when it triggers no secondary thread work.
+     * When a secondary thread passes the "q.go_ahead()" barrier, it performs a job and then notifies that it is done, by calling "q.done()". The go_ahead call returns an information that has to be passed to done, i.e. "info = q.go_ahead(); ....; q.done(info)". In the main thread, "q.flush()" waits for all running secondary threads to have acknowledge by "done". Some other secondary threads my ask for "go_ahead" while flushing is in progress. The "q.flush()" call returns false when it triggers no secondary thread work.
      */
     class queue : public sked::queue {
     private:
-      std::condition_variable   check_activity;
-      std::mutex                check_activity_mutex;
+      std::condition_variable   check_activity;       // For pausing and awakiing the main thread.
+      std::mutex                check_activity_mutex; 
       std::atomic<unsigned int> size = 0;
       
       
@@ -117,14 +116,12 @@ namespace sked {
       queue& operator=(queue&&) = delete;
       
       ack_info_type go_ahead() {
-	{
-	  std::lock_guard<std::mutex> lock(check_activity_mutex);
-	  check_activity.notify_one(); // There is only only the main thread pending.
-	}
+	check_activity.notify_one(); // We notify the main thread that a new thread enters the game.
 	{
 	  std::unique_lock<std::mutex> lock(to_do_mutex);
 	  size++;
 	  to_do.wait(lock);
+	  check_activity.notify_one(); // We notify the main thread that a "go-ahead" is done.
 	}
 	return {};
       }
@@ -133,21 +130,20 @@ namespace sked {
        * @return true if there were actual pending jobs.
        */
       bool flush() {
+	std::unique_lock<std::mutex> lock(check_activity_mutex);
 	bool res = false;
 	
 	while(size > 0) {
 	  res = true;
 	  this->sked::queue::flush();
-	  std::unique_lock<std::mutex> lock(check_activity_mutex);
 	  check_activity.wait(lock);
 	}
 	return res;
       }
 
       void done(ack_info_type) {
-	std::lock_guard<std::mutex> lock(check_activity_mutex);
 	--size;
-	check_activity.notify_one(); // There is only only the main thread pending.
+	check_activity.notify_one(); // // We notify the main thread that a current "go_ahead" section previously started is finished.
       }
     };
   }
