@@ -1,4 +1,3 @@
-# basic xSOM experiment
 
 
 Here, we set up two interconnected SOMs, using cxsom-builder. We have

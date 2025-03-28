@@ -1,4 +1,3 @@
-# basic SOM experiment
 
 Here, we set up a basic SOM, using cxsom-builder. We have customized a
 makefile for that purpose, read it.

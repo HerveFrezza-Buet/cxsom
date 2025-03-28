@@ -1,4 +1,3 @@
-# basic rec-SOM experiment
 
 
 Here, we set up a basic recurrent SOM, using cxsom-builder. We have

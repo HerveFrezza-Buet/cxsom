@@ -1,4 +1,4 @@
-# Basic scheduler experiment
+
 
 The scheduling ("sked" in cxsom) is a feature that enables to interact with a running simulation. Indeed, the computation is stored in .var files in the root directory, and the cxsom-processor reads and writes these files. The same stands for viewers, that read the files as well, or when new inputs are provided (when we 'feed' some variables), which is a write in some files.
 
