@@ -1,6 +1,6 @@
 
 Here, we set up a basic SOM, using cxsom-builder. We have customized a
-makefile for that purpose, read it.
+[makefile](makefile) for that purpose, read it.
 
 
 ## Setup the demo
@@ -78,7 +78,7 @@ make send-rules
 ## Running the simulation
 
 In order to make the processiing go further, we have to feed it with
-new inputs. This is what feed.py does. You can try any of the filling
+new inputs. This is what [feed.py](feed.py) does. You can try any of the filling
 (several times). You see the effect on the variable scanning window.
 
 ```
@@ -89,7 +89,7 @@ make feed-triangle
 
 You can also view the pasw evolution of weights. We have the last
 10000 of them in timeline "wgt", and the last 10000 of them, but saved
-every 500 steps, in timeline "save". The file visu.py makes the
+every 500 steps, in timeline "save". The file [visu.py](visu.py) makes the
 vizualization. Choose the ones you want to display.
 
 ```
