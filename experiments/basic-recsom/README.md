@@ -1,9 +1,9 @@
 
 
 Here, we set up a basic recurrent SOM, using cxsom-builder. We have
-customized a makefile for that purpose, read it.
+customized a [makefile](makefile) for that purpose, read it.
 
-We recommend to do the 'basic-som' experiment before, since things
+We recommend to do the [basic-som](basic-som) experiment before, since things
 presented there are not provided here with the same amount of details.
 
 We provide sequences of scalar inputs. The scalar input values are
@@ -31,7 +31,7 @@ make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 SKEDNET_
 
 ## Describing the computation
 
-The computation is described in the recsom.cpp file. Have a look at it.
+The computation is described in the [recsom.cpp](recsom.cpp) file. Have a look at it.
 
 We have to compile it, and use it to check the rules (from graph outputs).
 
@@ -51,8 +51,8 @@ make send-rules
 ```
 ## Experimentation
 
-Experimentation is based on `feed.py` for feeding the inputs, `view.py` and
-`history.py` for showing the weights. Read them both.
+Experimentation is based on [feed.py](feed.py) for feeding the inputs, [view.py](view.py) and
+[history.py](history.py) for showing the weights. Read them both.
 
 Try the following
 
