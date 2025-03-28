@@ -4,7 +4,7 @@ Here are gathered several experiments. They aim to be used as a tutorial. Each d
 
 Here is a suggestion of the order in which you can try experiments, but every experiment can be tried independently from the others.
 
-- basic-som
+- [basic-som](basic-som)
 - basic-recsom
 - basic-xsom
 - basic-sked
