@@ -37,7 +37,7 @@ make cxsom-clear-rootdir
 
 ## Describing the computation
 
-The computation is described in the som.cpp file. Have a look at it.
+The computation is described in the [som.cpp](som.cpp) file. Have a look at it.
 
 We have to compile it.
 
