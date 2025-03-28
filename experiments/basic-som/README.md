@@ -45,7 +45,7 @@ We have to compile it.
 make som
 ```
 
-The we can generate PDFs that describe the computation.
+Then we can generate PDFs that describe the computation.
 
 ```
 make som-figs
@@ -87,7 +87,7 @@ make feed-square
 make feed-triangle
 ```
 
-You can also view the pasw evolution of weights. We have the last
+You can also view the past evolution of weights. We have the last
 10000 of them in timeline "wgt", and the last 10000 of them, but saved
 every 500 steps, in timeline "save". The file [visu.py](visu.py) makes the
 vizualization. Choose the ones you want to display.
@@ -130,7 +130,7 @@ Nota: feeding ends with an error... the scripts pings the running
 processor, that is not running currently. But the xi variable has been
 fed.
 
-Let us launch a verbose monitor:
+Let us launch a monitored processor:
 
 ```
 make cxsom-launch-monitored-processor 
@@ -166,7 +166,7 @@ Another way to use the generated `monitoring.data` file is to generate a report 
 make cxsom-monitoring-report 
 ```
 
-The `monitoring.md` can be viewed with formatting tools base on markdown.
+The `monitoring.md` can be viewed with formatting tools based on markdown.
 
 
 
