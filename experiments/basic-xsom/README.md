@@ -1,9 +1,9 @@
 
 
 Here, we set up two interconnected SOMs, using cxsom-builder. We have
-customized a makefile for that purpose, read it.
+customized a [makefile](makefile) for that purpose, read it.
 
-We recommend to do the 'basic-som' experiment before, since things
+We recommend to do the [basic-som](basic-som) experiment before, since things
 presented there are not provided here with the same amount of details.
 
 The idea is to randomly toss u in [0,1], and provide to inputs, (x(u),
@@ -21,7 +21,7 @@ This is show by the demos.
 
 Inputs are 2D curves (i.e M(u) = (x(u), y(u))). You can choose one in
 the following (the examples are given for the banana curve). Let us
-display them before starting.
+display them before starting, using [show-input-shape.py](show-input-shape.py).
 
 ```
 make show-shape SHAPE=circle
@@ -54,7 +54,7 @@ make cxsom-launch-processor
 
 ### The main mode
 
-First, let us display the rules...
+The rules are encoded in [xsom.cpp](xsom.cpp). First, let us display the rules...
 
 ```
 make main-figs
@@ -67,13 +67,13 @@ make send-main-rules TRACE=2500
 ```
 Here, the TRACE value is the history size. In this experiment, feeding with inputs beyond this history window is not expected.
 
-Then we can feed the inputs (let us use a banana shape). You can try other shapes, available ones are 'circle', 'racket' and 'banana'.
+Then we can feed the inputs (see [feed-main.py](feed-main.py)) (let us use a banana shape). You can try other shapes, available ones are 'circle', 'racket' and 'banana'.
 
 ```
 make feed-main SHAPE=banana
 ```
 
-Then, we can view the weight evolution
+Then, we can view the weight evolution (see [view-weights.py](view-weights.py)):
 
 ```
 make view-weights
@@ -119,7 +119,7 @@ We can start relaxation by feeding the variable which are note
 computed by relaxation. We use the weights at timestep 100, the
 initial X/BMU and Y/BMU both initialized at .5 (for example), and X Y
 inputs initialized with values corresponding to U=.5 in the banana
-shape.
+shape (see [feed-relax.py](feed-relax.py)).
 
 ```
 make feed-relax-inputs TIMESTEP=100 U=.5 SHAPE=banana XBMU=.5 YBMU=.5
@@ -149,7 +149,7 @@ reults (i.e. which BMUs are visited, etc...).
 
 The architecture is able to provide rules for this "learning frozen"
 use. We prefix the timelines by zfrz, as we did previously with zrlx
-for relaxation.
+for relaxation (see [feed-frozen.py](feed-frozen.py)).
 
 ```
 make cxsom-clear-processor
@@ -170,7 +170,7 @@ make cxsom-ping-processor
 
 Now, the statistics for timestep step 2499 have been computed in
 timelines zfrz-00002499-*, let us visualize it (it may be weird, since we
-fed with a circle while we have learnt from a banana).
+fed with a circle while we have learnt from a banana). See [view-frozen-inputs.py](view-frozen-inputs.py).
 
 ```
 make view-frozen TIMESTEP=2499
