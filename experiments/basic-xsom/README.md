@@ -196,7 +196,7 @@ make clear-frozen-inputs
 
 You can close the variable scanning windows, since it reads the files periodically. Frozen input settings still need to be there (see previous section).
 
-If you are restarting from scratch, do the following to be abloe to
+If you are restarting from scratch, do the following to be able to
 generate a movie. Otherwise, skip these commands.
 
 ```
@@ -212,6 +212,7 @@ make feed-frozen-inputs SHAPE=racket
 ```
 
 
+Let us use [make-frames.py](make-frames.py) to make a movie.
 ```
 make frames EVERY=5 NEXT_FRAME=0
 ```
