@@ -111,3 +111,33 @@ make cxsom-launch-processor
 make make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
 make feed-train-inputs WALLTIME=100000
 ```
+
+
+## The ckecking stage
+
+In this mode, we check wether the map is able to encode in its external weights a good representation of the $(w, h, \rho)$ triplets. To do so, we feed the map with $(w, h, \rho)$ triplets, with $(w, h)$ spanning $[0, 1]^2$, and we get the (W/We-0, H/We-0, RGB/We-0) at corresponding bmus (W/BMU, H/BMU, RGB/BMU). The rules for this are the following:
+
+```
+make show-check-rules
+```
+
+We can, for example, build up the checking.
+
+```
+make cxsom-clear-processor
+make clear-checks
+make check WEIGHTS_AT=300 IMAGE_SIDE=100
+```
+
+Check the variable scanning and wait for the termination of the computing. Then, let us display the prediction
+
+```
+make show-checks
+```
+
+Clearing the checkings can be done as well.
+
+```
+make cxsom-clear-processor
+make clear-checks
+```

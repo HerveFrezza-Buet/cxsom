@@ -264,7 +264,7 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   auto Hmap = cxsom::builder::map::make_1D("H"  );  
   auto Rmap = cxsom::builder::map::make_1D("RGB");
 
-  // Let us connect the map, using non-adaptive layers and the weights
+  // Let us connect the map, using **non-adaptive** layers and the weights
   // learnt previously, instead of internally defined weights.
   auto Wc0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
   auto Wc1 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
@@ -272,6 +272,7 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
   auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
   auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
+  // These calls build up non adaptive layers, using external weights.
   Wmap->contextual(Hmap, fx::match_gaussian, p.match_ctx, Wc0, saved_weight_at);
   Wmap->contextual(Rmap, fx::match_gaussian, p.match_ctx, Wc1, saved_weight_at);
   Hmap->contextual(Wmap, fx::match_gaussian, p.match_ctx, Hc0, saved_weight_at);
@@ -291,7 +292,11 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   auto We0 = cxsom::builder::variable("saved", cxsom::builder::name("W")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);
   auto He0 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("We-0"), wtype, CACHE, trace, OPENED);  
   auto Re0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("We-0"), rtype, CACHE, trace, OPENED);
-  // We expose the value of the external weights at each BMU... This is the checking. This has to be close to the input.
+  
+  // We expose the value of the external weights at each BMU... This
+  // is the checking. This has to be close to the input. Using the
+  // cxsom::builder::expose::weight tag for a layer means that we have
+  // a variable computing weight(bmu) for that layer.
   Wmap->external(W  , fx::match_gaussian, p.match_pos, We0, saved_weight_at) | cxsom::builder::expose::weight;
   Hmap->external(H  , fx::match_gaussian, p.match_pos, He0, saved_weight_at) | cxsom::builder::expose::weight;
   Rmap->external(RGB, fx::match_gaussian, p.match_rgb, Re0, saved_weight_at) | cxsom::builder::expose::weight;
