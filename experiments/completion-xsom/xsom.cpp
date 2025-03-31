@@ -225,7 +225,9 @@ void make_train_rules(unsigned int save_period, unsigned int img_side) {
   R->var()     << fx::value_at(kwd::at(SRC->var(), 0), COORD->var()) | kwd::use("walltime", FOREVER); // We get the rgb value from the image collected at "Input" stage.
   
   
-  // We add the rules for weight savings.
+  // We add the rules for weight savings. It consists of saving
+  // weights externally (i.e. the 'saved' timeline) every save_period
+  // time steps.
   for(auto layer_ptr : layers) {
     auto W = layer_ptr->_W();
     auto Wsaved = cxsom::builder::variable("saved", W->varname, W->type, CACHE, SAVE_TRACE, OPEN_AS_NEEDED);
