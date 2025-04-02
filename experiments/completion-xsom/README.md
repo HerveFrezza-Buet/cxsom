@@ -141,3 +141,47 @@ Clearing the checkings can be done as well.
 make cxsom-clear-processor
 make clear-checks
 ```
+
+## Predict mode
+
+Here, we ask the map to retrieve rgb from (w, h) values un [0,1]^2. In other words, this will draw the image. Let us first display the prediction rules.
+
+```
+make show-predict-rules
+```
+
+An then let us build-up a prediction for the saved weights at 300.
+
+```
+make cxsom-clear-processor
+make clear-predictions
+make predict WEIGHTS_AT=300 IMAGE_SIDE=100
+```
+
+Check the variable scanning and wait for the termination of the computing. Then, let us display the prediction (see [show-samples.py](show-samples.py) and [reconstruct.py](reconstruct.py)).
+
+```
+make show-predictions
+make reconstruct-image
+```
+
+Clearing the prediction can be done as well.
+
+```
+make cxsom-clear-processor
+make clear-predictions
+```
+
+
+## Making movies (at work)
+
+See the instructions for this:
+
+```
+make movie-help
+```
+
+This relies on ffmpeg, as well as [frame-factory.py](frame-factory.py), [make-frame.py](make-frame.py), [wait_stable.py](wait_stable.py), [weights-frames.py](weights-frames.py).
+
+
+

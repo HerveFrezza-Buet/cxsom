@@ -159,13 +159,13 @@ Clearing the prediction can be done as well.
 ~> make clear-predict
 
 
-### Making movies
+## Making movies (at work)
 
 See the instructions for this:
 
 ~> make movie-help
 
-This relies on ffmpeg.
+This relies on ffmpeg, as well as [frame-factory.py](frame-factory.py), [make-frame.py](make-frame.py), [wait_stable.py](wait_stable.py), [weights-frames.py](weights-frames.py).
 
 
 
