@@ -272,6 +272,7 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   auto Hc1 = cxsom::builder::variable("saved", cxsom::builder::name("H")   / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
   auto Rc0 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-0"), wtype, CACHE, trace, OPENED);
   auto Rc1 = cxsom::builder::variable("saved", cxsom::builder::name("RGB") / cxsom::builder::name("Wc-1"), wtype, CACHE, trace, OPENED);
+  
   // These calls build up non adaptive layers, using external weights.
   Wmap->contextual(Hmap, fx::match_gaussian, p.match_ctx, Wc0, saved_weight_at);
   Wmap->contextual(Rmap, fx::match_gaussian, p.match_ctx, Wc1, saved_weight_at);
@@ -405,7 +406,7 @@ void make_predict_rules(unsigned int saved_weight_at, unsigned int img_side) {
   }
 
   // Now, we need supplementary rules for reading the RGB
-  // result. Indeed, it consists in usingr the BMU of the RGB map to
+  // result. Indeed, it consists in using the BMU of the RGB map to
   // index the learnt RGB weights.
   RGB->var() << fx::value_at(kwd::at(Re0->var(), saved_weight_at), Rmap->output_BMU()->var()) | kwd::use("walltime", FOREVER);
 }
