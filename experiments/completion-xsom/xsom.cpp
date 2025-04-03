@@ -249,7 +249,10 @@ void make_check_rules(unsigned int saved_weight_at, unsigned int img_side) {
   unsigned int trace = img_side * img_side;
   Params p;
   auto map_settings = make_map_settings(p);
-  map_settings.exposure_file_size = trace; // We exposed W, H and RGB weights, we keep trace of them as for a (w, h, rbb) dataset.
+  map_settings.exposure_file_size = trace; // At the end of this function, we exposed W, H and RGB weights, we keep trace of them as for a (w, h, rgb) dataset.
+
+  // We could have recordered the BMU positions of the maps like this.
+  // map_settings.bmu_file_size = trace;
   
   auto archi = cxsom::builder::architecture();
   archi->timelines = {"check-wgt", "check-rlx", "check-out"};
