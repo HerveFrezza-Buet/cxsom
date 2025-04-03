@@ -89,7 +89,7 @@ make feed-triangle
 
 You can also view the past evolution of weights. We have the last
 10000 of them in timeline "wgt", and the last 10000 of them, but saved
-every 500 steps, in timeline "save". The file [visu.py](visu.py) makes the
+every 500 steps, in timeline "save". The file [view.py](view.py) makes the
 vizualization. Choose the ones you want to display.
 
 ```
