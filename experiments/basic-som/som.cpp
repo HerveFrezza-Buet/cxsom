@@ -81,12 +81,12 @@ int main(int argc, char* argv[]) {
   archi->realize();
 
   // Updates of weights reads weights at t-1... so timestep 0 cannot
-  // be implemente with the general updating rule. Let us specify it as
+  // be implemented with the general updating rule. Let us specify it as
   // setting all the variables randomly.
   map->internals_random_at(0);
 
   // It can be nice to save weights every SAVE_PERIOD steps (we have
-  // already bufferd the past TRACE weight values).
+  // already buffered the past TRACE weight values).
 
   // Let us first retrieve the variable containing the weights... from
   // the layer where they are stored.
