@@ -25,7 +25,7 @@ include /usr/share/cxsom/cxsom-makefile
 
 .PHONY: clean
 clean:
-	@rm -f *~ *.dot *.pdf
+	@rm -f *~ *.dot *.pdf som monitoring.data monitoring.md
 
 # This is how we compile rules.
 som: som.cpp
