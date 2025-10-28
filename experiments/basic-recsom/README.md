@@ -53,13 +53,13 @@ make send-rules
 ## Experimentation
 
 Experimentation is based on [feed.py](feed.py) for feeding the inputs, [view.py](view.py) and
-[history.py](history.py) for showing the weights. Read them both.
+[history.py](history.py) for showing the weights. Read them all.
 
 Try the following
 
 ```
 make feed SEQ=ABCDEFEDCB
-make show_weights-sequence
+make show-weights-sequence
 make feed SEQ=ABCDEFEDCB
 make feed SEQ=ABCDEFEDCB
 make feed SEQ=ABCDEFEDCB
@@ -71,7 +71,7 @@ make feed SEQ=AAAAAF
 make feed SEQ=AAAAAF
 make feed SEQ=AAAAAF
 make feed SEQ=AAAAAF
-make show_weights-history
+make show-weights-history
 ```
 
 

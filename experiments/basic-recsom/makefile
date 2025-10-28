@@ -21,7 +21,7 @@ include /usr/share/cxsom/cxsom-makefile
 
 .PHONY: clean
 clean:
-	@rm -f *~ *.dot *.pdf
+	@rm -f *~ *.dot *.pdf recsom
 
 # This is how we compile rules.
 recsom: recsom.cpp
