@@ -77,7 +77,7 @@ make show-train-rules
 Let us emplace the training rules at server side (the null walltime warning is ok). Check the variable scanning and wait for the termination of the computing.
 
 ```
-make make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
+make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
 ```
 
 Indeed, computation is only done at step 0. This is due to the walltime value of the rule setting train-in/coord. In order to trigger computation until timestep 30000, we just have to send a rule that modifies thes walltime.
@@ -108,7 +108,7 @@ If you need to restart and continue the computation (up to 100000 for example)
 
 ```
 make cxsom-launch-processor
-make make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
+make train-setup SAVE_PERIOD=100 IMAGE_SIDE=100
 make feed-train-inputs WALLTIME=100000
 ```
 
