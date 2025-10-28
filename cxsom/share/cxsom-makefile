@@ -121,6 +121,8 @@ cxsom-install-venv:
 .PHONY: cxsom-show-venv-activation
 cxsom-show-venv-activation:
 	@echo
+	@echo Type the following to get your virtual environment activated:
+	@echo
 	@echo . `cat $(VENV_CONFIG_FILE)`/bin/activate
 
 .PHONY: cxsom-clear-rootdir
