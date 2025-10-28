@@ -1,0 +1,9 @@
+[project]
+name = "pycxsom"
+version = "1.0"
+dependencies = ['numpy', 'matplotlib']
+
+[project.scripts]
+pycxsom-plot-as-lines = "pycxsom.scripts.pycxsom_plot:main"
+cxsom-monitor-situation-report = "pycxsom.scripts.cxsom_monitor:main"
+
