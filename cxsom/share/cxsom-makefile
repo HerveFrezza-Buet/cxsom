@@ -8,7 +8,7 @@ cxsom-help:
 	@echo
 	@echo "# at both sides"
 	@echo
-	@echo "  make cxsom-set-config ROOT_DIR=./root_dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4"
+	@echo "  make cxsom-set-config ROOT_DIR=./root_dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4 VENV=cxsom-venv"
 	@echo "  make cxsom-show-config"
 	@echo
 	@echo "  make cxsom-set-rootdir      ROOT_DIR=./root_dir"
@@ -16,8 +16,13 @@ cxsom-help:
 	@echo "  make cxsom-set-port         PORT=10000"
 	@echo "  make skednet-set-port       SKEDNET_PORT=20000"
 	@echo "  make cxsom-set-nbthreads    NB_THREADS=4"
+	@echo "  make cxsom-set-venv         VENV=cxsom-venv"
 	@echo
 	@echo "  make cxsom-clear-rootdir"
+	@echo
+	@echo "  make cxsom-make-venv             // Creates (if needed) the venv"
+	@echo "  make cxsom-install-pycxsom       // Installs pycxsom in venv"
+	@echo "  make cxsom-show-venv-activation  // displays the venv activation command"
 	@echo
 	@echo "# at server side"
 	@echo 
@@ -55,15 +60,17 @@ HOSTNAME_CONFIG_FILE     = .cxsom-hostname-config
 PORT_CONFIG_FILE         = .cxsom-port-config
 SKEDNET_PORT_CONFIG_FILE = .skednet-port-config
 NBTHREADS_CONFIG_FILE    = .cxsom-nbthreads-config
+VENV_CONFIG_FILE         = .cxsom-venv-config
 
 .PHONY: cxsom-show-config
 cxsom-show-config:
 	@echo
-	@echo "nb_threads        =" `cat $(NBTHREADS_CONFIG_FILE)`
-	@echo "server hostname   =" `cat $(HOSTNAME_CONFIG_FILE)`
-	@echo "port              =" `cat $(PORT_CONFIG_FILE)`
-	@echo "skednet port      =" `cat $(SKEDNET_PORT_CONFIG_FILE)`
-	@echo "variables rootdir =" `cat $(ROOTDIR_CONFIG_FILE)`
+	@echo "python virtual environment =" `cat $(VENV_CONFIG_FILE)`
+	@echo "nb_threads                 =" `cat $(NBTHREADS_CONFIG_FILE)`
+	@echo "server hostname            =" `cat $(HOSTNAME_CONFIG_FILE)`
+	@echo "port                       =" `cat $(PORT_CONFIG_FILE)`
+	@echo "skednet port               =" `cat $(SKEDNET_PORT_CONFIG_FILE)`
+	@echo "variables rootdir          =" `cat $(ROOTDIR_CONFIG_FILE)`
 	@echo
 
 
@@ -92,8 +99,27 @@ cxsom-set-nbthreads:
 	@rm -f $(NBTHREADS_CONFIG_FILE)
 	@echo $(NB_THREADS) > $(NBTHREADS_CONFIG_FILE)
 
+.PHONY: cxsom-set-venv
+cxsom-set-venv:
+	@rm -f $(VENV_CONFIG_FILE)
+	@echo $(VENV) > $(VENV_CONFIG_FILE)
+
 .PHONY: cxsom-set-config
-cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port skednet-set-port cxsom-set-nbthreads
+cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port skednet-set-port cxsom-set-nbthreads cxsom-set-venv
+
+
+.PHONY: cxsom-make-venv
+cxsom-make-venv:
+	python3 -m venv `cat $(VENV_CONFIG_FILE)`
+
+.PHONY: cxsom-install-pycxsom
+cxsom-install-pycxsom:
+	`cat $(VENV_CONFIG_FILE)`/bin/activate; pip install git+https://github.com/HerveFrezza-Buet/cxsom#subdirectory=pycxsom
+
+.PHONY: cxsom-show-venv-activation
+cxsom-show-venv-activation:
+	@echo
+	@echo . `cat $(VENV_CONFIG_FILE)`/bin/activate
 
 .PHONY: cxsom-clear-rootdir
 cxsom-clear-rootdir:
