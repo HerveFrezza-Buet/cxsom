@@ -1,6 +1,6 @@
 help:
 	@echo
-	@echo "Read the README.txt file for instructions."
+	@echo "Read the README.md file for instructions."
 	@echo "make cxsom-help                                    <-- help for common cxsom manipulations."
 	@echo
 	@echo "# Calibration"
@@ -82,25 +82,25 @@ calibration-setup: xsom
 
 .PHONY: calibrate
 calibrate:
-	@python3 set-calibration.py `cat .cxsom-rootdir-config`
+	@python set-calibration.py `cat .cxsom-rootdir-config`
 	@make --quiet cxsom-ping-processor
 
 .PHONY: show-calibration
 show-calibration:
-	@python3 show-calibration.py `cat .cxsom-rootdir-config`
+	@python show-calibration.py `cat .cxsom-rootdir-config`
 
 
 
 .PHONY: inputs-setup
 inputs-setup: xsom
 	@./xsom send `cat .cxsom-hostname-config` `cat .cxsom-port-config` -- input ${IMAGE_SIDE}
-	@python3 build-eye-input.py `cat .cxsom-rootdir-config`
-	@python3 build-img-coords.py `cat .cxsom-rootdir-config` img ${IMAGE_SIDE}
+	@python build-eye-input.py `cat .cxsom-rootdir-config`
+	@python build-img-coords.py `cat .cxsom-rootdir-config` img ${IMAGE_SIDE}
 	@make --quiet cxsom-ping-processor
 
 .PHONY: show-samples
 show-samples:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h img rgb ${FRAME_ID}
+	@python show-samples.py `cat .cxsom-rootdir-config` img w img h img rgb ${FRAME_ID}
 
 .PHONY: clear-samples
 clear-samples:
@@ -127,11 +127,11 @@ feed-train-inputs:
 
 .PHONY: show-weights-history
 show-weights-history:
-	@python3 show-weights-history.py `cat .cxsom-rootdir-config`
+	@python show-weights-history.py `cat .cxsom-rootdir-config`
 
 .PHONY: show-rgb-mapping
 show-rgb-mapping:
-	@python3 show-rgb-mapping.py `cat .cxsom-rootdir-config`
+	@python show-rgb-mapping.py `cat .cxsom-rootdir-config`
 
 .PHONY: clear-training
 clear-training:
@@ -162,7 +162,7 @@ check:
 
 .PHONY: show-checks
 show-checks:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` check-out 'W/We-0' check-out 'H/We-0' check-out 'RGB/We-0' ${FRAME_ID}
+	@python show-samples.py `cat .cxsom-rootdir-config` check-out 'W/We-0' check-out 'H/We-0' check-out 'RGB/We-0' ${FRAME_ID}
 
 .PHONY: show-predict-rules
 show-predict-rules:
@@ -184,12 +184,12 @@ predict:
 
 .PHONY: show-predictions
 show-predictions:
-	@python3 show-samples.py `cat .cxsom-rootdir-config` img w img h predict-out rgb ${FRAME_ID}
+	@python show-samples.py `cat .cxsom-rootdir-config` img w img h predict-out rgb ${FRAME_ID}
 
 
 .PHONY: reconstruct-image
 reconstruct-image:
-	@python3 reconstruct.py `cat .cxsom-rootdir-config`
+	@python reconstruct.py `cat .cxsom-rootdir-config`
 
 
 .PHONY: clear-frames
@@ -205,15 +205,15 @@ one-frame:
 	@sleep 1
 	@make --quiet check predict
 	@sleep 2
-	@python3 wait_stable.py `cat .cxsom-rootdir-config` check-out 'H/We-0'
-	@python3 wait_stable.py `cat .cxsom-rootdir-config` predict-out rgb
-	@python3 make-frame.py  `cat .cxsom-rootdir-config` ${WEIGHTS_AT}
+	@python wait_stable.py `cat .cxsom-rootdir-config` check-out 'H/We-0'
+	@python wait_stable.py `cat .cxsom-rootdir-config` predict-out rgb
+	@python make-frame.py  `cat .cxsom-rootdir-config` ${WEIGHTS_AT}
 
 
 .PHONY: check-predict-frames
 check-predict-frames:
 	@make --quiet clear-frames
-	@python3 frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE}
+	@python frame-factory.py `cat .cxsom-rootdir-config` ${IMAGE_SIDE}
 
 .PHONY: movie-generation
 movie-generation:
@@ -223,4 +223,4 @@ movie-generation:
 .PHONY: weights-frames
 weights-frames:
 	@make --quiet clear-frames
-	@python3 weights-frames.py `cat .cxsom-rootdir-config` 
+	@python weights-frames.py `cat .cxsom-rootdir-config` 

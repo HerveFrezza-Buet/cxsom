@@ -19,7 +19,7 @@ include /usr/share/cxsom/cxsom-makefile
 
 .PHONY: clean
 clean:
-	@rm -f *~ *.dot *.pdf
+	@rm -f *~ *.dot *.pdf minmax
 
 # This is how we compile rules.
 minmax: minmax.cpp

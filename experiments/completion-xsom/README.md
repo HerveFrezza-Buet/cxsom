@@ -20,11 +20,11 @@ The demo is organized into several stages, detailes below.
 ## Set up the demo
 
 
-First setup a root-dir directory for our variables.
+First setup a root-dir directory for our variables as well as the virtual env.
 
 ```
 mkdir root-dir
-make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
+make cxsom-set-config ROOT_DIR=./root-dir VENV=../cxsom-venv HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
 ```
 
 Last we can launch a processor, and scan the root-dir.
