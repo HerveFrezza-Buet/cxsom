@@ -46,12 +46,12 @@ send-rules: recsom
 
 .PHONY: feed
 feed:
-	@python3 feed.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` ${SEQ} 50
+	@python feed.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` ${SEQ} 50
 
 .PHONY: show-weights-sequence
 show-weights-sequence:
-	@python3 view.py `cat .cxsom-rootdir-config` &
+	@python view.py `cat .cxsom-rootdir-config` &
 
 .PHONY: show-weights-history
 show-weights-history:
-	@python3 history.py `cat .cxsom-rootdir-config` &
+	@python history.py `cat .cxsom-rootdir-config` &

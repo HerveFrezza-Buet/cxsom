@@ -17,6 +17,19 @@ many identical inputs for the same u in each map.
 
 This is show by the demos.
 
+
+
+
+## Setup the demo
+
+First setup a root-dir and the virtual env directories (see. [basic-som](basic-som)).
+
+```
+mkdir root-dir
+make cxsom-set-config ROOT_DIR=./root-dir VENV=../cxsom-venv/ HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
+make cxsom-show-venv-activation 
+```
+
 ## Understand inputs
 
 Inputs are 2D curves (i.e M(u) = (x(u), y(u))). You can choose one in
@@ -28,18 +41,6 @@ make show-shape SHAPE=circle
 make show-shape SHAPE=banana
 make show-shape SHAPE=racket
 ```
-
-
-
-## Setup the demo
-
-First setup a root-dir directory for our variables.
-
-```
-mkdir root-dir
-make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
-```
-
 
 ## Running
 

@@ -56,7 +56,7 @@ include /usr/share/cxsom/cxsom-makefile
 
 .PHONY: clean
 clean:
-	@rm -f *~ *.dot *.pdf
+	@rm -f *~ *.dot *.pdf xsom
 
 # This is how we compile rules.
 xsom: xsom.cpp
@@ -84,11 +84,11 @@ send-main-rules: xsom
 
 .PHONY: feed-main
 feed-main:
-	@python3 feed-main.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` ${SHAPE}
+	@python feed-main.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` ${SHAPE}
 
 .PHONY: view-weights
 view-weights:
-	@python3 view-weights.py `cat .cxsom-rootdir-config` 
+	@python view-weights.py `cat .cxsom-rootdir-config` 
 
 RELAX_PREFIX  = zrlx
 
@@ -110,11 +110,11 @@ send-relax-rules:
 
 .PHONY: feed-relax-inputs
 feed-relax-inputs:
-	@python3 feed-relax.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(RELAX_PREFIX)-`printf %08d ${TIMESTEP}` ${U} ${SHAPE} ${XBMU} ${YBMU}
+	@python feed-relax.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(RELAX_PREFIX)-`printf %08d ${TIMESTEP}` ${U} ${SHAPE} ${XBMU} ${YBMU}
 
 .PHONY: view-relaxation
 view-relaxation:
-	@python3 view-relaxation.py `cat .cxsom-rootdir-config` ${TIMESTEP}
+	@python view-relaxation.py `cat .cxsom-rootdir-config` ${TIMESTEP}
 
 .PHONY: clear-relaxation
 clear-relaxation:
@@ -145,15 +145,15 @@ send-frozen-rules:
 
 .PHONY: feed-frozen-inputs
 feed-frozen-inputs:
-	@python3 feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(TEST_PREFIX) $(SHAPE)
+	@python feed-frozen.py `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` $(TEST_PREFIX) $(SHAPE)
 
 .PHONY: view-frozen-inputs
 view-frozen-inputs:
-	@python3 view-frozen-inputs.py `cat .cxsom-rootdir-config` $(TEST_PREFIX)
+	@python view-frozen-inputs.py `cat .cxsom-rootdir-config` $(TEST_PREFIX)
 
 .PHONY: view-frozen
 view-frozen:
-	@python3 view-frozen.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP} ${FRAME}
+	@python view-frozen.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX)-`printf %08d ${TIMESTEP}` ${TIMESTEP} ${FRAME}
 
 .PHONY: clear-frozen-inputs
 clear-frozen-inputs:
@@ -165,7 +165,7 @@ clear-frozen:
 
 ./PHONY: frames
 frames:
-	@python3 make-frames.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY) $(NEXT_FRAME)
+	@python make-frames.py `cat .cxsom-rootdir-config` $(TEST_PREFIX) $(FROZEN_PREFIX) $(EVERY) $(NEXT_FRAME)
 
 ./PHONY: movie
 movie:
