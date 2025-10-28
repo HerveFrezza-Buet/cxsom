@@ -117,6 +117,8 @@ cxsom-make-venv:
 cxsom-install-venv:
 	. `cat $(VENV_CONFIG_FILE)`/bin/activate; pip install git+https://github.com/HerveFrezza-Buet/cxsom#subdirectory=pycxsom
 	. `cat $(VENV_CONFIG_FILE)`/bin/activate; pip install pandoc
+	. `cat $(VENV_CONFIG_FILE)`/bin/activate; pip install numpy
+	. `cat $(VENV_CONFIG_FILE)`/bin/activate; pip install matplotlib
 
 .PHONY: cxsom-show-venv-activation
 cxsom-show-venv-activation:
