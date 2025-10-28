@@ -9,7 +9,12 @@ First setup a root-dir directory for our variables.
 
 ```
 mkdir root-dir
-make cxsom-set-config ROOT_DIR=./root-dir HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
+```
+
+Then, as we will use python tools, we need a virtual environment. You can use an existing one, or create a new one somewhere. Whatever the case, you have to declare the path to your environment as the `VENV` variable. Here, let us plan to have the virtual environment in `../cxsom-venv`... but once again, you can use an already existing one.
+
+```
+make cxsom-set-config ROOT_DIR=./root-dir VENV=../cxsom-venv HOSTNAME=localhost PORT=10000 SKEDNET_PORT=20000 NB_THREADS=4
 ```
 
 You can get help by only typing
@@ -23,6 +28,16 @@ You can check the config
 ```
 make cxsom-show-config
 ```
+
+Now, if your environment is not created yet, you have to created it (be sure that your python installation has the venv modules).
+
+```
+make cxsom-make-venv 
+```
+
+In your environment, the `pycxsom` library has to be installed. Let us do this.
+
+
 
 
 ## Clearing all

@@ -114,7 +114,7 @@ cxsom-make-venv:
 
 .PHONY: cxsom-install-pycxsom
 cxsom-install-pycxsom:
-	`cat $(VENV_CONFIG_FILE)`/bin/activate; pip install git+https://github.com/HerveFrezza-Buet/cxsom#subdirectory=pycxsom
+	. `cat $(VENV_CONFIG_FILE)`/bin/activate; pip install git+https://github.com/HerveFrezza-Buet/cxsom#subdirectory=pycxsom
 
 .PHONY: cxsom-show-venv-activation
 cxsom-show-venv-activation:
