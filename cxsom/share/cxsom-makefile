@@ -53,6 +53,7 @@ cxsom-help:
 	@echo "                                // the command 'grip monitoring.md' to render the report on a "
 	@echo "                                // web page (the page will update each time you re-build the report)."
 	@echo
+	@echo "  make cxsom-monitoring-to-pdf  // Uses pandoc to view monitoring.md into a pdf."
 	@echo
 
 ROOTDIR_CONFIG_FILE      = .cxsom-rootdir-config
@@ -198,3 +199,9 @@ cxsom-scan-vars:
 cxsom-monitoring-report:
 	@cxsom-monitor-situation-report > monitoring.md
 	@echo File monitoring.md is the generated report.
+
+.PHONY: cxsom-monitoring-to-pdf
+cxsom-monitoring-to-pdf:
+	@pandoc monitoring.md -o monitoring.pdf
+	@echo
+	@echo monitoring.pdf generated.

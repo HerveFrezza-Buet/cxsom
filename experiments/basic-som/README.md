@@ -35,7 +35,12 @@ Now, if your environment is not created yet, you have to created it (be sure tha
 make cxsom-make-venv 
 ```
 
-In your environment, the `pycxsom` library has to be installed. Let us do this.
+In your environment, the `pycxsom` library and other stuff have to be installed. Let us do this.
+
+```
+make cxsom-install-venv
+```
+
 
 Now, you can "open" your environment and use it throughout the experiment. The command line to do so is recalled by
 
@@ -203,6 +208,9 @@ make cxsom-monitoring-report
 
 The `monitoring.md` can be viewed with formatting tools based on markdown.
 
+```
+make cxsom-monitoring-to-pdf 
+```
 
 
 
