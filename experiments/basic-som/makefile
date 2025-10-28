@@ -50,20 +50,20 @@ send-rules: som
 
 .PHONY: feed-square
 feed-square:
-	@python3 feed.py square `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config`
+	@python feed.py square `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config`
 
 .PHONY: feed-crown
 feed-crown:
-	@python3 feed.py crown `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` 
+	@python feed.py crown `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` 
 
 .PHONY: feed-triangle
 feed-triangle:
-	@python3 feed.py triangle `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` 
+	@python feed.py triangle `cat .cxsom-rootdir-config` `cat .cxsom-hostname-config` `cat .cxsom-port-config` 
 
 .PHONY: view-last-weights
 view-last-weights:
-	@python3 view.py `cat .cxsom-rootdir-config` wgt &
+	@python view.py `cat .cxsom-rootdir-config` wgt &
 
 .PHONY: view-weights-history
 view-weights-history:    
-	@python3 view.py `cat .cxsom-rootdir-config` save &
+	@python view.py `cat .cxsom-rootdir-config` save &

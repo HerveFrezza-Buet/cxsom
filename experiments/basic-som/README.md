@@ -37,6 +37,19 @@ make cxsom-make-venv
 
 In your environment, the `pycxsom` library has to be installed. Let us do this.
 
+Now, you can "open" your environment and use it throughout the experiment. The command line to do so is recalled by
+
+```
+make cxsom-show-venv-activation
+```
+
+When you are done with experiments, only type
+
+```
+deactivate
+```
+
+to exit the virtual environment.
 
 
 
@@ -81,6 +94,11 @@ We launch a processor (since none is already running)
 
 ```
 make cxsom-launch-processor
+```
+
+It is also convinient to have a window scanning your (currently empty) root directory.
+
+```
 make cxsom-scan-vars
 ```
 
@@ -95,6 +113,8 @@ make send-rules
 In order to make the processiing go further, we have to feed it with
 new inputs. This is what [feed.py](feed.py) does. You can try any of the filling
 (several times). You see the effect on the variable scanning window.
+
+**Nota**: Be sure to have your virtual envoronment opened, since we use python files involving `pycxsom`.
 
 ```
 make feed-crown
@@ -162,7 +182,7 @@ First you can use the `pycxsom.monitor` module for interactive
 debugging inside a python console. Try this:
 
 ```
-python3
+python
 ```
 
 and then, in the python shell.

@@ -195,5 +195,5 @@ cxsom-scan-vars:
 
 .PHONY: cxsom-monitoring-report
 cxsom-monitoring-report:
-	@cxsom-monitor-situation-report.py > monitoring.md
+	@cxsom-monitor-situation-report > monitoring.md
 	@echo File monitoring.md is the generated report.
