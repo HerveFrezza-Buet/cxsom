@@ -44,43 +44,45 @@ def make_plot(title, X, Ys, mask, curve_names):
         ax.plot(X, np.ma.masked_array(curve, mask=mask), label=label)
     ax.legend()
 
-if len(sys.argv) < 3:
-    print('Usage : {} <file.var> [show | save] [save-filename]'.format(sys.argv[0]))
-    sys.exit(1)
-
-varpath = sys.argv[1]
-command = sys.argv[2]
-
-if command not in ['show', 'save']:
-    print('Command "{}" is not supported.'.format(command))
-    sys.exit(1)
-
-curve_names = collect_labels(varpath)
-if len(curve_names) == 0:
-    sys.exit(1)
-
-X, Ys, mask = collect_data(varpath, curve_names)
-
-fig = plt.figure(figsize=(10,3))
-make_plot(varpath, X, Ys, mask, curve_names)
-
-if command == 'show':
-    plt.show()
-    sys.exit(0)
-
-if command == 'save':
-    if len(sys.argv) < 4:
-        print('filename missing, aborting.')
+def main():
+    if len(sys.argv) < 3:
+        print('Usage : {} <file.var> [show | save] [save-filename]'.format(sys.argv[0]))
         sys.exit(1)
-    plt.savefig(sys.argv[3], bbox_inches='tight')
-    print()
-    print('file "{}" saved.'.format(sys.argv[3]))
-    sys.exit(0)
-
+    
+    varpath = sys.argv[1]
+    command = sys.argv[2]
+    
+    if command not in ['show', 'save']:
+        print('Command "{}" is not supported.'.format(command))
+        sys.exit(1)
+    
+    curve_names = collect_labels(varpath)
+    if len(curve_names) == 0:
+        sys.exit(1)
+    
+    X, Ys, mask = collect_data(varpath, curve_names)
+    
+    fig = plt.figure(figsize=(10,3))
+    make_plot(varpath, X, Ys, mask, curve_names)
+    
+    if command == 'show':
+        plt.show()
+        sys.exit(0)
+    
+    if command == 'save':
+        if len(sys.argv) < 4:
+            print('filename missing, aborting.')
+            sys.exit(1)
+        plt.savefig(sys.argv[3], bbox_inches='tight')
+        print()
+        print('file "{}" saved.'.format(sys.argv[3]))
+        sys.exit(0)
     
         
-        
-
-
+            
+            
     
-
+    
+        
+    
+    

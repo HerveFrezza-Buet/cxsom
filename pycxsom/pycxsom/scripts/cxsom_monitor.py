@@ -169,20 +169,20 @@ def report_pending_timesteps(monitor):
     
     
        
+def main():
+    if len(sys.argv) > 2:
+        print(f'usage : {sys.argv[0]} [monitoring-data-file]')
+        sys.exit(0)
 
-if len(sys.argv) > 2:
-    print(f'usage : {sys.argv[0]} [monitoring-data-file]')
-    sys.exit(0)
-
-if len(sys.argv) == 2:
-    monitor = cx.monitor.Monitor(Path(sys.argv[1]))
-else:
-    monitor = cx.monitor.Monitor()
+    if len(sys.argv) == 2:
+        monitor = cx.monitor.Monitor(Path(sys.argv[1]))
+    else:
+        monitor = cx.monitor.Monitor()
     
-report_main(monitor)
-report_timelines(monitor)
-report_walltime_issues(monitor)
-report_pending_timesteps(monitor)
+    report_main(monitor)
+    report_timelines(monitor)
+    report_walltime_issues(monitor)
+    report_pending_timesteps(monitor)
 
 
 
