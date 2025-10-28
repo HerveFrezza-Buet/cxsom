@@ -21,7 +21,7 @@ cxsom-help:
 	@echo "  make cxsom-clear-rootdir"
 	@echo
 	@echo "  make cxsom-make-venv             // Creates (if needed) the venv"
-	@echo "  make cxsom-install-pycxsom       // Installs pycxsom in venv"
+	@echo "  make cxsom-install-venv          // Installs pycxsom and other stuff in venv"
 	@echo "  make cxsom-show-venv-activation  // displays the venv activation command"
 	@echo
 	@echo "# at server side"
@@ -112,9 +112,10 @@ cxsom-set-config: | cxsom-set-rootdir cxsom-set-hostname cxsom-set-port skednet-
 cxsom-make-venv:
 	python3 -m venv `cat $(VENV_CONFIG_FILE)`
 
-.PHONY: cxsom-install-pycxsom
-cxsom-install-pycxsom:
+.PHONY: cxsom-install-venv
+cxsom-install-venv:
 	. `cat $(VENV_CONFIG_FILE)`/bin/activate; pip install git+https://github.com/HerveFrezza-Buet/cxsom#subdirectory=pycxsom
+	. `cat $(VENV_CONFIG_FILE)`/bin/activate; pip install pandoc
 
 .PHONY: cxsom-show-venv-activation
 cxsom-show-venv-activation:
