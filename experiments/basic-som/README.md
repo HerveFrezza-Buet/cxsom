@@ -5,7 +5,7 @@ Here, we set up a basic SOM, using cxsom-builder. We have customized a
 
 ## Setup the demo
 
-First setup a root-dir directory for our variables.
+First, let us setup a root-dir directory for our variables.
 
 ```
 mkdir root-dir
