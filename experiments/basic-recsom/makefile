@@ -9,8 +9,8 @@ help:
 	@echo "make send-rules                                    <-- send rules to the processor"
 	@echo
 	@echo "make feed SEQ=ABCDEF                               <-- feeds with a sequence."
-	@echo "make show-weight-sequence                          <-- displays weights evolution (sequential view)."
-	@echo "make show-weight-history                           <-- displays weights evolution (global view)."
+	@echo "make show-weights-sequence                          <-- displays weights evolution (sequential view)."
+	@echo "make show-weights-history                           <-- displays weights evolution (global view)."
 	@echo
 
 
