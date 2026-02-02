@@ -1,0 +1,10 @@
+[project]
+name = "pysked"
+version = "1.0.0"
+dependencies = [
+  'pycairo'
+]	
+
+
+[project.scripts]
+pysked-timeline-to-pdf = "pysked.scripts.timeline:to_pdf"
