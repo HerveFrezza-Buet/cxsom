@@ -55,10 +55,14 @@ cd pycxsom
 pip install .
 ```
 
+The same stands for other python libs.
+
 Second option: install directly from the remote repository.
 
 ```
 pip install git+https://github.com/HerveFrezza-Buet/cxsom#subdirectory=pycxsom
+pip install git+https://github.com/HerveFrezza-Buet/cxsom#subdirectory=sked/pysked
 ```
 
 This installs (with setup tools) the required python library, as well as some utilities (see the bin directory).
+
