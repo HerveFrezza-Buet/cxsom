@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
 	      << "    ++ <value>                              // Adds a next value."     << std::endl
 	      << "    +@ <at> <value>                         // Adds a value at time <at>." << std::endl
 	      << "    *@ <at>                                 // Reads the value at time <at>." << std::endl
+	      << "    []                                      // Get time interval." << std::endl
 	      << std::endl;
     return 0;
   }
@@ -86,6 +87,20 @@ int main(int argc, char* argv[]) {
 	  std::cout << "  got " << *data_ref << std::endl;
 	else
 	  std::cout << "  thus no reading was performed." << std::endl;
+      }
+      else if(command == "[]") {
+	auto [min, max] = file.get_time_range();
+	std::cout << '[';
+	if(min ==  cxsom::data::File::no_time())
+	  std::cout << "no-time";
+	else
+	  std::cout << min;
+	std::cout << ", ";
+	if(max ==  cxsom::data::File::no_time())
+	  std::cout << "no-time";
+	else
+	  std::cout << max;
+	std::cout << ']' << std::endl;
       }
       else
 	std::cout << "Unhandled command \"" << command << "\". Nothing done except checking." << std::endl;
