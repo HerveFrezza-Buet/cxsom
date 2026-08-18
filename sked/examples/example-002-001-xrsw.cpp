@@ -2,6 +2,7 @@
 #include <string>
 #include <random>
 #include <atomic>
+#include <iostream>
 
 #define NB_THREADS 10
 #define DT .3 // small duration, such as the message is visible on the timeline.
