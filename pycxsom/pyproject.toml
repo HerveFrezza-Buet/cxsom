@@ -1,0 +1,8 @@
+[project]
+name = "pycxsom"
+version = "1.0.0"
+
+
+[project.scripts]
+cxsom-monitor-situation-report = "pycxsom.scripts.cxsom_monitor_situation_report:main"
+pycxsom-plot-as-lines = "pycxsom.scripts.pycxsom_plot_as_lines:main"
