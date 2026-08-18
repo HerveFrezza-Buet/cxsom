@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
   
   std::cout << std::endl
 	    << std::endl
-	    << "You can use pysked-timeline-to-pdf.py to view the generated timeline-001-002.tml file." << std::endl
+	    << "You can use pysked-timeline-to-pdf to view the generated timeline-001-002.tml file." << std::endl
 	    << std::endl;
 
   return 0;
