@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 	    << std::endl
 	    << t() << "s, ideally " << ideal << "s." << std::endl
 	    << std::endl
-	    << "You can use pysked-timeline-to-pdf to view the generated timeline-002-001.tml file." << std::endl
+	    << "You can use pysked-timeline-to-pdf to view the generated timeline-002-002.tml file." << std::endl
 	    << std::endl;
   
   return 0;

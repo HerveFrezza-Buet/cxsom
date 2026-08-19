@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
       timeline(i, "finished", DT, cmap.finish);
     });
 
-  timeline("sleeping", NB_THREADS + 3, cmap.wait); // We wait all secondary threads to each go_ahead.
+  timeline("sleeping", NB_THREADS + 3, cmap.wait); // We wait all secondary threads to reach go_ahead.
   timeline("flushing now", DT, cmap.sync);
   queue.flush();
 
