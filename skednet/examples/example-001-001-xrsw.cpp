@@ -29,7 +29,7 @@ void process(sked::json::timeline& timeline, unsigned int id, const std::string&
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<double> job_duration(1, 3);
-  std::uniform_real_distribution<double> toss(0, 1);
+  std::bernoulli_distribution toss(WRITER_PROBA);
   sked::json::rgb write_color {.8, .2, .2};
   sked::json::rgb read_color  {.2, .8, .2};
   try {
@@ -37,7 +37,7 @@ void process(sked::json::timeline& timeline, unsigned int id, const std::string&
     socket.connect(hostname, port);
 
     for(unsigned int i = 0; i < NB_ROUNDS; ++i)
-      if(toss(gen) < WRITER_PROBA) {
+      if(toss(gen)) {
 	sked::net::scope::xrsw::write lock {socket, socket};
 	timeline(id, "write", job_duration(gen), write_color);
       }
